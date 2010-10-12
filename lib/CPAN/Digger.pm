@@ -4,8 +4,7 @@ use Moose;
 
 our $VERSION = '0.01';
 
-#use File::Find::Rule;
-
+use Data::Dumper qw(Dumper);
 use File::Basename qw(dirname);
 use File::Copy     qw(copy);
 use File::Path     qw(mkpath);
@@ -23,10 +22,7 @@ sub run_index {
 
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
-	my $db = CPAN::Digger::DB->db;
-	my %db;
-	$db{distro}    = $db->distro;
-	$db{author}    = $db->author;
+	my %db =  CPAN::Digger::DB->dbh;
 
 	my @distributions = $p->distributions;
 	foreach my $d (@distributions) {
@@ -54,12 +50,27 @@ last if $main::counter++ > 5;
 	#;
 	#$d->dist;
 	#$d->version;
-	
-	#my $iterator = File::Find::Rule->file->name("*.tar.gz")->start( File::Spec->catfile($self->cpan, 'authors', 'id' ) );
-	#while ( my $thing = $iterator->match ) {
-	#	die $thing;
-	#}
+
 }
+
+sub run {
+	my $self = shift;
+	require CGI;
+	my $q = CGI->new;
+	my $term = $q->param('q');
+	$term =~ s/[^\w]//g; # sanitize for now
+	my %db =  CPAN::Digger::DB->dbh;
+	my $result = $db{distro}->find({ name => qr/$term/ });
+
+	print $q->header;
+	print "<pre>\n";
+	while (my $doc = $result->next) {
+		say $doc->{name};
+	}
+#	print Dumper $result;
+	print "\n</pre>\n";
+}
+
 
 1;
 

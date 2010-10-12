@@ -3,7 +3,7 @@
 <title>CPAN::Digger</title>
 </head>
 <body>
-<form>
+<form action="/q">
 <input name="q"> <input type="submit" value="Dig">
 </form>
 </body>

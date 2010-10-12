@@ -10,4 +10,15 @@ sub db {
 	return $db;
 }
 
+sub dbh {
+	my $class = shift;
+	my $db = $class->db;
+	
+	my %db;
+	$db{distro}    = $db->distro;
+	$db{author}    = $db->author;
+
+	return %db;
+}
+
 1;
