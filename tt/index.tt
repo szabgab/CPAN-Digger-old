@@ -1,0 +1,10 @@
+<html>
+<head>
+<title>CPAN::Digger</title>
+</head>
+<body>
+<form>
+<input name="q"> <input type="submit" value="Dig">
+</form>
+</body>
+</html>

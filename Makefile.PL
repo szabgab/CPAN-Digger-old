@@ -26,7 +26,7 @@ requires 'File::Basename';
 requires 'Getopt::Long';
 requires 'Moose';
 requires 'Parse::CPAN::Packages';
-
+requires 'MongoDB'                 => '0.39';
 
 test_requires 'Test::More'         => '0.88';
 test_requires 'Test::NoWarnings'   => '0.084';
