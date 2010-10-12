@@ -12,6 +12,8 @@ use File::Path     qw(mkpath);
 use File::Spec;
 use Parse::CPAN::Packages;
 
+use CPAN::Digger::DB;
+
 has 'tt'     => (is => 'ro', isa => 'Str');
 has 'cpan'   => (is => 'ro', isa => 'Str');
 has 'output' => (is => 'ro', isa => 'Str');
@@ -20,6 +22,11 @@ sub run_index {
 	my $self = shift;
 
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
+
+	my $db = CPAN::Digger::DB->db;
+	my %db;
+	$db{distro}    = $db->distro;
+	$db{author}    = $db->author;
 
 	my @distributions = $p->distributions;
 	foreach my $d (@distributions) {
@@ -35,12 +42,13 @@ sub run_index {
 			my $out = qx{$cmd};
 			say '----';
 			say $out;
+			$db{distro}->update({ name => $d->dist }, { name => $d->dist, author => lc $d->cpanid } , { upsert => 1 })
 		} else {
 			warn "Skipping $src\n";
 		}
-last;
+last if $main::counter++ > 5;
 	}
-	
+
 	copy(File::Spec->catfile( $self->tt, 'index.tt' ), File::Spec->catfile( $self->output, 'index.html' ));
 
 	#;
