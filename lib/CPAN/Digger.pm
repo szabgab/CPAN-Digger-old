@@ -169,6 +169,9 @@ sub unzip {
 		when (qr/\.(tar\.gz|\.tgz)$/) {
 			$cmd = "tar xzf $src";
 		}
+		when (qr/\.tar\bz2$/) {
+			$cmd = "tar xjf $src";
+		}
 		when (qr/\.zip$/) {
 			$cmd = "unzip $src";
 		}
