@@ -41,12 +41,3 @@ set noindex on /id/pauseid/*  (but allow indexing /id/pauseid/ itself)
 set noindex on /src/
 set noindex on /pod/perl_5_10_01/ and similar
 
-
-<ul>
-[% FOREACH doc IN result.next %]
-   [% FOREACH k IN doc.keys %]
-     [% k %]
-   [% END %]
-  <li><a href="/dist/[% doc.key %]">[% doc.name %]</a></li>);
-[% END %]
-</ul>
