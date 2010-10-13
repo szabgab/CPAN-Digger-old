@@ -4,11 +4,14 @@ use Moose;
 
 our $VERSION = '0.01';
 
+#use autodie;
+use Cwd            qw(cwd);
 use Data::Dumper   qw(Dumper);
 use File::Basename qw(basename dirname);
-use File::Copy     qw(copy);
+use File::Copy     qw(copy move);
 use File::Path     qw(mkpath);
 use File::Spec;
+use File::Temp     qw(tempdir);
 use Parse::CPAN::Packages;
 use Template;
 use YAML::Any      ();
@@ -38,32 +41,41 @@ sub run_index {
 	my @distributions = $p->distributions;
 	foreach my $d (@distributions) {
 		$counter{distro}++;
+#		last if  $counter{distro}++ > 5;
+
 		LOG("Working on " . $d->prefix);
 		my $path    = dirname $d->prefix;
 		my $src     = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
 		my $src_dir = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
 		my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
 
+		my %data = (
+			name   => $d->dist,
+			author => lc $d->cpanid,
+		);
+
 		mkpath $dist_dir;
 		mkpath $src_dir;
 		chdir $src_dir;
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-			if (not $self->unzip($d, $src)) {
+			my $unzip = $self->unzip($d, $src);
+			if (not $unzip) {
 				$counter{unzip_failed}++;
 				next;
 			}
+			if ($unzip == 2) {
+				$counter{unzip_without_subdir}++;
+				$data{unzip_without_subdir} = 1;
+			}
 		}
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-			WARN("No directory for $src");
+			WARN("No directory for $src_dir " . $d->distvname);
+			die cwd;
 			$counter{no_directory}++;
 			next;
 			
 		}
 		
-		my %data = (
-			name   => $d->dist,
-			author => lc $d->cpanid,
-		);
 
 		if (not $d->distvname) {
 			WARN("distvname is empty, skipping database update");
@@ -95,7 +107,6 @@ sub run_index {
 		$data{distvname} = $d->distvname;
 		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
-#last if $main::counter++ > 5;
 	}
 
 	my %map = (
@@ -152,9 +163,10 @@ sub LOG {
 
 sub unzip {
 	my ($self, $d, $src) = @_;
+
 	my $cmd;
 	given ($d->prefix) {
-		when (qr/\.tar\.gz$/) {
+		when (qr/\.(tar\.gz|\.tgz)$/) {
 			$cmd = "tar xzf $src";
 		}
 		when (qr/\.zip$/) {
@@ -165,13 +177,42 @@ sub unzip {
 	}
 	if ($cmd) {
 		LOG($cmd);
+
+		my $cwd = cwd();
+		my $temp = tempdir( CLEANUP => 1 );
+		chdir $temp;
 		my $out = qx{$cmd};
 		# TODO check if this was really successful?
-		return 1;
+
+		opendir my $dh, '.' or die $!;
+		my @content = grep {$_ ne '.' and $_ ne '..'} readdir $dh;
+		#print "CON: @content\n";
+		if (@content == 1 and $content[0] eq $d->distvname) {
+			# using external mv as File::Copy::move cannot move directory...
+			my $cmd_move = "mv " . $d->distvname . " $cwd";
+			#LOG("Moving " . $d->distvname . " to $cwd");
+			LOG($cmd_move);
+			#move $d->distvname, File::Spec->catdir( $cwd, $d->distvname );
+			system($cmd_move);
+			# TODO: some files open with only read permissions on the main directory.
+			# this needs to be reported and I need to correct it on the local unzip setting
+			# xw on the directories and w on the files
+			chdir $cwd;
+			return 1;
+		} else {
+			my $target_dir = File::Spec->catdir( $cwd, $d->distvname );
+			LOG("Need to create $target_dir");
+			mkdir $target_dir;
+			foreach my $thing (@content) {
+				system "mv $thing $target_dir";
+			}
+			chdir $cwd;
+			return 2;
+		}
 	} else {
-		WARN("Does not know how unzip $src");
+		WARN("Does not know how to unzip $src");
 	}
-	return;
+	return 0;
 }
 
 sub get_tt {
