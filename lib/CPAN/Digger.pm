@@ -51,19 +51,29 @@ sub run_index {
 			
 		}
 		
-		chdir $d->distvname;
 		my %data = (
 			name   => $d->dist,
 			author => lc $d->cpanid,
 		);
 
+		if (not $d->distvname) {
+			WARN("distvname is empty, skipping database update");
+			return;
+		}
+
+		chdir $d->distvname;
 		$data{has_meta} = -e 'META.yml';
 		# TODO we need to make sure the data we read from META.yml is correct and
 		# someone does not try to fill it with garbage or too much data.
 		if ($data{has_meta}) {
-			my $meta = YAML::Any::LoadFile('META.yml');
-			#print Dumper $meta;
-			$data{meta}{license} = $meta->{license};
+			eval {
+				my $meta = YAML::Any::LoadFile('META.yml');
+				#print Dumper $meta;
+				$data{meta}{license} = $meta->{license};
+			};
+			if ($@) {
+				WARN("Exception while reading YAML file: $@");
+			}
 		}
 
 		LOG("Update DB");
@@ -74,7 +84,7 @@ sub run_index {
 		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 		
-last if $main::counter++ > 5;
+#last if $main::counter++ > 5;
 	}
 
 	my %map = (
@@ -130,14 +140,19 @@ sub LOG {
 
 sub unzip {
 	my ($self, $d, $src) = @_;
-	if (substr($d->prefix, -7) eq '.tar.gz') {
-		my $cmd = "tar xzf $src";
+	my $cmd;
+	if (lc(substr($d->prefix, -7)) eq '.tar.gz') {
+		$cmd = "tar xzf $src";
+	} elsif (lc(substr($d->prefix, -4)) eq '.zip') {
+		$cmd = "unzip $src";
+	} else {
+		WARN("Does not know how unzip $src");
+	}
+	if ($cmd) {
 		LOG($cmd);
 		my $out = qx{$cmd};
 		#say '----';
 		#say $out;
-	} else {
-		WARN("Does not know how unzip $src");
 	}
 }
 
