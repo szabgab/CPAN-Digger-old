@@ -4,8 +4,9 @@ use Moose;
 
 our $VERSION = '0.01';
 
-#use autodie;
+use autodie;
 use Cwd            qw(cwd);
+use Capture::Tiny  qw(capture);
 use Data::Dumper   qw(Dumper);
 use File::Basename qw(basename dirname);
 use File::Copy     qw(copy move);
@@ -39,6 +40,7 @@ sub run_index {
 	my $tt = $self->get_tt;
 
 	my @distributions = $p->distributions;
+	DISTRO:
 	foreach my $d (@distributions) {
 		$counter{distro}++;
 #		last if  $counter{distro}++ > 5;
@@ -48,6 +50,16 @@ sub run_index {
 		my $src     = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
 		my $src_dir = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
 		my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
+
+		# untaint
+		foreach my $p ($src, $src_dir, $dist_dir) {
+			$p = eval {_untaint_path($p)};
+			if ($@) {
+				chomp $@;
+				WARN($@);
+				next DISTRO;
+			}
+		}
 
 		my %data = (
 			name   => $d->dist,
@@ -70,10 +82,8 @@ sub run_index {
 		}
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
 			WARN("No directory for $src_dir " . $d->distvname);
-			die cwd;
 			$counter{no_directory}++;
 			next;
-			
 		}
 		
 
@@ -164,30 +174,42 @@ sub LOG {
 sub unzip {
 	my ($self, $d, $src) = @_;
 
-	my $cmd;
+	my @cmd;
 	given ($d->prefix) {
-		when (qr/\.(tar\.gz|\.tgz)$/) {
-			$cmd = "tar xzf $src";
+		when (qr/\.(tar\.gz|tgz)$/) {
+			@cmd = ('/bin/tar', 'xzf', "'$src'");
 		}
-		when (qr/\.tar\bz2$/) {
-			$cmd = "tar xjf $src";
+		when (qr/\.tar\.bz2$/) {
+			@cmd = ('/bin/tar', 'xjf', "'$src'");
 		}
 		when (qr/\.zip$/) {
-			$cmd = "unzip $src";
+			@cmd = ('/usr/bin/unzip', "'$src'");
 		}
 		default{
 		}
 	}
-	if ($cmd) {
+	if (@cmd) {
+		my $cmd = join " ", @cmd;
+		#LOG(join " ", @cmd);
 		LOG($cmd);
 
-		my $cwd = cwd();
+		my $cwd = _untaint_path(cwd());
 		my $temp = tempdir( CLEANUP => 1 );
 		chdir $temp;
-		my $out = qx{$cmd};
+		local $ENV{PATH};
+		my ($out, $err) = eval { capture { system($cmd) } };
+		if ($@) {
+			die "$cmd $@";
+		}
+		if ($err) {
+			WARN("Command ($cmd) failed: $err");
+			chdir $cwd;
+			return;
+		}
+
 		# TODO check if this was really successful?
 
-		opendir my $dh, '.' or die $!;
+		opendir my $dh, '.';
 		my @content = grep {$_ ne '.' and $_ ne '..'} readdir $dh;
 		#print "CON: @content\n";
 		if (@content == 1 and $content[0] eq $d->distvname) {
@@ -203,7 +225,7 @@ sub unzip {
 			chdir $cwd;
 			return 1;
 		} else {
-			my $target_dir = File::Spec->catdir( $cwd, $d->distvname );
+			my $target_dir = _untaint_path(File::Spec->catdir( $cwd, $d->distvname ));
 			LOG("Need to create $target_dir");
 			mkdir $target_dir;
 			foreach my $thing (@content) {
@@ -232,6 +254,19 @@ sub get_tt {
 		EVAL_PERL    => 1,
 	};
 	Template->new($config);
+}
+
+sub _untaint_path {
+	my $p = shift;
+	if ($p =~ m{^([\w/.-]+)$}x) {
+		$p = $1;
+	} else {
+		die "Untaint failed for '$p'\n";
+	}
+	if (index($p, '..') > -1) {
+		die "Found .. in '$p'\n";
+	}
+	return $p;
 }
 
 1;
