@@ -1,10 +1,42 @@
 
+Mirror CPAN (?) Done by rsync:
+/usr/bin/rsync -av --delete ftp.funet.fi::CPAN /opt/cpan
 
-Mirror CPAN (?)
 
 Index CPAN:
- save the results in the database and ceate static pages
+   save the results in the database and ceate static pages
+   - unzip file if it is not yet unzipped
+   - update database with the following information
+     distro:
+       name: Dist-Name
+       author: <pauseid>
+       modules: list of .pm files in lib/  (later also deal with pm files in root)
+   - generate html file from pod
 
 Search:
- allow users to search in the database
+  allow users to search in the database
 
+
+Server Layout:
+
+/dist/Dist-Name/      <- collected information about the most recent version of the distribution
+/dist/Dist-Name/pod/  <- The POD in HTML format
+/dist/Dist-Name/src/  <- The source in HTML format
+    (links to real source lead to the /src/<pauseid>/Dist-Name-1.02/ structure)
+
+/id/<pauseid>/       <- collected information about the author
+/id/<pauseid>/Dist-Name-1.02/     <- The POD in HTML format
+
+/src/<pauseid>/Dist-Name-1.02/    <- source code in plain text format
+
+/pod/                 <- the documentation of the most recent perl in HTML marked up format
+/pod/perl_5_10_01/    <- the documentation of specific versions of perl in HTML marked up formate (Later)
+
+/q                    <- send queries here
+
+
+robots.txt
+
+set noindex on /id/pauseid/*  (but allow indexing /id/pauseid/ itself)
+set noindex on /src/
+set noindex on /pod/perl_5_10_01/ and similar

@@ -19,14 +19,17 @@ name 'CPAN-Digger';
 license 'perl';
 author 'Gabor Szabo';
 all_from 'lib/CPAN/Digger.pm';
+
 requires 'perl'                  => '5.010';
+
 requires 'Cwd';
 requires 'Data::Dumper';
 requires 'File::Basename';
 requires 'Getopt::Long';
+requires 'MongoDB'                 => '0.39';
 requires 'Moose';
 requires 'Parse::CPAN::Packages';
-requires 'MongoDB'                 => '0.39';
+requires 'YAML::Any';
 
 test_requires 'Test::More'         => '0.88';
 test_requires 'Test::NoWarnings'   => '0.084';
