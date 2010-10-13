@@ -21,7 +21,11 @@ has 'output' => (is => 'ro', isa => 'Str');
 
 
 my %db;
+my %counter;
 
+END {
+	print Dumper \%counter;
+}
 sub run_index {
 	my $self = shift;
 
@@ -33,6 +37,7 @@ sub run_index {
 
 	my @distributions = $p->distributions;
 	foreach my $d (@distributions) {
+		$counter{distro}++;
 		LOG("Working on " . $d->prefix);
 		my $path    = dirname $d->prefix;
 		my $src     = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
@@ -43,10 +48,14 @@ sub run_index {
 		mkpath $src_dir;
 		chdir $src_dir;
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-			$self->unzip($d, $src);
+			if (not $self->unzip($d, $src)) {
+				$counter{unzip_failed}++;
+				next;
+			}
 		}
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
 			WARN("No directory for $src");
+			$counter{no_directory}++;
 			next;
 			
 		}
@@ -58,7 +67,8 @@ sub run_index {
 
 		if (not $d->distvname) {
 			WARN("distvname is empty, skipping database update");
-			return;
+			$counter{distvname_empty}++;
+			next;
 		}
 
 		chdir $d->distvname;
@@ -73,6 +83,8 @@ sub run_index {
 			};
 			if ($@) {
 				WARN("Exception while reading YAML file: $@");
+				$counter{exception_in_yaml}++;
+				$data{exception_in_yaml} = $@;
 			}
 		}
 
@@ -83,7 +95,6 @@ sub run_index {
 		$data{distvname} = $d->distvname;
 		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
-		
 #last if $main::counter++ > 5;
 	}
 
@@ -101,6 +112,7 @@ sub run_index {
 		LOG("Copy $file to $output");
 		copy $file, $output;
 	}
+	return;
 }
 
 
@@ -141,19 +153,25 @@ sub LOG {
 sub unzip {
 	my ($self, $d, $src) = @_;
 	my $cmd;
-	if (lc(substr($d->prefix, -7)) eq '.tar.gz') {
-		$cmd = "tar xzf $src";
-	} elsif (lc(substr($d->prefix, -4)) eq '.zip') {
-		$cmd = "unzip $src";
-	} else {
-		WARN("Does not know how unzip $src");
+	given ($d->prefix) {
+		when (qr/\.tar\.gz$/) {
+			$cmd = "tar xzf $src";
+		}
+		when (qr/\.zip$/) {
+			$cmd = "unzip $src";
+		}
+		default{
+		}
 	}
 	if ($cmd) {
 		LOG($cmd);
 		my $out = qx{$cmd};
-		#say '----';
-		#say $out;
+		# TODO check if this was really successful?
+		return 1;
+	} else {
+		WARN("Does not know how unzip $src");
 	}
+	return;
 }
 
 sub get_tt {
