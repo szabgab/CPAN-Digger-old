@@ -30,7 +30,7 @@ if ($opt{dropdb}) {
 
 usage() if not $opt{cpan} or not -d $opt{cpan};
 usage() if not $opt{output} or not -d $opt{output};
-$opt{tt} = File::Spec->catdir( $root, 'tt' );
+$opt{root} = $root;
 
 my $cpan = CPAN::Digger->new(%opt);
 $cpan->run_index;

@@ -21,13 +21,13 @@ Server Layout:
 
 /dist/Dist-Name/      <- collected information about the most recent version of the distribution
 /dist/Dist-Name/pod/  <- The POD in HTML format
-/dist/Dist-Name/src/  <- The source in HTML format
+/dist/Dist-Name/src/  <- The source in HTML format with syntax highlighting
     (links to real source lead to the /src/<pauseid>/Dist-Name-1.02/ structure)
 
 /id/<pauseid>/       <- collected information about the author
 /id/<pauseid>/Dist-Name-1.02/     <- The POD in HTML format
 
-/src/<pauseid>/Dist-Name-1.02/    <- source code in plain text format
+/src/<pauseid>/Dist-Name-1.02/    <- source code in plain text format (this is where we unzip the files)
 
 /pod/                 <- the documentation of the most recent perl in HTML marked up format
 /pod/perl_5_10_01/    <- the documentation of specific versions of perl in HTML marked up formate (Later)
@@ -40,3 +40,13 @@ robots.txt
 set noindex on /id/pauseid/*  (but allow indexing /id/pauseid/ itself)
 set noindex on /src/
 set noindex on /pod/perl_5_10_01/ and similar
+
+
+<ul>
+[% FOREACH doc IN result.next %]
+   [% FOREACH k IN doc.keys %]
+     [% k %]
+   [% END %]
+  <li><a href="/dist/[% doc.key %]">[% doc.name %]</a></li>);
+[% END %]
+</ul>

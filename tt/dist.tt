@@ -4,4 +4,8 @@
 %]
 [% INCLUDE incl/header.tt %]
 [% INCLUDE incl/form.tt %]
+[% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a>
+<br>
+License: [% meta.license %]
+<br>
 [% INCLUDE incl/footer.tt %]

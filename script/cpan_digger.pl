@@ -14,8 +14,6 @@ BEGIN {
 use lib File::Spec->catdir($root, 'lib');
 use CPAN::Digger;
 
-#$opt{tt} = File::Spec->catdir( $root, 'tt' );
-
-my $cpan = CPAN::Digger->new();
+my $cpan = CPAN::Digger->new(root => $root);
 $cpan->run;
 

@@ -4,4 +4,10 @@
 %]
 [% INCLUDE incl/header.tt %]
 [% INCLUDE incl/form.tt %]
+
+[% FOREACH doc IN results %]
+   <a href="/dist/[% doc.name %]">[% doc.name %]<br>
+[% END %]
+
 [% INCLUDE incl/footer.tt %]
+
