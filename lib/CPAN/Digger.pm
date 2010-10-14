@@ -133,6 +133,7 @@ sub generate_central_files {
 	my $tt = $self->get_tt;
 	my %map = (
 		'index.tt' => 'index.html',
+		'news.tt'  => 'news.html',
 	);
 	foreach my $infile (keys %map) {
 		my $outfile = _untaint_path(File::Spec->catfile($self->output, $map{$infile}));
