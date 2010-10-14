@@ -13,8 +13,10 @@ BEGIN {
 
 	# sanitize variables to make Taint mode happy
 	($root) = $root =~ m{   ([\w/-]+)  }x;
-	my ($path) = $ENV{PERL5LIB} =~ m{   ([\w/:-]+)  }x;
-	unshift @INC, split /:/, $path;
+	if ($ENV{PERL5LIB}) {
+		my ($path) = $ENV{PERL5LIB} =~ m{   ([\w/:-]+)  }x;
+		unshift @INC, split /:/, $path;
+	}
 }
 use lib File::Spec->catdir($root, 'lib');
 use CPAN::Digger;
