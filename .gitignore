@@ -1,8 +1,8 @@
 META.yml
 Makefile
 RUN
-blib/
-html/
-inc/
-logs/
+blib
+html
+inc
+logs
 pm_to_blib
