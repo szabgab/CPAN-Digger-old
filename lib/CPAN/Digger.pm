@@ -213,8 +213,10 @@ sub unzip {
 		}
 
 		# TODO check if this was really successful?
+		# TODO check what were the permission bits
+		_chmod($temp);
 
-		opendir my $dh, '.';
+		opendir my($dh), '.';
 		my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
 		if ($@) {
 			WARN("Could not untaint content of directory: $@");
@@ -283,6 +285,27 @@ sub _untaint_path {
 		Carp::confess("Found .. in '$p'\n");
 	}
 	return $p;
+}
+
+sub _chmod {
+	my $dir = shift;
+	opendir my ($dh), $dir;
+	my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
+	if ($@) {
+		WARN("Could not untaint: $@");
+	}
+	foreach my $thing (@content) {
+		my $path = File::Spec->catfile($dir, $thing);
+		if (-d $path) {
+			chmod 0755, $path;
+			_chmod($path);
+		} elsif (-f $path) {
+			chmod 0644, $path;
+		} else {
+			WARN("Unknown thing '$path'");
+		}
+	}
+	return;
 }
 
 1;
