@@ -26,3 +26,7 @@ isa_ok($d, 'CPAN::Digger');
 # mv: cannot open `WWW-Search-NCBI-PubMed-0.01/lib/WWW/Search/NCBI/PubMed/article_to_html.xslt' for reading: Permission denied
 # mv: cannot stat `Math-Modular-SquareRoot-1.001/Build.PL': Permission denied
 # Can't chdir('Math-Modular-SquareRoot-1.001'): Permission denied
+
+# cpan/authors/id/C/CM/CMORRIS/Parse-Extract-Net-MAC48-0.01.tar.gz
+# has symlinks in the t/ directory
+#

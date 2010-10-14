@@ -121,17 +121,32 @@ sub run_index {
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 	}
 
+	#$self->generate_central_files;
+	#$self->copy_static_files;
+
+	return;
+}
+
+sub generate_central_files {
+	my $self = shift;
+
+	my $tt = $self->get_tt;
 	my %map = (
 		'index.tt' => 'index.html',
 	);
 	foreach my $infile (keys %map) {
-		my $outfile = File::Spec->catfile($self->output, $map{$infile});
+		my $outfile = _untaint_path(File::Spec->catfile($self->output, $map{$infile}));
 		my $data = {};
 		$tt->process($infile, $data, $outfile) or die $tt->error;
 	}
+	return;
+}
 
+sub copy_static_files {
+	my $self = shift;
 	foreach my $file (glob File::Spec->catdir($self->root, 'static', '*')) {
-		my $output = File::Spec->catdir($self->output, basename($file));
+		$file = _untaint_path($file);
+		my $output = _untaint_path(File::Spec->catdir($self->output, basename($file)));
 		LOG("Copy $file to $output");
 		copy $file, $output;
 	}
@@ -296,13 +311,21 @@ sub _chmod {
 	}
 	foreach my $thing (@content) {
 		my $path = File::Spec->catfile($dir, $thing);
-		if (-d $path) {
-			chmod 0755, $path;
-			_chmod($path);
-		} elsif (-f $path) {
-			chmod 0644, $path;
-		} else {
-			WARN("Unknown thing '$path'");
+		given ($path) {
+			when (-l $_) {
+				WARN("Symlink found '$path'");
+				unlink $path;
+			}
+			when (-d $_) {
+				chmod 0755, $path;
+				_chmod($path);
+			}
+			when (-f $_) {
+				chmod 0644, $path;
+			}
+			default {
+				WARN("Unknown thing '$path'");
+			}
 		}
 	}
 	return;
