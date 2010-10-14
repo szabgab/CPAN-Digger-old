@@ -5,6 +5,7 @@ use Moose;
 our $VERSION = '0.01';
 
 use autodie;
+use Carp           ();
 use Cwd            qw(cwd);
 use Capture::Tiny  qw(capture);
 use Data::Dumper   qw(Dumper);
@@ -35,6 +36,7 @@ sub run_index {
 
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
+	$ENV{PATH} = '/bin:/usr/bin';
 	%db =  CPAN::Digger::DB->dbh;
 
 	my $tt = $self->get_tt;
@@ -177,13 +179,13 @@ sub unzip {
 	my @cmd;
 	given ($d->prefix) {
 		when (qr/\.(tar\.gz|tgz)$/) {
-			@cmd = ('/bin/tar', 'xzf', "'$src'");
+			@cmd = ('tar', 'xzf', "'$src'");
 		}
 		when (qr/\.tar\.bz2$/) {
-			@cmd = ('/bin/tar', 'xjf', "'$src'");
+			@cmd = ('tar', 'xjf', "'$src'");
 		}
 		when (qr/\.zip$/) {
-			@cmd = ('/usr/bin/unzip', "'$src'");
+			@cmd = ('unzip', "'$src'");
 		}
 		default{
 		}
@@ -193,10 +195,13 @@ sub unzip {
 		#LOG(join " ", @cmd);
 		LOG($cmd);
 
-		my $cwd = _untaint_path(cwd());
+		my $cwd = eval { _untaint_path(cwd()) };
+		if ($@) {
+			WARN("Could not untaint cwd: '" . cwd() . "'  $@");
+			return;
+		}
 		my $temp = tempdir( CLEANUP => 1 );
 		chdir $temp;
-		local $ENV{PATH};
 		my ($out, $err) = eval { capture { system($cmd) } };
 		if ($@) {
 			die "$cmd $@";
@@ -210,7 +215,13 @@ sub unzip {
 		# TODO check if this was really successful?
 
 		opendir my $dh, '.';
-		my @content = grep {$_ ne '.' and $_ ne '..'} readdir $dh;
+		my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
+		if ($@) {
+			WARN("Could not untaint content of directory: $@");
+			chdir $cwd;
+			return;
+		}
+		
 		#print "CON: @content\n";
 		if (@content == 1 and $content[0] eq $d->distvname) {
 			# using external mv as File::Copy::move cannot move directory...
@@ -225,7 +236,12 @@ sub unzip {
 			chdir $cwd;
 			return 1;
 		} else {
-			my $target_dir = _untaint_path(File::Spec->catdir( $cwd, $d->distvname ));
+			my $target_dir = eval { _untaint_path(File::Spec->catdir( $cwd, $d->distvname )) };
+			if ($@) {
+				WARN("Could not untaint target_directory: $@");
+				chdir $cwd;
+				return;
+			}
 			LOG("Need to create $target_dir");
 			mkdir $target_dir;
 			foreach my $thing (@content) {
@@ -261,10 +277,10 @@ sub _untaint_path {
 	if ($p =~ m{^([\w/.-]+)$}x) {
 		$p = $1;
 	} else {
-		die "Untaint failed for '$p'\n";
+		Carp::confess("Untaint failed for '$p'\n");
 	}
 	if (index($p, '..') > -1) {
-		die "Found .. in '$p'\n";
+		Carp::confess("Found .. in '$p'\n");
 	}
 	return $p;
 }
