@@ -30,3 +30,5 @@ isa_ok($d, 'CPAN::Digger');
 # cpan/authors/id/C/CM/CMORRIS/Parse-Extract-Net-MAC48-0.01.tar.gz
 # has symlinks in the t/ directory
 #
+# as an additional directory inside:
+# Deep-Hash-Utils-0.01

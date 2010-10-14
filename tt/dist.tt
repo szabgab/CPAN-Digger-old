@@ -1,11 +1,58 @@
 [%
-   title=""
-   description=""
+   title=  meta.name
+   description=meta.abstract
 %]
 [% INCLUDE incl/header.tt %]
 [% INCLUDE incl/form.tt %]
-[% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a>
+[% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a><br>
+Version: [% meta.version %]
+Abstract: [% meta.abstract %]
 <br>
-License: [% meta.license %]
+License: 
+[% IF meta.license %]
+  [% IF meta.license == 'perl' %]
+     <a href="http://dev.perl.org/licenses/">Perl</a>
+     (<a href="http://dev.perl.org/licenses/artistic.html">Artistic</a> and <a href="http://www.gnu.org/licenses/gpl-1.0.txt">GPL</a>)
+  [% ELSE %]
+     [% meta.license %]
+  [% END %]
+[% ELSE %]
+  [% IF has_meta %]
+    <a href="/faq#meta_license">Not found</a> in <a href="/src/[% author %]/[% distvname %]/META.ym">META.yml</a>
+  [% ELSE %]
+    <a href="/faq#meta_yaml">No META.yml</a>
+  [% END %]
+[% END %]
+<br>
+Examples: 
+[% IF examples %]
+<a href="/src/[% author %]/[% distvname %]/[% examples %]">[% examples %]</a>
+[% ELSE %]
+<a href="/faq#examples">Not found</a>.
+[% END %]
+<br>
+Tests:
+[% IF t %]
+  <a href="/src/[% author %]/[% distvname %]/t/">in the t/ directory</a>
+[% ELSIF test_file %]
+  <a href="/src/[% author %]/[% distvname %]/test.pl">in the test.pl file</a>
+[% END %]
+
+[% IF xt %]
+Author tests are in the <a href="/src/[% author %]/[% distvname %]/xt/">xt</a> directory.
+[% END %]
+</br>
+
+Depends on (requires):
+[% IF meta.requires %]
+  <ul>
+  [% FOR e IN meta.requires %]
+    <li>[% e %]</li>
+  [% END %]
+  </ul>
+[% ELSE %]
+  No prereqs were found in MEAT.yml
+[% END %]
 <br>
 [% INCLUDE incl/footer.tt %]
+

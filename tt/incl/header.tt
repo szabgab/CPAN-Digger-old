@@ -1,6 +1,9 @@
 <html>
 <head>
-<title>CPAN::Digger</title>
+  <title>[% title %]</title>
+  <link rel="stylesheet" type="text/css" href="/style.css" /> 
+  <meta name="description" content="[% description %]" />
+  <meta name="keywords" content="[% meta.keywords %]" />
 </head>
 <body>
 <a href="/">CPAN::Digger</a> <a href="/news">news</a>

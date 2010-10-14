@@ -103,7 +103,10 @@ sub run_index {
 			eval {
 				my $meta = YAML::Any::LoadFile('META.yml');
 				#print Dumper $meta;
-				$data{meta}{license} = $meta->{license};
+				my @fields = qw(license abstract author name requires version);
+				foreach my $field (@fields) {
+					$data{meta}{$field} = $meta->{$field};
+				}
 			};
 			if ($@) {
 				WARN("Exception while reading YAML file: $@");
@@ -111,6 +114,23 @@ sub run_index {
 				$data{exception_in_yaml} = $@;
 			}
 		}
+
+		if (-d 'xt') {
+			$data{xt} = 1;
+		}
+		if (-d 't') {
+			$data{t} = 1;
+		}
+		if (-f 'test.pl') {
+			$data{test_file} = 1;
+		}
+		my @example_dirs = qw(eg examples);
+		foreach my $dir (@example_dirs) {
+			if (-d $dir) {
+				$data{examples} = $dir;
+			}
+		}
+		my @changes_files = qw(Changes CHANGES ChangeLog);
 
 		LOG("Update DB");
 		$db{distro}->update({ name => $d->dist }, \%data , { upsert => 1 });
