@@ -33,16 +33,27 @@ Examples:
 <br>
 Tests:
 [% IF t %]
-  <a href="/src/[% author %]/[% distvname %]/t/">in the t/ directory</a>
+  in the <a href="/src/[% author %]/[% distvname %]/t/">t/</a> directory
 [% ELSIF test_file %]
-  <a href="/src/[% author %]/[% distvname %]/test.pl">in the test.pl file</a>
+  in the <a href="/src/[% author %]/[% distvname %]/test.pl">test.pl</a> file
 [% END %]
 
 [% IF xt %]
 Author tests are in the <a href="/src/[% author %]/[% distvname %]/xt/">xt</a> directory.
 [% END %]
-</br>
+<br>
 
+<div id="special_files">
+Special files:
+<ul>
+[% FOREACH file IN special_files %]
+  <li><a href="/src/[% author %]/[% distvname %]/[% file %]">[% file %]</a></li>
+[% END %]
+</ul>
+</div>
+
+<br>
+<div id="dependencies">
 Depends on (requires):
 [% IF meta.requires %]
   <ul>
@@ -53,6 +64,8 @@ Depends on (requires):
 [% ELSE %]
   No prereqs were found in MEAT.yml
 [% END %]
+</div>
+
 <br>
 [% INCLUDE incl/footer.tt %]
 

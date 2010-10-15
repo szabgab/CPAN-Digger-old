@@ -133,9 +133,20 @@ sub run_index {
 		my @changes_files = qw(Changes CHANGES ChangeLog);
 
 		LOG("Update DB");
-		$db{distro}->update({ name => $d->dist }, \%data , { upsert => 1 });
+		eval {
+			$db{distro}->update({ name => $d->dist }, \%data , { upsert => 1 });
+		};
+		if ($@) {
+			WARN("Exception in MongoDB: $@");
+		}
 
+		my @readme_files = qw('README');
 		# additional fields needed for the main page of the distribution
+		my @special_files = grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
+		#opendir my($dh), '.';
+		#my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
+
+		$data{special_files} = \@special_files;
 		$data{distvname} = $d->distvname;
 		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;

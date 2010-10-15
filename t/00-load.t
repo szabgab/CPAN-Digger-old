@@ -10,8 +10,11 @@ use CPAN::Digger;
 my $d = CPAN::Digger->new;
 isa_ok($d, 'CPAN::Digger');
 
-
 # Test cases for unzip and process files:
+
+# Exception:
+# Wide character in subroutine entry at /home/gabor/perl5/lib/perl5/x86_64-linux-gnu-thread-multi/MongoDB/Collection.pm line 379.
+
 
 # fail in the unzip
 
