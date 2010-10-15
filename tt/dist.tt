@@ -4,10 +4,11 @@
 %]
 [% INCLUDE incl/header.tt %]
 [% INCLUDE incl/form.tt %]
-[% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a><br>
-Version: [% meta.version %]
-Abstract: [% meta.abstract %]
-<br>
+<a href="/id/[% author %]/">[% author %]</a> - [% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a><br>
+<a href="/dist/[% name %]/">permalink</a><br>
+<a href="http://www.cpan.org/CPAN/authors/id/[% prefix %]">download</a><br>
+Version: [% meta.version %]<br>
+Abstract: [% meta.abstract %]<br>
 License: 
 [% IF meta.license %]
   [% IF meta.license == 'perl' %]

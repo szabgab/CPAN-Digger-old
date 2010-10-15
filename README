@@ -41,3 +41,6 @@ set noindex on /id/pauseid/*  (but allow indexing /id/pauseid/ itself)
 set noindex on /src/
 set noindex on /pod/perl_5_10_01/ and similar
 
+
+TODO
+- add links to previous release

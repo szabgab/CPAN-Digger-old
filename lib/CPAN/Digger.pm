@@ -144,10 +144,11 @@ sub run_index {
 		}
 
 		my @readme_files = qw('README');
+
+
 		# additional fields needed for the main page of the distribution
 		my @special_files = grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
-		#opendir my($dh), '.';
-		#my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
+		$data{prefix} = $d->prefix;
 
 		$data{special_files} = \@special_files;
 		$data{distvname} = $d->distvname;
