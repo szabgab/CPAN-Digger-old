@@ -99,7 +99,7 @@ Depends on (requires):
 [% IF meta.requires %]
   <ul>
   [% FOR e IN meta.requires %]
-    <li>[% e %]</li>
+    <li><a href="/q?m=[% e.key %]">[% e.key %]</a> [% e.value %]</li>
   [% END %]
   </ul>
 [% ELSE %]

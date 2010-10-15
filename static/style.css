@@ -6,3 +6,14 @@ body {
  padding: 0px;
 }
 
+#dependencies {
+  font-size: 12px;
+  
+}
+#dependencies li {
+  display:   inline;
+}
+
+#special_files li {
+  display:   inline;
+}
