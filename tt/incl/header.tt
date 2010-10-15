@@ -6,4 +6,4 @@
   <meta name="keywords" content="[% meta.keywords %]" />
 </head>
 <body>
-<a href="/">CPAN::Digger</a> <a href="/news">news</a>
+<a href="/">CPAN::Digger</a> <a href="/news.html">news</a>
