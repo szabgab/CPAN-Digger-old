@@ -46,6 +46,9 @@ sub run_index {
 	foreach my $d (@distributions) {
 		$counter{distro}++;
 #		last if  $counter{distro}++ > 5;
+		if ($ENV{DIGGER_TEST}) {
+			next if $d->dist !~ /Padre/;
+		}
 
 		LOG("Working on " . $d->prefix);
 		my $path    = dirname $d->prefix;

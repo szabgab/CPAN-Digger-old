@@ -26,6 +26,7 @@ my %opt;
 GetOptions(\%opt,
 	'cpan=s',
 	'output=s',
+	'test',
 	'dropdb',
 ) or usage();
 
@@ -39,6 +40,8 @@ usage() if not $opt{cpan} or not -d $opt{cpan};
 usage() if not $opt{output} or not -d $opt{output};
 $opt{root} = $root;
 
+$ENV{DIGGER_TEST} = delete $opt{test};
+
 my $cpan = CPAN::Digger->new(%opt);
 $cpan->run_index;
 $cpan->generate_central_files;
@@ -51,6 +54,7 @@ sub usage {
 Usage: $0 --cpan PATH_TO_CPAN_MIRROR --output PATH_TO_OUTPUT_DIRECTORY
    or
    --dropdb   to drop the whole database
+   --test     will do only a limited set of packages and then exit
 
 END_USAGE
 }
