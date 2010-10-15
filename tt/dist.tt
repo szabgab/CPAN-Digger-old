@@ -9,6 +9,46 @@
 <a href="http://www.cpan.org/CPAN/authors/id/[% prefix %]">download</a><br>
 Version: [% meta.version %]<br>
 Abstract: [% meta.abstract %]<br>
+<div id="links">
+Links: 
+[ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ] [ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ] 
+[ <a href="https://rt.cpan.org/Public/Dist/Display.html?Name=[% name %]">View/Report bugs</a> ]
+[ <a href="http://deps.cpantesters.org/?module=[% name %];perl=latest">dependencies</a> ]
+<!--
+Other tools (grep, diff)
+-->
+</div>
+<br>
+Repository: 
+[% IF meta.resources.repository %]
+  <a href="[% meta.resources.repository %]">[% meta.resources.repository %]</a>
+[% ELSE %]
+  Not in META.yml
+[% END %]
+<br>
+Home page: 
+[% IF meta.resources.homepage %]
+  <a href="[% meta.resources.homepage %]">[% meta.resources.homepage %]</a>
+[% ELSE %]
+  Not in META.yml
+[% END %]
+<br>
+
+CPAN Testers:
+[ <a href="http://www.cpantesters.org/show/[% name %].html#[% distvname %]">View reports</a> ]
+[ <a herf="http://matrix.cpantesters.org/?dist=[% name %]+[% version %]">Perl/Platform Version Matrix</a> ]
+<br>
+
+Rating:
+[ <a href="http://cpanratings.perl.org/d/[% name %]">reviews</a> ]
+[ <a href="http://cpanratings.perl.org/rate/?distribution=[% name %]">Rate this distribution</a> ]
+<br>
+
+[ <a href="http://www.annocpan.org/dist/[% name %]">AnnoCPAN</a> ]
+[ <a href="http://search.cpan.org/dist/[% name %]">search.cpan.org</a> ]
+[ <a href="http://cpan.uwinnipeg.ca/dist/[% name %]">Kobes search</a> ]
+<br>
+
 License: 
 [% IF meta.license %]
   [% IF meta.license == 'perl' %]

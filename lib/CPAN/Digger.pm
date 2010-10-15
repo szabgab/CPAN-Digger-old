@@ -110,6 +110,11 @@ sub run_index {
 				foreach my $field (@fields) {
 					$data{meta}{$field} = $meta->{$field};
 				}
+				if ($meta->{resources}) {
+					foreach my $field (qw(repository homepage bugtracker license)) {
+						$data{meta}{resources}{$field} = $meta->{resources}{$field};
+					}
+				}
 			};
 			if ($@) {
 				WARN("Exception while reading YAML file: $@");
