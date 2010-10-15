@@ -16,6 +16,7 @@ use File::Spec;
 use File::Temp     qw(tempdir);
 use Parse::CPAN::Packages;
 use Template;
+use Time::HiRes;
 use YAML::Any      ();
 
 use CPAN::Digger::DB;
@@ -199,12 +200,13 @@ sub run {
 	my $self = shift;
 	my %args = @_;
 
+	my $start_time = time;
 	require CGI;
 	my $q = CGI->new;
 	my $term = $q->param('q') // '';
-	$term =~ s/[^\w]//g; # sanitize for now
+	$term =~ s/[^\w:.*+?-]//g; # sanitize for now
 	my %db =  CPAN::Digger::DB->dbh;
-	my $result = $db{distro}->find({ name => qr/$term/ });
+	my $result = $db{distro}->find({ name => qr/$term/i });
 
 	my $tt = $self->get_tt;
 	print $q->header;
@@ -217,6 +219,7 @@ sub run {
 	my %data = (
 		results => \@results,
 	);
+	$data{q} = $term;
 	$tt->process('result.tt', \%data) or die $tt->error;
 	return;
 }

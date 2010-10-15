@@ -6,7 +6,10 @@
 [% INCLUDE incl/form.tt %]
 
 [% FOREACH doc IN results %]
-   <a href="/dist/[% doc.name %]">[% doc.name %]<br>
+<div class="result_entry">
+   <a href="/dist/[% doc.name %]">[% doc.name %]</a><br>
+   [% doc.meta.abstract %]<br>
+</div>
 [% END %]
 
 [% INCLUDE incl/footer.tt %]
