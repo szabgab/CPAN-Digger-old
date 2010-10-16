@@ -12,5 +12,7 @@
 </div>
 [% END %]
 
+Ellapsed time: [% ellapsed_time %]<br>
+
 [% INCLUDE incl/footer.tt %]
 

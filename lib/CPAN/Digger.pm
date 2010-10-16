@@ -5,19 +5,20 @@ use Moose;
 our $VERSION = '0.01';
 
 use autodie;
-use Carp           ();
-use Cwd            qw(cwd);
-use Capture::Tiny  qw(capture);
-use Data::Dumper   qw(Dumper);
-use File::Basename qw(basename dirname);
-use File::Copy     qw(copy move);
-use File::Path     qw(mkpath);
-use File::Spec;
-use File::Temp     qw(tempdir);
-use Parse::CPAN::Packages;
-use Template;
-use Time::HiRes;
-use YAML::Any      ();
+use Carp                  ();
+use Cwd                   qw(cwd);
+use Capture::Tiny         qw(capture);
+use Data::Dumper          qw(Dumper);
+use File::Basename        qw(basename dirname);
+use File::Copy            qw(copy move);
+use File::Path            qw(mkpath);
+use File::Spec            ();
+use File::Temp            qw(tempdir);
+use File::Find::Rule      ();
+use Parse::CPAN::Packages ();
+use Template              ();
+use Time::HiRes           qw(time);
+use YAML::Any             ();
 
 use CPAN::Digger::DB;
 
@@ -47,17 +48,21 @@ sub run_index {
 	foreach my $d (@distributions) {
 		$counter{distro}++;
 #		last if  $counter{distro}++ > 5;
+		if (not $d->dist) {
+			WARN("No dist provided. Skipping");
+			next;
+		}
+
 		if ($ENV{DIGGER_TEST}) {
 			next if $d->dist !~ /Padre/;
 		}
 
 		LOG("Working on " . $d->prefix);
-		my $path    = dirname $d->prefix;
-		my $src     = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
-		my $src_dir = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
+		my $path     = dirname $d->prefix;
+		my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
+		my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
 		my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
 
-		# untaint
 		foreach my $p ($src, $src_dir, $dist_dir) {
 			$p = eval {_untaint_path($p)};
 			if ($@) {
@@ -100,6 +105,11 @@ sub run_index {
 		}
 
 		chdir $d->distvname;
+		
+		my @files = $self->generate_html_from_pod($dist_dir);
+		$data{modules} = \@files;
+
+		
 		$data{has_meta} = -e 'META.yml';
 		# TODO we need to make sure the data we read from META.yml is correct and
 		# someone does not try to fill it with garbage or too much data.
@@ -168,6 +178,28 @@ sub run_index {
 	return;
 }
 
+# starting from current directory
+sub generate_html_from_pod {
+	my ($self, $dir) = @_;
+
+	my @files = map {_untaint_path($_)} File::Find::Rule->file->name('*.pm')->extras({ untaint => 1})->in('lib');
+	my @ret;
+	foreach my $infile (@files) {
+		my $module = substr($infile, 0, -3);
+		$module =~ s{/}{::}g;
+		my $outfile = File::Spec->catfile($dir, $infile);
+		mkpath dirname $outfile;
+		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";
+		LOG("CMD: $cmd");
+		system $cmd;
+		push @ret, {
+			path => $infile,
+			name => $module,
+		};
+	}
+	return @ret;
+}
+
 sub generate_central_files {
 	my $self = shift;
 
@@ -175,12 +207,20 @@ sub generate_central_files {
 	my %map = (
 		'index.tt' => 'index.html',
 		'news.tt'  => 'news.html',
+		'faq.tt'   => 'faq.html',
 	);
+	my $outdir = _untaint_path($self->output);
 	foreach my $infile (keys %map) {
-		my $outfile = _untaint_path(File::Spec->catfile($self->output, $map{$infile}));
+		my $outfile = File::Spec->catfile($outdir, $map{$infile});
 		my $data = {};
+		LOG("Processing $infile to $outfile");
 		$tt->process($infile, $data, $outfile) or die $tt->error;
 	}
+	
+	# just an empty file for now so it won't try to create a list of all the distributions
+	open my $fh, '>', File::Spec->catfile($outdir, 'dist', 'index.html');
+	close $fh;
+	
 	return;
 }
 
@@ -216,9 +256,11 @@ sub run {
 		push @results, $d;
 	}
 
+	my $end_time = time;
 	my %data = (
 		results => \@results,
 	);
+	$data{ellapsed_time} = $end_time - $start_time;
 	$data{q} = $term;
 	$tt->process('result.tt', \%data) or die $tt->error;
 	return;
