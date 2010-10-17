@@ -101,7 +101,9 @@ sub run_index {
 		
 		my $pods = $self->generate_html_from_pod($dist_dir);
 		$data{modules} = $pods->{modules};
-		$data{pods}    = $pods->{pods};
+		if (@{ $pods->{pods} }) {
+			$data{pods} = $pods->{pods};
+		}
 
 		$data{has_meta} = -e 'META.yml';
 		# TODO we need to make sure the data we read from META.yml is correct and

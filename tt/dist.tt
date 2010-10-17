@@ -145,6 +145,7 @@ Modules:
 </ul>
 </div>
 
+[% IF pods %]
 <div id="pods">
 Documents:
 <ul>
@@ -153,6 +154,7 @@ Documents:
 [% END %]
 </ul>
 </div>
+[% END %]
 
 
 [% INCLUDE incl/footer.tt %]
