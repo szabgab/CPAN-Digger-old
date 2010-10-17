@@ -62,7 +62,6 @@ TODO
   - add links to previous releases (see search.cpan.org)
   - fetch and display number of bugs from RT (and explain why it is not there if the bugtracking is different)
   - Other tools (grep and later diff between versions)
-  - Repository link: replace git://github.com/mongodb/mongo-perl-driver.git by http://github.com/mongodb/mongo-perl-driver in the link
   - fetch data from CPAN Testers and display PASS (146)   NA (1)   UNKNOWN (70)
   - Rating: fetch data from CPANRATINGS and display the stars and the number of reviews
   - For modules, fetch the one-line description and the version number from each one and display them

@@ -57,7 +57,7 @@ Home page:
 <div id="cpan_testers">
 CPAN Testers:
 [ <a href="http://www.cpantesters.org/show/[% name %].html#[% distvname %]">View reports</a> ]
-[ <a herf="http://matrix.cpantesters.org/?dist=[% name %]+[% version %]">Perl/Platform Version Matrix</a> ]
+[ <a href="http://matrix.cpantesters.org/?dist=[% name %]+[% meta.version %]">Perl/Platform Version Matrix</a> ]
 </div>
 
 <div id="cpan_rating">
