@@ -23,22 +23,35 @@ sub run {
 	$term =~ s/[^\w:.*+?-]//g; # sanitize for now
 
 	my %data;
-	$data{q} = $term;
 
-	if (not $term) {
-		$data{not_found} = 1;
+
+	my $m = $q->param('m') || '';
+	$m =~ s/[^\w:.*+?-]//g; # sanitize for now
+	
+	my $start_time = time;
+
+	my $result;
+	if ($m) {
+		$data{q} = $m;
+		$result = $self->db->distro->find({ 'modules.name' => $m });
+	} elsif ($term) {
+		$data{q} = $term;
+		$result = $self->db->distro->find({ name => qr/$term/i });
+	} else {
+		$data{not_term_found} = 1;
 		$tt->process('result.tt', \%data) or die $tt->error;
 		return;
 	}
 
-	
-	my $start_time = time;
-	my $result = $self->db->distro->find({ name => qr/$term/i });
-
 
 	my @results;
+	my $count = 0;
 	while (my $d = $result->next) {
+		$count++;
 		push @results, $d;
+	}
+	if (not $count) {
+		$data{not_found} = 1;
 	}
 
 	my $end_time = time;
