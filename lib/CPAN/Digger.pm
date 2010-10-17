@@ -185,11 +185,12 @@ sub run_index {
 sub generate_html_from_pod {
 	my ($self, $dir) = @_;
 
-	my @files = map {_untaint_path($_)} File::Find::Rule->file->name('*.pm')->extras({ untaint => 1})->in('lib');
+	my @files = map {_untaint_path($_)} File::Find::Rule->file->name('*.pm')->extras({ untaint => 1})->relative->in('lib');
 	my @ret;
 	foreach my $infile (@files) {
 		my $module = substr($infile, 0, -3);
 		$module =~ s{/}{::}g;
+		$infile = File::Spec->catdir('lib', $infile);
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
 		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";

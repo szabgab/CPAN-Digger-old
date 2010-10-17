@@ -43,4 +43,12 @@ set noindex on /pod/perl_5_10_01/ and similar
 
 
 TODO
+- get rid of the lib:: pretag on the dist page
+- list the full dependency hierarchy
+- 'license analysys' list the licenses of all the dependencies
+- replace plain CGI code with Dancer
+- allow the user to see the common dependencies
+- --ppi run the ppi processor on the files
 - add links to previous release
+- check why are several versions of the same package processed (eg. Padre)
+
