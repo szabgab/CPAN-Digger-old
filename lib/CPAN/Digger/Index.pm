@@ -17,7 +17,6 @@ use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
 use Parse::CPAN::Packages ();
-use Time::HiRes           qw(time);
 use YAML::Any             ();
 
 

@@ -7,6 +7,7 @@ our $VERSION = '0.01';
 extends 'CPAN::Digger';
 
 use autodie;
+use Time::HiRes           qw(time);
 
 sub run {
 	my $self = shift;
