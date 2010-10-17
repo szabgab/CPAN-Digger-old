@@ -145,5 +145,15 @@ Modules:
 </ul>
 </div>
 
+<div id="pods">
+Documents:
+<ul>
+[% FOR m IN pods %]
+  <li><a href="/dist/[% name %]/[% m.path %]">[% m.name %]</a></li>
+[% END %]
+</ul>
+</div>
+
+
 [% INCLUDE incl/footer.tt %]
 

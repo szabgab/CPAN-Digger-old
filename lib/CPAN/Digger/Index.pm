@@ -99,8 +99,8 @@ sub run_index {
 		
 		my $pods = $self->generate_html_from_pod($dist_dir);
 		$data{modules} = $pods->{modules};
+		$data{pods}    = $pods->{pods};
 
-		
 		$data{has_meta} = -e 'META.yml';
 		# TODO we need to make sure the data we read from META.yml is correct and
 		# someone does not try to fill it with garbage or too much data.
@@ -171,11 +171,18 @@ sub run_index {
 sub generate_html_from_pod {
 	my ($self, $dir) = @_;
 
-	my $ext = '.pm';
-	my $path = 'lib';
+	my %ret;
+	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib');
+	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib');
+
+	return \%ret;
+}
+
+sub _generate_html {
+	my ($self, $dir, $ext, $path) = @_;
 
 	my @files = sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path);
-	my @ret;
+	my @data;
 	foreach my $infile (@files) {
 		my $module = substr($infile, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
@@ -187,15 +194,14 @@ sub generate_html_from_pod {
 		if ($self->pod) {
 			system $cmd;
 		}
-		push @ret, {
+		push @data, {
 			path => $infile,
 			name => $module,
 		};
 	}
-#	my @ret = sort {$a->{name} cmp $b->{name}} @ret;
-
-	return {modules => \@ret};
+	return \@data;
 }
+
 
 sub generate_central_files {
 	my $self = shift;
