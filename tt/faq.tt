@@ -12,6 +12,7 @@ It is hard to write a FAQ before the web site is launched.
 <li><a href="#the_source_code_of_cpan_digger">Where is the source code of CPAN Digger?</a></li>
 <li><a href="#meta_yaml"></a>What is META.yml and why is it missing?</li>
 <li><a href="#meta_license">Why is the license missing?</a></li>
+<li><a href="#examples">Examples not found?</a></li>
 </ul>
 </div>
 
@@ -34,6 +35,11 @@ Modern tool will be able to automatically generate it when packaging the distrib
 The META.yml file can optionally contain a license field. Older distributions don't have META.yml file 
 or don't have this field yet. Newer distributions can make sure that the license field in the META.yml 
 file is included. (TODO: describe or link to how.)
+</li>
+
+<li><a name="examples">Examples not found?</a><b></b><br>
+Some CPAN distributions add examples for usage in the eg/ or examples/ directory in the distribution.
+Apparently you just looked at a package that does not have either of those directories.
 </li>
 
 </ul>
