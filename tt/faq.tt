@@ -10,9 +10,10 @@ It is hard to write a FAQ before the web site is launched.
 <ul>
 <li><a href="#what_is_cpan_digger">What is CPAN Digger?</a></li>
 <li><a href="#the_source_code_of_cpan_digger">Where is the source code of CPAN Digger?</a></li>
-<li><a href="#meta_yaml"></a>What is META.yml and why is it missing?</li>
+<li><a href="#meta_yaml">What is META.yml and why is it missing?</a></li>
 <li><a href="#meta_license">Why is the license missing?</a></li>
 <li><a href="#examples">Examples not found?</a></li>
+<li><a href="#other_search_engines">Other search engines for CPAN?</a></li>
 </ul>
 </div>
 
@@ -31,16 +32,41 @@ The META.yml file needs to be supplied by the developer of the module as part of
 Modern tool will be able to automatically generate it when packaging the distribution. (TODO: describe how or link to article)
 </li>
 
-<li><a name="meta_license">Why is the license missing?</a><b></b><br>
+<li><a name="meta_license"></a><b>Why is the license missing?</b><br>
 The META.yml file can optionally contain a license field. Older distributions don't have META.yml file 
 or don't have this field yet. Newer distributions can make sure that the license field in the META.yml 
 file is included. (TODO: describe or link to how.)
 </li>
 
-<li><a name="examples">Examples not found?</a><b></b><br>
+<li><a name="examples"></a><b>Examples not found?</b><br>
 Some CPAN distributions add examples for usage in the eg/ or examples/ directory in the distribution.
 Apparently you just looked at a package that does not have either of those directories.
 </li>
+
+<li><a name="other_search_engines"></a><b>Other search engines for CPAN?</b><br>
+There are two main search engines for CPAN:
+<a href="http://search.cpan.org/">search.cpan.org</a> written by Graham Bar and
+<a href="http://kobesearch.cpan.org/">Kobesearch</a> written by Randy Kobes.
+There is also a separate web site to look up the core Perl documentation at 
+<a href="http://perldoc.perl.org/">perldoc.perl.org</a> by Jon Allen.
+Various other sites serve the Perl and CPAN community:
+
+<a href="https://rt.cpan.org/">Request Tracker for CPAN</a>
+<a href="http://www.cpantesters.org/">CPAN Testers</a>
+<a href="http://deps.cpantesters.org/">Dependencies and test</a>
+<a href="http://cpanratings.perl.org/">CPAN Ratings</a>
+<!--
+<a href="http://p3rl.org/">p3rl.org</a>
+-->
+<a href="http://www.cpanforum.com/">CPAN::Forum</a>
+
+<!--
+<a href="http://cpants.perl.org/">CPANTS</a> 
+-->
+
+
+</li>
+
 
 </ul>
 </div>
