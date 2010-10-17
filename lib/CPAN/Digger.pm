@@ -25,6 +25,7 @@ use CPAN::Digger::DB;
 has 'root'   => (is => 'ro', isa => 'Str');
 has 'cpan'   => (is => 'ro', isa => 'Str');
 has 'output' => (is => 'ro', isa => 'Str');
+has 'filter' => (is => 'ro', isa => 'Str');
 
 
 my %db;
@@ -53,8 +54,8 @@ sub run_index {
 			next;
 		}
 
-		if ($ENV{DIGGER_TEST}) {
-			next if $d->dist !~ /Padre/;
+		if (my $filter = $self->filter) {
+			next if $d->dist !~ /$filter/;
 		}
 
 		LOG("Working on " . $d->prefix);
