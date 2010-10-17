@@ -27,6 +27,7 @@ GetOptions(\%opt,
 	'cpan=s',
 	'output=s',
 	'filter=s',
+	'pod',
 	'dropdb',
 ) or usage();
 
@@ -50,9 +51,10 @@ $cpan->copy_static_files;
 sub usage {
 	die <<"END_USAGE";
 Usage: $0 --cpan PATH_TO_CPAN_MIRROR --output PATH_TO_OUTPUT_DIRECTORY
+   --filter REGEX   only packages that match the regex will be indexed
+   --pod            generate HTML pages from POD
    or
    --dropdb         to drop the whole database
-   --filter REGEX   only packages that match the regex will be indexed
 
 END_USAGE
 }

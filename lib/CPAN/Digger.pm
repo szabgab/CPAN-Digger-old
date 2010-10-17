@@ -26,6 +26,7 @@ has 'root'   => (is => 'ro', isa => 'Str');
 has 'cpan'   => (is => 'ro', isa => 'Str');
 has 'output' => (is => 'ro', isa => 'Str');
 has 'filter' => (is => 'ro', isa => 'Str');
+has 'pod'    => (is => 'ro', isa => 'Str');
 
 
 my %db;
@@ -50,7 +51,7 @@ sub run_index {
 		$counter{distro}++;
 #		last if  $counter{distro}++ > 5;
 		if (not $d->dist) {
-			WARN("No dist provided. Skipping");
+			WARN("No dist provided. Skipping " . $d->prefix);
 			next;
 		}
 
@@ -193,7 +194,9 @@ sub generate_html_from_pod {
 		mkpath dirname $outfile;
 		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";
 		LOG("CMD: $cmd");
-		system $cmd;
+		if ($self->pod) {
+			system $cmd;
+		}
 		push @ret, {
 			path => $infile,
 			name => $module,
