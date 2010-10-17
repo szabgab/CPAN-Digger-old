@@ -97,8 +97,8 @@ sub run_index {
 
 		chdir $d->distvname;
 		
-		my @files = sort {$a->{name} cmp $b->{name}} $self->generate_html_from_pod($dist_dir);
-		$data{modules} = \@files;
+		my $pods = $self->generate_html_from_pod($dist_dir);
+		$data{modules} = $pods->{modules};
 
 		
 		$data{has_meta} = -e 'META.yml';
@@ -164,9 +164,6 @@ sub run_index {
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 	}
 
-	#$self->generate_central_files;
-	#$self->copy_static_files;
-
 	return;
 }
 
@@ -174,12 +171,15 @@ sub run_index {
 sub generate_html_from_pod {
 	my ($self, $dir) = @_;
 
-	my @files = map {_untaint_path($_)} File::Find::Rule->file->name('*.pm')->extras({ untaint => 1})->relative->in('lib');
+	my $ext = '.pm';
+	my $path = 'lib';
+
+	my @files = sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path);
 	my @ret;
 	foreach my $infile (@files) {
-		my $module = substr($infile, 0, -3);
+		my $module = substr($infile, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
-		$infile = File::Spec->catdir('lib', $infile);
+		$infile = File::Spec->catdir($path, $infile);
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
 		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";
@@ -192,7 +192,9 @@ sub generate_html_from_pod {
 			name => $module,
 		};
 	}
-	return @ret;
+#	my @ret = sort {$a->{name} cmp $b->{name}} @ret;
+
+	return {modules => \@ret};
 }
 
 sub generate_central_files {
