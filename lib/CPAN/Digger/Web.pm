@@ -18,7 +18,6 @@ sub run {
 	my $q = CGI->new;
 	my $term = $q->param('q') // '';
 	$term =~ s/[^\w:.*+?-]//g; # sanitize for now
-	#my %db =  CPAN::Digger::DB->dbh;
 	my $result = $self->db->distro->find({ name => qr/$term/i });
 
 	my $tt = $self->get_tt;

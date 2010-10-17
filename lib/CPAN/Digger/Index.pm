@@ -31,7 +31,6 @@ sub run_index {
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
 	$ENV{PATH} = '/bin:/usr/bin';
-	#%db =  CPAN::Digger::DB->dbh;
 
 	my $tt = $self->get_tt;
 
