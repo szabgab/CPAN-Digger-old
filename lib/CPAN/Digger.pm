@@ -106,7 +106,7 @@ sub run_index {
 
 		chdir $d->distvname;
 		
-		my @files = $self->generate_html_from_pod($dist_dir);
+		my @files = sort $self->generate_html_from_pod($dist_dir);
 		$data{modules} = \@files;
 
 		
@@ -163,7 +163,8 @@ sub run_index {
 
 
 		# additional fields needed for the main page of the distribution
-		my @special_files = grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
+		$data{author_name} ||= $data{author};
+		my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
 		$data{prefix} = $d->prefix;
 
 		$data{special_files} = \@special_files;

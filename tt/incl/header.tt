@@ -6,4 +6,11 @@
   <meta name="keywords" content="[% meta.keywords %]" />
 </head>
 <body>
-<a href="/">CPAN::Digger</a> <a href="/news.html">news</a>
+<div id="body">
+<div id="menu">
+<ul>
+  <li><a href="/">CPAN::Digger</a></li>
+  <li><a href="/news.html">News</a></li>
+  <li><a href="/faq.html">FAQ</a></li>
+</ul>
+</div>
