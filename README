@@ -50,6 +50,21 @@ TODO
 - allow the user to see the common dependencies of two packages
 - allow the user to create all the dependencies of a list of packages and then see "what if I add this extra package?" 
 - --ppi run the ppi processor on the files
-- add links to previous releases
 - check why are several versions of the same package processed (eg. Padre)
-- get rid of the $VAR1 = {};   at the end of the result display
+- List all the licenses that were used in META files and list all the packages with the given license. List all packages without license
+
+
+- dist page:
+  - path: Full Name instead of just the PAUSEID
+  - download link should be based on a configurable cpan server
+  - date of release
+  - add cpan faces: http://hexten.net/cpan-faces/
+  - add links to previous releases (see search.cpan.org)
+  - fetch and display number of bugs from RT (and explain why it is not there if the bugtracking is different)
+  - Other tools (grep and later diff between versions)
+  - Repository link: replace git://github.com/mongodb/mongo-perl-driver.git by http://github.com/mongodb/mongo-perl-driver in the link
+  - fetch data from CPAN Testers and display PASS (146)   NA (1)   UNKNOWN (70)
+  - Rating: fetch data from CPANRATINGS and display the stars and the number of reviews
+  - For modules, fetch the one-line description and the version number from each one and display them
+  - .pod files should be also processed (pod2html) and displayed
+  - Annotate POD - fetch the number of annotations and display the counter

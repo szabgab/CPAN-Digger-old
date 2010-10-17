@@ -27,7 +27,7 @@ Abstract: [% meta.abstract %]
 
 <div id="links">
 Links: 
-[ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ] [ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ] 
+[ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ]
 [ <a href="https://rt.cpan.org/Public/Dist/Display.html?Name=[% name %]">View/Report bugs</a> ]
 [ <a href="http://deps.cpantesters.org/?module=[% name %];perl=latest">dependencies</a> ]
 </div>
