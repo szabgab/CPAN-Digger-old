@@ -66,5 +66,4 @@ TODO
   - fetch data from CPAN Testers and display PASS (146)   NA (1)   UNKNOWN (70)
   - Rating: fetch data from CPANRATINGS and display the stars and the number of reviews
   - For modules, fetch the one-line description and the version number from each one and display them
-  - .pod files should be also processed (pod2html) and displayed
   - Annotate POD - fetch the number of annotations and display the counter

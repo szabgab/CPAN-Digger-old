@@ -39,7 +39,7 @@ Other tools (grep, diff)
 <div id="repository">
 Repository: 
 [% IF meta.resources.repository %]
-  <a href="[% meta.resources.repository %]">[% meta.resources.repository %]</a>
+  <a href="[% meta.resources.repository.link %]">[% meta.resources.repository.display %]</a>
 [% ELSE %]
   Not in META.yml
 [% END %]

@@ -157,6 +157,13 @@ sub run_index {
 		$data{author_name} ||= $data{author};
 		my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
 		$data{prefix} = $d->prefix;
+		
+		if ($data{meta}{resources}{repository}) {
+			my $repo = delete $data{meta}{resources}{repository};
+			$data{meta}{resources}{repository}{display} = $repo;
+			$repo =~ s{git://(github.com/.*)\.git}{http://$1};
+			$data{meta}{resources}{repository}{link} = $repo;
+		}
 
 		$data{special_files} = \@special_files;
 		$data{distvname} = $d->distvname;
