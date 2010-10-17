@@ -20,7 +20,7 @@ BEGIN {
 	}
 }
 use lib File::Spec->catdir($root, 'lib');
-use CPAN::Digger;
+use CPAN::Digger::Index;
 
 my %opt;
 GetOptions(\%opt,
@@ -32,6 +32,7 @@ GetOptions(\%opt,
 ) or usage();
 
 if ($opt{dropdb}) {
+	require CPAN::Digger::DB;
 	my $db = CPAN::Digger::DB->db;
 	$db->drop;
 	exit;
@@ -41,7 +42,7 @@ usage() if not $opt{cpan} or not -d $opt{cpan};
 usage() if not $opt{output} or not -d $opt{output};
 $opt{root} = $root;
 
-my $cpan = CPAN::Digger->new(%opt);
+my $cpan = CPAN::Digger::Index->new(%opt);
 $cpan->run_index;
 $cpan->generate_central_files;
 $cpan->copy_static_files;

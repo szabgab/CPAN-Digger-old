@@ -19,8 +19,8 @@ BEGIN {
 	}
 }
 use lib File::Spec->catdir($root, 'lib');
-use CPAN::Digger;
+use CPAN::Digger::Web;
 
-my $cpan = CPAN::Digger->new(root => $root);
+my $cpan = CPAN::Digger::Web->new(root => $root);
 $cpan->run;
 

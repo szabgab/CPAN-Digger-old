@@ -43,12 +43,13 @@ set noindex on /pod/perl_5_10_01/ and similar
 
 
 TODO
-- get rid of the lib:: pretag on the dist page
+- create the author pages  /id/<pauseid> to hold the list of all the packages of that user
 - list the full dependency hierarchy
-- 'license analysys' list the licenses of all the dependencies
+- 'license analyzis' list the licenses of all the dependencies
 - replace plain CGI code with Dancer
-- allow the user to see the common dependencies
+- allow the user to see the common dependencies of two packages
+- allow the user to create all the dependencies of a list of packages and then see "what if I add this extra package?" 
 - --ppi run the ppi processor on the files
-- add links to previous release
+- add links to previous releases
 - check why are several versions of the same package processed (eg. Padre)
-
+- get rid of the $VAR1 = {};   at the end of the result display
