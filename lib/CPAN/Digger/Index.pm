@@ -97,7 +97,7 @@ sub run_index {
 
 		chdir $d->distvname;
 		
-		my @files = sort $self->generate_html_from_pod($dist_dir);
+		my @files = sort {$a->{name} cmp $b->{name}} $self->generate_html_from_pod($dist_dir);
 		$data{modules} = \@files;
 
 		
