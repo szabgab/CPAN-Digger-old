@@ -16,6 +16,7 @@ use File::Path            qw(mkpath);
 use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
+use Parse::CPAN::Authors  ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
@@ -28,6 +29,7 @@ END {
 sub run_index {
 	my $self = shift;
 
+	my $cpan = Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' ));
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
 	$ENV{PATH} = '/bin:/usr/bin';
@@ -152,9 +154,16 @@ sub run_index {
 
 		my @readme_files = qw('README');
 
-
 		# additional fields needed for the main page of the distribution
+		my $author = $cpan->author(uc $data{author});
+		if ($author) {
+			$data{author_name} = $author->name;
+		} else {
+			WARN("Could not find details of '$data{author}'");
+		}
+
 		$data{author_name} ||= $data{author};
+
 		my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
 		$data{prefix} = $d->prefix;
 		
@@ -170,6 +179,32 @@ sub run_index {
 		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 	}
+
+	my @authors = $cpan->authors;
+	foreach my $author (@authors) {
+		my $pauseid = $author->pauseid;
+		LOG("Author: $pauseid");
+		my $outdir = _untaint_path( File::Spec->catdir( $self->output, 'id', lc $pauseid) );
+		mkpath $outdir;
+		my $outfile = File::Spec->catfile($outdir, 'index.html');
+		my @packages;
+		my $distros = $self->db->distro->find({ author => lc($pauseid) });
+		while (my $d = $distros->next) {
+			LOG("D: $d->{name}");
+			push @packages, {
+				name => $d->{name},
+			};
+		}
+		my %data = (
+			pauseid   => $pauseid,
+			lcpauseid => lc($pauseid),
+			name      => $author->name,
+			backpan   => join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid),
+			packages  => \@packages,
+		);
+		$tt->process('author.tt', \%data, $outfile) or die $tt->error;
+	}
+
 
 	return;
 }

@@ -36,6 +36,7 @@ requires 'Getopt::Long';
 requires 'MongoDB'                 => '0.39';
 requires 'Moose';
 requires 'Parse::CPAN::Packages';
+requires 'Parse::CPAN::Authors';
 requires 'Template';
 requires 'YAML::Any';
 
