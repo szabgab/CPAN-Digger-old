@@ -132,7 +132,7 @@ Depends on (requires):
   [% END %]
   </ul>
 [% ELSE %]
-  No prereqs were found in MEAT.yml
+  No prereqs were found in META.yml
 [% END %]
 </div>
 
