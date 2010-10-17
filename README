@@ -55,7 +55,6 @@ TODO
 
 
 - dist page:
-  - path: Full Name instead of just the PAUSEID
   - download link should be based on a configurable cpan server
   - date of release
   - add cpan faces: http://hexten.net/cpan-faces/
