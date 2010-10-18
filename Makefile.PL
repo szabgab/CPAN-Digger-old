@@ -29,6 +29,7 @@ requires 'Capture::Tiny';
 requires 'Data::Dumper';
 requires 'File::Basename';
 requires 'File::Copy';
+requires 'File::Find::Rule';
 requires 'File::Path';
 requires 'File::Spec';
 requires 'File::Temp';
