@@ -27,6 +27,9 @@ sub run {
 
 	my $m = $q->param('m') || '';
 	$m =~ s/[^\w:.*+?-]//g; # sanitize for now
+
+	my $license = $q->param('license') || '';
+	$license =~ s/[^\w:.*+?-]//g; # sanitize for now
 	
 	my $start_time = time;
 
@@ -36,7 +39,10 @@ sub run {
 		$result = $self->db->distro->find({ 'modules.name' => $m });
 	} elsif ($term) {
 		$data{q} = $term;
-		$result = $self->db->distro->find({ name => qr/$term/i });
+		$result = $self->db->distro->find({ 'name' => qr/$term/i });
+	} elsif ($license) {
+		$data{q} = $term;
+		$result = $self->db->distro->find({ 'meta.license' => $license });
 	} else {
 		$data{not_term_found} = 1;
 		$tt->process('result.tt', \%data) or die $tt->error;

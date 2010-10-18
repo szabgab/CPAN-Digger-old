@@ -225,7 +225,13 @@ sub generate_html_from_pod {
 sub _generate_html {
 	my ($self, $dir, $ext, $path) = @_;
 
-	my @files = sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path);
+	my @files = eval { sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path) };
+	# id/K/KA/KAWASAKI/WSST-0.1.1.tar.gz
+	# directory (lib/WSST/Templates/perl/lib/WebService/) {company_name} is still tainted at /usr/share/perl/5.10/File/Find.pm line 869.
+	if ($@) {
+		WARN("Exception in File::Find::Rule: $@");
+		return [];
+	}
 	my @data;
 	foreach my $infile (@files) {
 		my $module = substr($infile, 0, -1 * length($ext));
@@ -252,10 +258,15 @@ sub generate_central_files {
 
 	my $tt = $self->get_tt;
 	my %map = (
-		'index.tt' => 'index.html',
-		'news.tt'  => 'news.html',
-		'faq.tt'   => 'faq.html',
+		'index.tt'    => 'index.html',
+		'news.tt'     => 'news.html',
+		'faq.tt'      => 'faq.html',
+		'licenses.tt' => 'licenses.html',
 	);
+
+	my $result = $self->db->distro->distinct('meta.license');
+	
+
 	my $outdir = _untaint_path($self->output);
 	foreach my $infile (keys %map) {
 		my $outfile = File::Spec->catfile($outdir, $map{$infile});
