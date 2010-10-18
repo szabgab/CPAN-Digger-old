@@ -20,12 +20,10 @@ use Parse::CPAN::Authors  ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
+#has 'counter'    => (is => 'rw', isa => 'HASH');
+has 'counter_distro'    => (is => 'rw', isa => 'Int');
 
-my %counter;
 
-END {
-	print Dumper \%counter;
-}
 sub run_index {
 	my $self = shift;
 
@@ -39,8 +37,7 @@ sub run_index {
 	my @distributions = $p->distributions;
 	DISTRO:
 	foreach my $d (@distributions) {
-		$counter{distro}++;
-#		last if  $counter{distro}++ > 5;
+		$self->counter_distro($self->counter_distro +1);
 		if (not $d->dist) {
 			WARN("No dist provided. Skipping " . $d->prefix);
 			next;
@@ -76,24 +73,24 @@ sub run_index {
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
 			my $unzip = $self->unzip($d, $src);
 			if (not $unzip) {
-				$counter{unzip_failed}++;
+				#$counter{unzip_failed}++;
 				next;
 			}
 			if ($unzip == 2) {
-				$counter{unzip_without_subdir}++;
+				#$counter{unzip_without_subdir}++;
 				$data{unzip_without_subdir} = 1;
 			}
 		}
 		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
 			WARN("No directory for $src_dir " . $d->distvname);
-			$counter{no_directory}++;
+			#$counter{no_directory}++;
 			next;
 		}
 		
 
 		if (not $d->distvname) {
 			WARN("distvname is empty, skipping database update");
-			$counter{distvname_empty}++;
+			#$counter{distvname_empty}++;
 			next;
 		}
 
@@ -124,7 +121,7 @@ sub run_index {
 			};
 			if ($@) {
 				WARN("Exception while reading YAML file: $@");
-				$counter{exception_in_yaml}++;
+				#$counter{exception_in_yaml}++;
 				$data{exception_in_yaml} = $@;
 			}
 		}
@@ -185,17 +182,20 @@ sub run_index {
 	my @authors = $cpan->authors;
 	foreach my $author (@authors) {
 		my $pauseid = $author->pauseid;
-		LOG("Author: $pauseid");
+		#LOG("Author: $pauseid");
 		my $outdir = _untaint_path( File::Spec->catdir( $self->output, 'id', lc $pauseid) );
 		mkpath $outdir;
 		my $outfile = File::Spec->catfile($outdir, 'index.html');
 		my @packages;
 		my $distros = $self->db->distro->find({ author => lc($pauseid) });
 		while (my $d = $distros->next) {
-			LOG("D: $d->{name}");
-			push @packages, {
-				name => $d->{name},
-			};
+			if ($d->{name}) {
+				push @packages, {
+					name => $d->{name},
+				};
+			} else {
+				WARN("distro name is missing");
+			}
 		}
 		my %data = (
 			pauseid   => $pauseid,
@@ -264,7 +264,12 @@ sub generate_central_files {
 		'licenses.tt' => 'licenses.html',
 	);
 
-	my $result = $self->db->distro->distinct('meta.license');
+	# my $result = $self->db->distro->distinct('meta.license');
+	# say $result;
+	# my @licenses;
+	# while (my $license = $result->next) {
+		# say $license;
+	# }
 	
 
 	my $outdir = _untaint_path($self->output);

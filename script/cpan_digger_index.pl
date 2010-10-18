@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Cwd qw(abs_path);
+use Data::Dumper          qw(Dumper);
 use File::Basename qw(dirname);
 use File::Spec;
 use Getopt::Long qw(GetOptions);
@@ -43,7 +44,14 @@ usage() if not $opt{output} or not -d $opt{output};
 $opt{root} = $root;
 
 my $cpan = CPAN::Digger::Index->new(%opt);
-$cpan->run_index;
+eval {
+	$cpan->run_index;
+};
+if ($@) {
+	warn "Exception in run_index: $@";
+	say $cpan->counter_distro;
+}
+
 $cpan->generate_central_files;
 $cpan->copy_static_files;
 
