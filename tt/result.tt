@@ -1,5 +1,5 @@
 [%
-   title=""
+   title="CPAN Digger query"
    description=""
 %]
 [% INCLUDE incl/header.tt %]

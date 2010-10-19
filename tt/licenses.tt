@@ -5,6 +5,10 @@
 [% INCLUDE incl/header.tt %]
 [% INCLUDE incl/form.tt %]
 
+<p>
+The following licenses were found in the META.yml files.
+</p>
+
 <div id="licenses">
 <ul>
 [% FOR license IN licenses %]

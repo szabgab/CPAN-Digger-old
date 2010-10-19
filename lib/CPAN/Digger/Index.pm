@@ -21,7 +21,7 @@ use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
 #has 'counter'    => (is => 'rw', isa => 'HASH');
-has 'counter_distro'    => (is => 'rw', isa => 'Int');
+has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
 
 
 sub run_index {
@@ -240,8 +240,8 @@ sub _generate_html {
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
 		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";
-		LOG("CMD: $cmd");
 		if ($self->pod) {
+			LOG("CMD: $cmd");
 			system $cmd;
 		}
 		push @data, {
@@ -264,20 +264,26 @@ sub generate_central_files {
 		'licenses.tt' => 'licenses.html',
 	);
 
-	# my $result = $self->db->distro->distinct('meta.license');
-	# say $result;
-	# my @licenses;
-	# while (my $license = $result->next) {
-		# say $license;
-	# }
-	
+	my $result = $self->db->run_command([
+		"distinct" => "distro",
+		"key"      => "meta.license",
+		"query"    => {}
+	]);
+
+	my @licenses;
+	foreach my $license ( @{ $result->{values} } ) {
+#		print "D: $license\n";
+		next if $license =~ /^\s*$/;
+		push @licenses, $license;
+	}
 
 	my $outdir = _untaint_path($self->output);
 	foreach my $infile (keys %map) {
 		my $outfile = File::Spec->catfile($outdir, $map{$infile});
-		my $data = {};
+		my %data;
+		$data{licenses} = \@licenses;
 		LOG("Processing $infile to $outfile");
-		$tt->process($infile, $data, $outfile) or die $tt->error;
+		$tt->process($infile, \%data, $outfile) or die $tt->error;
 	}
 	
 	# just an empty file for now so it won't try to create a list of all the distributions

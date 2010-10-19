@@ -1,5 +1,5 @@
 [%
-   title=""
+   title="CPAN Digger - digging CPAN packages and Perl code"
    description=""
 %]
 [% INCLUDE incl/header.tt %]
