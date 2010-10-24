@@ -14,7 +14,7 @@ BEGIN {
 	$root = dirname dirname abs_path $0;
 
 	# sanitize variables to make Taint mode happy
-	($root) = $root =~ m{   ([\w/-]+)  }x;
+	($root) = $root =~ m{   ([\w/:\\-]+)  }x;
 	if ($ENV{PERL5LIB}) {
 		my ($path) = $ENV{PERL5LIB} =~ m{   ([\w/:-]+)  }x;
 		unshift @INC, split /:/, $path;
