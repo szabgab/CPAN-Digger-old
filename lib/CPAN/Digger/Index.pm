@@ -16,12 +16,17 @@ use File::Path            qw(mkpath);
 use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
+use JSON                  qw(to_json);
 use Parse::CPAN::Authors  ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
+use CPAN::Digger::PPI;
+
+
 #has 'counter'    => (is => 'rw', isa => 'HASH');
 has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
+
 
 
 sub run_index {
@@ -101,6 +106,8 @@ sub run_index {
 		if (@{ $pods->{pods} }) {
 			$data{pods} = $pods->{pods};
 		}
+
+		_generate_outline($dist_dir, $data{modules});
 
 		$data{has_meta} = -e 'META.yml';
 		# TODO we need to make sure the data we read from META.yml is correct and
@@ -220,6 +227,21 @@ sub generate_html_from_pod {
 	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib');
 
 	return \%ret;
+}
+
+sub _generate_outline {
+	my ($self, $dir, $files) = @_;
+
+	foreach my $file (@$files) {
+		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
+		mkpath dirname $outfile;
+
+		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
+		my $outline = $ppi->process;
+		open my $out, '>', $$outfile;
+		print $out to_json($outline);
+	}
+	return;
 }
 
 sub _generate_html {

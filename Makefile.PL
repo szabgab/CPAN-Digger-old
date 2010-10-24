@@ -34,6 +34,7 @@ requires 'File::Path';
 requires 'File::Spec';
 requires 'File::Temp';
 requires 'Getopt::Long';
+requires 'JSON';
 requires 'MongoDB'                 => '0.39';
 requires 'Moose';
 requires 'Parse::CPAN::Packages';
