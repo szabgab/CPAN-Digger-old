@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Cwd qw(abs_path);
-#use Data::Dumper       qw(Dumper);
+use Data::Dumper       qw(Dumper);
 use File::Basename qw(dirname);
 use File::Spec;
 #use Getopt::Long qw(GetOptions);
@@ -27,4 +27,6 @@ use CPAN::Digger::PPI;
 my $file = shift or die "Usage: $0 FILENAME";
 
 my $ppi = CPAN::Digger::PPI->new(infile => $file);
-$ppi->process;
+my $outline = $ppi->process;
+
+print Dumper $outline;

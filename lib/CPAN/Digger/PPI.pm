@@ -4,7 +4,6 @@ use Moose;
 
 use PPI::Document;
 use PPI::Find;
-use Data::Dumper qw(Dumper);
 
 has 'infile' => (is => 'rw');
 
@@ -39,16 +38,87 @@ sub process {
 		}
 	)->in($ppi);
 
-	my %cur_pkg;
+	my $check_alternate_sub_decls = 0;
 
+	# Build the outline structure from the search results
+	my @outline       = ();
+	my $cur_pkg       = {};
+	my $not_first_one = 0;
 	foreach my $thing (@things) {
 		if ( ref $thing eq 'PPI::Statement::Package' ) {
-			print $thing->namespace, "\n";
+			if ($not_first_one) {
+				if ( not $cur_pkg->{name} ) {
+					$cur_pkg->{name} = 'main';
+				}
+				push @outline, $cur_pkg;
+				$cur_pkg = {};
+			}
+			$not_first_one   = 1;
+			$cur_pkg->{name} = $thing->namespace;
+			$cur_pkg->{line} = $thing->location->[0];
+		} elsif ( ref $thing eq 'PPI::Statement::Include' ) {
+			next if $thing->type eq 'no';
+			if ( $thing->pragma ) {
+				push @{ $cur_pkg->{pragmata} }, { name => $thing->pragma, line => $thing->location->[0] };
+			} elsif ( $thing->module ) {
+				push @{ $cur_pkg->{modules} }, { name => $thing->module, line => $thing->location->[0] };
+				unless ($check_alternate_sub_decls) {
+					$check_alternate_sub_decls = 1
+						if grep { $thing->module eq $_ } (
+						'Method::Signatures',
+						'MooseX::Declare',
+						'MooseX::Method::Signatures'
+						);
+				}
+			}
+		} elsif ( ref $thing eq 'PPI::Statement::Sub' ) {
+			push @{ $cur_pkg->{methods} }, { name => $thing->name, line => $thing->location->[0] };
+		} elsif ( ref $thing eq 'PPI::Statement' ) {
+
+			# last resort, let's analyse further down...
+			my $node1 = $thing->first_element;
+			my $node2 = $thing->child(2);
+			next unless defined $node2;
+
+			# Moose attribute declaration
+			if ( $node1->isa('PPI::Token::Word') && $node1->content eq 'has' ) {
+				push @{ $cur_pkg->{attributes} }, { name => $node2->content, line => $thing->location->[0] };
+				next;
+			}
+
+			# MooseX::POE event declaration
+			if ( $node1->isa('PPI::Token::Word') && $node1->content eq 'event' ) {
+				push @{ $cur_pkg->{events} }, { name => $node2->content, line => $thing->location->[0] };
+				next;
+			}
 		}
 	}
 
-	#print Dumper \@things;
-	return;
+	if ($check_alternate_sub_decls) {
+		$ppi->find(
+			sub {
+				$_[1]->isa('PPI::Token::Word') or return 0;
+				$_[1]->content =~ /^(?:func|method)\z/ or return 0;
+				$_[1]->next_sibling->isa('PPI::Token::Whitespace') or return 0;
+				my $sib_content = $_[1]->next_sibling->next_sibling->content or return 0;
+
+				$sib_content =~ m/^\b(\w+)\b/;
+				return 0 unless defined $1;
+
+				push @{ $cur_pkg->{methods} }, { name => $1, line => $_[1]->line_number };
+
+				return 1;
+			}
+		);
+	}
+
+	if ( not $cur_pkg->{name} ) {
+		$cur_pkg->{name} = 'main';
+	}
+
+	push @outline, $cur_pkg;
+
+	return \@outline;
 }
 
 
