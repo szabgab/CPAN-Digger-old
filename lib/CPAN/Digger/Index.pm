@@ -28,6 +28,7 @@ use CPAN::Digger::PPI;
 has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
 has 'dir'    => (is => 'ro', isa => 'ArrayRef');
 
+has 'authors'    => (is => 'rw', isa => 'Parse::CPAN::Authors');
 
 
 sub index_dirs {
@@ -42,7 +43,7 @@ sub index_dirs {
 sub run_index {
 	my $self = shift;
 
-	my $cpan = Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' ));
+	$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
 	$ENV{PATH} = '/bin:/usr/bin';
@@ -50,153 +51,11 @@ sub run_index {
 	my $tt = $self->get_tt;
 
 	my @distributions = $p->distributions;
-	DISTRO:
 	foreach my $d (@distributions) {
-		$self->counter_distro($self->counter_distro +1);
-		if (not $d->dist) {
-			WARN("No dist provided. Skipping " . $d->prefix);
-			next;
-		}
-
-		if (my $filter = $self->filter) {
-			next if $d->dist !~ /$filter/;
-		}
-
-		LOG("Working on " . $d->prefix);
-		my $path     = dirname $d->prefix;
-		my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
-		my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
-		my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
-
-		foreach my $p ($src, $src_dir, $dist_dir) {
-			$p = eval {_untaint_path($p)};
-			if ($@) {
-				chomp $@;
-				WARN($@);
-				next DISTRO;
-			}
-		}
-
-		my %data = (
-			name   => $d->dist,
-			author => lc $d->cpanid,
-		);
-
-		mkpath $dist_dir;
-		mkpath $src_dir;
-		chdir $src_dir;
-		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-			my $unzip = $self->unzip($d, $src);
-			if (not $unzip) {
-				#$counter{unzip_failed}++;
-				next;
-			}
-			if ($unzip == 2) {
-				#$counter{unzip_without_subdir}++;
-				$data{unzip_without_subdir} = 1;
-			}
-		}
-		if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-			WARN("No directory for $src_dir " . $d->distvname);
-			#$counter{no_directory}++;
-			next;
-		}
-		
-
-		if (not $d->distvname) {
-			WARN("distvname is empty, skipping database update");
-			#$counter{distvname_empty}++;
-			next;
-		}
-
-		chdir $d->distvname;
-		
-		my $pods = $self->generate_html_from_pod($dist_dir);
-		$data{modules} = $pods->{modules};
-		if (@{ $pods->{pods} }) {
-			$data{pods} = $pods->{pods};
-		}
-
-		_generate_outline($dist_dir, $data{modules});
-
-		$data{has_meta} = -e 'META.yml';
-		# TODO we need to make sure the data we read from META.yml is correct and
-		# someone does not try to fill it with garbage or too much data.
-		if ($data{has_meta}) {
-			eval {
-				my $meta = YAML::Any::LoadFile('META.yml');
-				#print Dumper $meta;
-				my @fields = qw(license abstract author name requires version);
-				foreach my $field (@fields) {
-					$data{meta}{$field} = $meta->{$field};
-				}
-				if ($meta->{resources}) {
-					foreach my $field (qw(repository homepage bugtracker license)) {
-						$data{meta}{resources}{$field} = $meta->{resources}{$field};
-					}
-				}
-			};
-			if ($@) {
-				WARN("Exception while reading YAML file: $@");
-				#$counter{exception_in_yaml}++;
-				$data{exception_in_yaml} = $@;
-			}
-		}
-
-		if (-d 'xt') {
-			$data{xt} = 1;
-		}
-		if (-d 't') {
-			$data{t} = 1;
-		}
-		if (-f 'test.pl') {
-			$data{test_file} = 1;
-		}
-		my @example_dirs = qw(eg examples);
-		foreach my $dir (@example_dirs) {
-			if (-d $dir) {
-				$data{examples} = $dir;
-			}
-		}
-		my @changes_files = qw(Changes CHANGES ChangeLog);
-
-		LOG("Update DB");
-		eval {
-			$self->db->distro->update({ name => $d->dist }, \%data , { upsert => 1 });
-		};
-		if ($@) {
-			WARN("Exception in MongoDB: $@");
-		}
-
-		my @readme_files = qw('README');
-
-		# additional fields needed for the main page of the distribution
-		my $author = $cpan->author(uc $data{author});
-		if ($author) {
-			$data{author_name} = $author->name;
-		} else {
-			WARN("Could not find details of '$data{author}'");
-		}
-
-		$data{author_name} ||= $data{author};
-
-		my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
-		$data{prefix} = $d->prefix;
-		
-		if ($data{meta}{resources}{repository}) {
-			my $repo = delete $data{meta}{resources}{repository};
-			$data{meta}{resources}{repository}{display} = $repo;
-			$repo =~ s{git://(github.com/.*)\.git}{http://$1};
-			$data{meta}{resources}{repository}{link} = $repo;
-		}
-
-		$data{special_files} = \@special_files;
-		$data{distvname} = $d->distvname;
-		my $outfile = File::Spec->catfile($dist_dir, 'index.html');
-		$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
+		$self->process_distro($d);
 	}
 
-	my @authors = $cpan->authors;
+	my @authors = $self->authors->authors;
 	foreach my $author (@authors) {
 		my $pauseid = $author->pauseid;
 		#LOG("Author: $pauseid");
@@ -227,6 +86,162 @@ sub run_index {
 
 	return;
 }
+
+sub author_info {
+	my ($self, $author) = @_;
+	return $self->authors->author(uc $author);
+}
+
+sub process_distro {
+	my ($self, $d) = @_;
+
+	$self->counter_distro($self->counter_distro +1);
+	if (not $d->dist) {
+		WARN("No dist provided. Skipping " . $d->prefix);
+		next;
+	}
+
+	if (my $filter = $self->filter) {
+		next if $d->dist !~ /$filter/;
+	}
+
+	LOG("Working on " . $d->prefix);
+	my $path     = dirname $d->prefix;
+	my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
+	my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
+	my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
+
+	foreach my $p ($src, $src_dir, $dist_dir) {
+		$p = eval {_untaint_path($p)};
+		if ($@) {
+			chomp $@;
+			WARN($@);
+			return;
+		}
+	}
+
+	my %data = (
+		name   => $d->dist,
+		author => lc $d->cpanid,
+	);
+
+	mkpath $dist_dir;
+	mkpath $src_dir;
+	chdir $src_dir;
+	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
+		my $unzip = $self->unzip($d, $src);
+		if (not $unzip) {
+			#$counter{unzip_failed}++;
+			next;
+		}
+		if ($unzip == 2) {
+			#$counter{unzip_without_subdir}++;
+			$data{unzip_without_subdir} = 1;
+		}
+	}
+	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
+		WARN("No directory for $src_dir " . $d->distvname);
+		#$counter{no_directory}++;
+		next;
+	}
+	
+
+	if (not $d->distvname) {
+		WARN("distvname is empty, skipping database update");
+		#$counter{distvname_empty}++;
+		next;
+	}
+
+	chdir $d->distvname;
+	
+	my $pods = $self->generate_html_from_pod($dist_dir);
+	$data{modules} = $pods->{modules};
+	if (@{ $pods->{pods} }) {
+		$data{pods} = $pods->{pods};
+	}
+
+	_generate_outline($dist_dir, $data{modules});
+
+	$data{has_meta} = -e 'META.yml';
+	# TODO we need to make sure the data we read from META.yml is correct and
+	# someone does not try to fill it with garbage or too much data.
+	if ($data{has_meta}) {
+		eval {
+			my $meta = YAML::Any::LoadFile('META.yml');
+			#print Dumper $meta;
+			my @fields = qw(license abstract author name requires version);
+			foreach my $field (@fields) {
+				$data{meta}{$field} = $meta->{$field};
+			}
+			if ($meta->{resources}) {
+				foreach my $field (qw(repository homepage bugtracker license)) {
+					$data{meta}{resources}{$field} = $meta->{resources}{$field};
+				}
+			}
+		};
+		if ($@) {
+			WARN("Exception while reading YAML file: $@");
+			#$counter{exception_in_yaml}++;
+			$data{exception_in_yaml} = $@;
+		}
+	}
+
+	if (-d 'xt') {
+		$data{xt} = 1;
+	}
+	if (-d 't') {
+		$data{t} = 1;
+	}
+	if (-f 'test.pl') {
+		$data{test_file} = 1;
+	}
+	my @example_dirs = qw(eg examples);
+	foreach my $dir (@example_dirs) {
+		if (-d $dir) {
+			$data{examples} = $dir;
+		}
+	}
+	my @changes_files = qw(Changes CHANGES ChangeLog);
+
+	LOG("Update DB");
+	eval {
+		$self->db->distro->update({ name => $d->dist }, \%data , { upsert => 1 });
+	};
+	if ($@) {
+		WARN("Exception in MongoDB: $@");
+	}
+
+	my @readme_files = qw('README');
+
+	# additional fields needed for the main page of the distribution
+	my $author = $self->author_info($data{author});
+	if ($author) {
+		$data{author_name} = $author->name;
+	} else {
+		WARN("Could not find details of '$data{author}'");
+	}
+
+	$data{author_name} ||= $data{author};
+
+	my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
+	$data{prefix} = $d->prefix;
+	
+	if ($data{meta}{resources}{repository}) {
+		my $repo = delete $data{meta}{resources}{repository};
+		$data{meta}{resources}{repository}{display} = $repo;
+		$repo =~ s{git://(github.com/.*)\.git}{http://$1};
+		$data{meta}{resources}{repository}{link} = $repo;
+	}
+
+	$data{special_files} = \@special_files;
+	$data{distvname} = $d->distvname;
+	my $outfile = File::Spec->catfile($dist_dir, 'index.html');
+	my $tt = $self->get_tt;
+	$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
+
+	return;
+}
+
 
 # starting from current directory
 sub generate_html_from_pod {

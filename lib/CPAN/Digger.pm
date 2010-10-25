@@ -18,6 +18,8 @@ has 'pod'    => (is => 'ro', isa => 'Str');
 
 has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
 
+has 'tt'     => (is => 'rw', isa => 'Template');
+
 sub BUILD {
 	my $self = shift;
 	$self->db(CPAN::Digger::DB->db);
@@ -27,17 +29,22 @@ sub BUILD {
 sub get_tt {
 	my $self = shift;
 
-	my $root = $self->root;
+	if (not $self->tt) {
 
-	my $config = {
-		INCLUDE_PATH => "$root/tt",
-		INTERPOLATE  => 1,
-		POST_CHOMP   => 1,
-	#	PRE_PROCESS  => 'incl/header.tt',
-	#	POST_PROCESS  => 'incl/footer.tt',
-		EVAL_PERL    => 1,
-	};
-	Template->new($config);
+		my $root = $self->root;
+	
+		my $config = {
+			INCLUDE_PATH => "$root/tt",
+			INTERPOLATE  => 1,
+			POST_CHOMP   => 1,
+		#	PRE_PROCESS  => 'incl/header.tt',
+		#	POST_PROCESS  => 'incl/footer.tt',
+			EVAL_PERL    => 1,
+		};
+		$self->tt(Template->new($config));
+	}
+
+	return $self->tt;
 }
 
 
