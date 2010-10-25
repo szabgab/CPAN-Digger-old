@@ -26,8 +26,18 @@ use CPAN::Digger::PPI;
 
 #has 'counter'    => (is => 'rw', isa => 'HASH');
 has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
+has 'dir'    => (is => 'ro', isa => 'ArrayRef');
 
 
+
+sub index_dirs {
+	my $self = shift;
+
+	$ENV{PATH} = '/bin:/usr/bin';
+	die Dumper $self->dir;
+
+	return;
+}
 
 sub run_index {
 	my $self = shift;
@@ -295,7 +305,7 @@ sub generate_central_files {
 	my @licenses;
 	foreach my $license ( @{ $result->{values} } ) {
 #		print "D: $license\n";
-		next if $license =~ /^\s*$/;
+		next if not defined $license or $license =~ /^\s*$/;
 		push @licenses, $license;
 	}
 

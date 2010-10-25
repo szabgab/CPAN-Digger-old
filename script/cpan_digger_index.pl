@@ -28,6 +28,7 @@ GetOptions(\%opt,
 	'cpan=s',
 	'output=s',
 	'filter=s',
+	'dir=s@',
 	'pod',
 	'dropdb',
 ) or usage();
@@ -39,18 +40,30 @@ if ($opt{dropdb}) {
 	exit;
 }
 
-usage() if not $opt{cpan} or not -d $opt{cpan};
+usage() if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
 usage() if not $opt{output} or not -d $opt{output};
 $opt{root} = $root;
 
 my $cpan = CPAN::Digger::Index->new(%opt);
-eval {
-	$cpan->run_index;
-};
-if ($@) {
-	warn "Exception in run_index: $@";
-	say $cpan->counter_distro;
+
+if ($cpan->cpan) {
+	eval {
+		$cpan->run_index;
+	};
+	if ($@) {
+		warn "Exception in run_index: $@";
+		say $cpan->counter_distro;
+	}
 }
+if ($cpan->dir) {
+	eval {
+		$cpan->index_dirs;
+	};
+	if ($@) {
+		warn "Exception in index_dirs: $@";
+	}
+}
+
 
 $cpan->generate_central_files;
 $cpan->copy_static_files;
@@ -59,10 +72,18 @@ $cpan->copy_static_files;
 
 sub usage {
 	die <<"END_USAGE";
-Usage: $0 --cpan PATH_TO_CPAN_MIRROR --output PATH_TO_OUTPUT_DIRECTORY
+Usage: $0
+   --output PATH_TO_OUTPUT_DIRECTORY    (required)
+
+At least one of these is required:
+   --cpan PATH_TO_CPAN_MIRROR
+   --dir PATH_TO_SOURCE_DIR   (can appear several times)
+
+Optional:
    --filter REGEX   only packages that match the regex will be indexed
    --pod            generate HTML pages from POD
-   or
+
+Or:
    --dropdb         to drop the whole database
 
 END_USAGE

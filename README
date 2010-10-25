@@ -65,3 +65,11 @@ TODO
   - Rating: fetch data from CPANRATINGS and display the stars and the number of reviews
   - For modules, fetch the one-line description and the version number from each one and display them
   - Annotate POD - fetch the number of annotations and display the counter
+
+Be able to index
+  1) CPAN or local CPAN with injected files
+  2) @INC of current perl
+  3) list of directories (e.g. for the @INC of some other perl or file of
+     a project in a version control system)
+
+
