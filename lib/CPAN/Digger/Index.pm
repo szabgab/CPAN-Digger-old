@@ -477,7 +477,7 @@ sub _chmod {
 
 sub _untaint_path {
 	my $p = shift;
-	if ($p =~ m{^([\w/.-]+)$}x) {
+	if ($p =~ m{^([\w/:\\.-]+)$}x) {
 		$p = $1;
 	} else {
 		Carp::confess("Untaint failed for '$p'\n");
