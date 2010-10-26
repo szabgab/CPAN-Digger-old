@@ -286,10 +286,12 @@ sub _generate_html {
 		$infile = File::Spec->catdir($path, $infile);
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
-		my $cmd = "pod2html --css /style.css --infile $infile --outfile $outfile";
+		
 		if ($self->pod) {
-			LOG("CMD: $cmd");
-			system $cmd;
+			require CPAN::Digger::Pod;
+			LOG("POD: $infile -> $outfile");
+			my $pod = CPAN::Digger::Pod->new();
+			$pod->process($infile, $outfile);
 		}
 		push @data, {
 			path => $infile,
