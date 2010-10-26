@@ -23,6 +23,9 @@ all_from 'lib/CPAN/Digger.pm';
 requires 'perl'                  => '5.010';
 
 requires 'autodie';
+requires 'Archive::Any';
+requires 'Archive::Zip';
+requires 'Archive::Tar';
 requires 'Carp';
 requires 'Cwd';
 requires 'Capture::Tiny';

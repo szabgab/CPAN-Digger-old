@@ -366,86 +366,89 @@ sub LOG {
 sub unzip {
 	my ($self, $d, $src) = @_;
 
-	my @cmd;
-	given ($d->prefix) {
-		when (qr/\.(tar\.gz|tgz)$/) {
-			@cmd = ('tar', 'xzf', "'$src'");
-		}
-		when (qr/\.tar\.bz2$/) {
-			@cmd = ('tar', 'xjf', "'$src'");
-		}
-		when (qr/\.zip$/) {
-			@cmd = ('unzip', "'$src'");
-		}
-		default{
-		}
-	}
-	if (not @cmd) {
+	if ($d->prefix !~ m/\.(tar\.bz2|tar\.gz|tgz|zip)$/) {
 		WARN("Does not know how to unzip $src");
 		return 0;
 	}
 
-	my $cmd = join " ", @cmd;
-	#LOG(join " ", @cmd);
-	LOG($cmd);
+	LOG("Unzipping '$src'");
+	my $archive = eval { Archive::Any->new($src); };
+	if ($@) {
+		WARN $@;
+		return;
+	}
+	
+	if ($archive->is_naughty) {
+		WARN("Archive is naughty");
+		return;
+	}
+	my $dir = $d->distvname;
+	if ($archive->is_impolite) {
+		mkdir $dir;
+		$archive->extract($dir);
+	} else {
+		$archive->extract();
+	}
 
-	my $cwd = eval { _untaint_path(cwd()) };
-	if ($@) {
-		WARN("Could not untaint cwd: '" . cwd() . "'  $@");
-		return;
-	}
-	my $temp = tempdir( CLEANUP => 1 );
-	chdir $temp;
-	my ($out, $err) = eval { capture { system($cmd) } };
-	if ($@) {
-		die "$cmd $@";
-	}
-	if ($err) {
-		WARN("Command ($cmd) failed: $err");
-		chdir $cwd;
-		return;
-	}
+	# my $cwd = eval { _untaint_path(cwd()) };
+	# if ($@) {
+		# WARN("Could not untaint cwd: '" . cwd() . "'  $@");
+		# return;
+	# }
+	# my $temp = tempdir( CLEANUP => 1 );
+	# chdir $temp;
+	# my ($out, $err) = eval { capture { system($cmd) } };
+	# if ($@) {
+		# die "$cmd $@";
+	# }
+	# if ($err) {
+		# WARN("Command ($cmd) failed: $err");
+		# chdir $cwd;
+		# return;
+	# }
 
 	# TODO check if this was really successful?
 	# TODO check what were the permission bits
-	_chmod($temp);
+	_chmod('.');
 
 	opendir my($dh), '.';
 	my @content = eval { map { _untaint_path($_) } grep {$_ ne '.' and $_ ne '..'} readdir $dh };
 	if ($@) {
 		WARN("Could not untaint content of directory: $@");
-		chdir $cwd;
+		#chdir $cwd;
 		return;
 	}
 	
 	#print "CON: @content\n";
-	if (@content == 1 and $content[0] eq $d->distvname) {
-		# using external mv as File::Copy::move cannot move directory...
-		my $cmd_move = "mv " . $d->distvname . " $cwd";
-		#LOG("Moving " . $d->distvname . " to $cwd");
-		LOG($cmd_move);
-		#move $d->distvname, File::Spec->catdir( $cwd, $d->distvname );
-		system($cmd_move);
-		# TODO: some files open with only read permissions on the main directory.
-		# this needs to be reported and I need to correct it on the local unzip setting
-		# xw on the directories and w on the files
-		chdir $cwd;
-		return 1;
-	} else {
-		my $target_dir = eval { _untaint_path(File::Spec->catdir( $cwd, $d->distvname )) };
-		if ($@) {
-			WARN("Could not untaint target_directory: $@");
-			chdir $cwd;
-			return;
-		}
-		LOG("Need to create $target_dir");
-		mkdir $target_dir;
-		foreach my $thing (@content) {
-			system "mv $thing $target_dir";
-		}
-		chdir $cwd;
-		return 2;
-	}
+	# if (@content == 1 and $content[0] eq $d->distvname) {
+		# # using external mv as File::Copy::move cannot move directory...
+		# my $cmd_move = "mv " . $d->distvname . " $cwd";
+		# #LOG("Moving " . $d->distvname . " to $cwd");
+		# LOG($cmd_move);
+		# #move $d->distvname, File::Spec->catdir( $cwd, $d->distvname );
+		# system($cmd_move);
+		# # TODO: some files open with only read permissions on the main directory.
+		# # this needs to be reported and I need to correct it on the local unzip setting
+		# # xw on the directories and w on the files
+		# #chdir $cwd;
+		# return 1;
+	# } else {
+		# my $target_dir = eval { _untaint_path(File::Spec->catdir( $cwd, $d->distvname )) };
+		# if ($@) {
+			# WARN("Could not untaint target_directory: $@");
+			# chdir $cwd;
+			# return;
+		# }
+		# LOG("Need to create $target_dir");
+		# mkdir $target_dir;
+		# foreach my $thing (@content) {
+			# system "mv $thing $target_dir";
+		# }
+		# chdir $cwd;
+		# return 2;
+	# }
+
+	return 1;
 }
 
 sub _chmod {
