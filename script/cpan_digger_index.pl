@@ -44,7 +44,11 @@ usage() if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
 usage() if not $opt{output} or not -d $opt{output};
 $opt{root} = $root;
 
+
 my $cpan = CPAN::Digger::Index->new(%opt);
+
+$cpan->generate_central_files;
+$cpan->copy_static_files;
 
 if ($cpan->cpan) {
 	eval {
@@ -65,8 +69,6 @@ if ($cpan->dir) {
 }
 
 
-$cpan->generate_central_files;
-$cpan->copy_static_files;
 
 
 
