@@ -5,7 +5,7 @@ use Moose;
 use MongoDB;
 
 sub db {
-	my $connection = MongoDB::Connection->new(host => 'localhost', port => 27017);
+	my $connection = MongoDB::Connection->new(host => '127.0.0.1', port => 27016);
 	my $db         = $connection->cpan_digger;
 	return $db;
 }
