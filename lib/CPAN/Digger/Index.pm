@@ -98,11 +98,11 @@ sub process_distro {
 	$self->counter_distro($self->counter_distro +1);
 	if (not $d->dist) {
 		WARN("No dist provided. Skipping " . $d->prefix);
-		next;
+		return;
 	}
 
 	if (my $filter = $self->filter) {
-		next if $d->dist !~ /$filter/;
+		return if $d->dist !~ /$filter/;
 	}
 
 	LOG("Working on " . $d->prefix);
@@ -132,7 +132,7 @@ sub process_distro {
 		my $unzip = $self->unzip($d, $src);
 		if (not $unzip) {
 			#$counter{unzip_failed}++;
-			next;
+			return;
 		}
 		if ($unzip == 2) {
 			#$counter{unzip_without_subdir}++;
@@ -142,14 +142,14 @@ sub process_distro {
 	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
 		WARN("No directory for $src_dir " . $d->distvname);
 		#$counter{no_directory}++;
-		next;
+		return;
 	}
 	
 
 	if (not $d->distvname) {
 		WARN("distvname is empty, skipping database update");
 		#$counter{distvname_empty}++;
-		next;
+		return;
 	}
 
 	chdir $d->distvname;
@@ -327,6 +327,7 @@ sub generate_central_files {
 	}
 
 	my $outdir = _untaint_path($self->output);
+	mkpath $outdir;
 	foreach my $infile (keys %map) {
 		my $outfile = File::Spec->catfile($outdir, $map{$infile});
 		my %data;
@@ -335,6 +336,7 @@ sub generate_central_files {
 		$tt->process($infile, \%data, $outfile) or die $tt->error;
 	}
 	
+	mkpath(File::Spec->catfile($outdir, 'dist'));
 	# just an empty file for now so it won't try to create a list of all the distributions
 	open my $fh, '>', File::Spec->catfile($outdir, 'dist', 'index.html');
 	close $fh;
@@ -370,6 +372,9 @@ sub unzip {
 		WARN("Does not know how to unzip $src");
 		return 0;
 	}
+	require Archive::Any;
+	#require Archive::Any::Plugin::Tar;
+	#require Archive::Any::Plugin::Zip;
 
 	LOG("Unzipping '$src'");
 	my $archive = eval { Archive::Any->new($src); };

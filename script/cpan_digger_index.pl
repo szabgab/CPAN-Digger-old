@@ -1,4 +1,6 @@
-#!/usr/bin/perl -T
+#!/usr/bin/perl
+# remove tain mode till we know how to use Archive::Any
+# -T
 use 5.010;
 use strict;
 use warnings;
@@ -74,7 +76,7 @@ if ($cpan->dir) {
 
 sub usage {
 	die <<"END_USAGE";
-Usage: $0
+Usage: perl -T $0
    --output PATH_TO_OUTPUT_DIRECTORY    (required)
 
 At least one of these is required:
