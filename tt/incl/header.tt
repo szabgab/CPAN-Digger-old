@@ -4,6 +4,11 @@
   <link rel="stylesheet" type="text/css" href="/style.css" /> 
   <meta name="description" content="[% description %]" />
   <meta name="keywords" content="[% meta.keywords %]" />
+  <meta name="keywords" content="" />
+
+  <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
+  <script type="text/javascript" src="js/digger.js"></script>
 </head>
 <body>
 <div id="body">
@@ -15,3 +20,8 @@
   <li><a href="/licenses.html">Licenses</a></li>
 </ul>
 </div>
+<a id="dialog_link" href="#">dialog</a>
+<div id="dialog" title="Dialog Title">
+<p>Text of the dialog</p>
+</div>
+
