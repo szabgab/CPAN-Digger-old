@@ -42,8 +42,11 @@ if ($opt{dropdb}) {
 	exit;
 }
 
-usage() if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
-usage() if not $opt{output} or not -d $opt{output};
+usage("--cpan or --dir required")
+	if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
+usage("--output required") if not $opt{output};
+usage("--output must be given an existing directory") if not -d $opt{output};
+
 $opt{root} = $root;
 
 
@@ -75,6 +78,10 @@ if ($cpan->dir) {
 
 
 sub usage {
+	my $msg = shift;
+	if ($msg) {
+		print "\n*** $msg\n\n";
+	}
 	die <<"END_USAGE";
 Usage: perl -T $0
    --output PATH_TO_OUTPUT_DIRECTORY    (required)
