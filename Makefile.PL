@@ -48,6 +48,9 @@ requires 'PPI::Find';
 requires 'Template';
 requires 'YAML::Any';
 
+requires 'YAML';
+requires 'Dancer'     => '1.1901';
+
 test_requires 'Test::More'         => '0.88';
 test_requires 'Test::NoWarnings'   => '0.084';
 
