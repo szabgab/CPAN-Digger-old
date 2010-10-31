@@ -7,7 +7,7 @@ our $VERSION = '0.01';
 extends 'CPAN::Digger';
 
 use autodie;
-use Cwd                   qw(cwd);
+use Cwd                   qw(abs_path cwd);
 use Capture::Tiny         qw(capture);
 use Data::Dumper          qw(Dumper);
 use File::Basename        qw(basename dirname);
@@ -35,7 +35,24 @@ sub index_dirs {
 	my $self = shift;
 
 	$ENV{PATH} = '/bin:/usr/bin';
-	die Dumper $self->dir;
+	my $dirs = $self->dir;
+	#die Dumper $dirs;
+	foreach my $dir (@$dirs) {
+		my $dist    = 'Local-A'; #?
+		my $version = '1.00';
+		my $author  = 'ANONIMUS';
+		my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2), $author; 
+		my $d = Parse::CPAN::Packages::Distribution->new(
+			dist      => $dist,
+			prefix    => "$path/$dist-$version",
+			cpanid    => $author,
+			distvname => "$dist-$version",
+			# version =>
+			# filename =>
+			# maturity =>
+		);
+		$self->process_distro($d, abs_path $dir);
+	}
 
 	return;
 }
@@ -89,11 +106,15 @@ sub run_index {
 
 sub author_info {
 	my ($self, $author) = @_;
-	return $self->authors->author(uc $author);
+	if ($self->authors) {
+		return $self->authors->author(uc $author);
+	} else {
+		return;
+	}
 }
 
 sub process_distro {
-	my ($self, $d) = @_;
+	my ($self, $d, $source_dir) = @_;
 
 	$self->counter_distro($self->counter_distro +1);
 	if (not $d->dist) {
@@ -129,14 +150,27 @@ sub process_distro {
 	mkpath $src_dir;
 	chdir $src_dir;
 	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-		my $unzip = $self->unzip($d, $src);
-		if (not $unzip) {
-			#$counter{unzip_failed}++;
-			return;
-		}
-		if ($unzip == 2) {
-			#$counter{unzip_without_subdir}++;
-			$data{unzip_without_subdir} = 1;
+		if ($source_dir) {
+			LOG("Source directory $source_dir");
+			# just copy the files
+			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
+				next if $file =~ /\.svn|\.git|CVS/;
+				my $from = File::Spec->catfile($source_dir, $file);
+				my $to   = File::Spec->catfile($src_dir, $d->distvname, $file);
+				LOG("Copy $from to $to");
+				mkpath dirname $to;
+				copy $from, $to or die $!;
+			}
+		} else {
+			my $unzip = $self->unzip($d, $src);
+			if (not $unzip) {
+				#$counter{unzip_failed}++;
+				return;
+			}
+			if ($unzip == 2) {
+				#$counter{unzip_without_subdir}++;
+				$data{unzip_without_subdir} = 1;
+			}
 		}
 	}
 	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
