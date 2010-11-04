@@ -18,10 +18,19 @@ get '/' => sub {
         keywords => 'x,y',
     };
 };
-foreach my $page (qw(news faq licenses)) {
+foreach my $page (qw(news faq)) {
     get "/$page" => sub {
         template $page;
     }
+};
+
+
+get '/licenses' => sub {
+    my $data_file = path config->{public}, 'data', 'licenses.json';
+    my $json = from_json slurp($data_file);
+    template 'licenses', {
+        licenses => $json,
+    };
 };
 
 
@@ -29,5 +38,12 @@ get '/dancer' => sub {
     content_type 'text/plain';
     to_dumper config;
 };
+
+sub slurp {
+    my $file = shift;
+    open my $fh, '<', $file or die;
+    local $/ = undef;
+    <$fh>;
+}
 
 true;

@@ -339,13 +339,10 @@ sub _generate_html {
 sub generate_central_files {
 	my $self = shift;
 
-	my $tt = $self->get_tt;
-	my %map = (
-		'index.tt'    => 'index.html',
-		'news.tt'     => 'news.html',
-		'faq.tt'      => 'faq.html',
-		'licenses.tt' => 'licenses.html',
-	);
+	# my $tt = $self->get_tt;
+	# my %map = (
+		# 'licenses.tt' => 'licenses.html',
+	# );
 
 	my $result = $self->db->run_command([
 		"distinct" => "distro",
@@ -362,14 +359,19 @@ sub generate_central_files {
 
 	my $outdir = _untaint_path($self->output);
 	mkpath $outdir;
-	foreach my $infile (keys %map) {
-		my $outfile = File::Spec->catfile($outdir, $map{$infile});
-		my %data;
-		$data{licenses} = \@licenses;
-		LOG("Processing $infile to $outfile");
-		$tt->process($infile, \%data, $outfile) or die $tt->error;
-	}
-	
+	# foreach my $infile (keys %map) {
+		# my $outfile = File::Spec->catfile($outdir, $map{$infile});
+		# my %data;
+		# $data{licenses} = \@licenses;
+		# LOG("Processing $infile to $outfile");
+		# $tt->process($infile, \%data, $outfile) or die $tt->error;
+	# }
+
+	mkpath(File::Spec->catfile($outdir, 'data'));
+	open my $out, '>', File::Spec->catfile($outdir, 'data', 'licenses.json');
+	print $out to_json(\@licenses);
+	close $out;
+
 	mkpath(File::Spec->catfile($outdir, 'dist'));
 	# just an empty file for now so it won't try to create a list of all the distributions
 	open my $fh, '>', File::Spec->catfile($outdir, 'dist', 'index.html');
