@@ -1,7 +1,7 @@
 <html>
 <head>
   <title>[% title %]</title>
-  <link rel="stylesheet" type="text/css" href="/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/css/style.css" /> 
   <meta name="description" content="[% description %]" />
   <meta name="keywords" content="[% keywords %]" />
   <meta name="keywords" content="" />
