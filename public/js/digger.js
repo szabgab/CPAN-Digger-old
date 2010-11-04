@@ -22,5 +22,13 @@ $(function(){
 	return false;
     });
 
+    $('#dig').click(function() {
+            var query = $('#query').val();
+            $.get('/q/' + query, {} , function(data) {
+                    $('#result').html(data);
+            });
+//            alert("done");
+            return false;
+    });
 });
 

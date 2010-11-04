@@ -1,3 +1,7 @@
+<div id="search">
 <form action="/q">
-<input name="q" value=[% q %]> <input type="submit" value="Dig">
+<input id="query" name="q" value=[% q %]> <input id="dig" type="button" value="Dig">
 </form>
+</div>
+<div id="result">
+</div>
