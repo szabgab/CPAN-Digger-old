@@ -27,7 +27,7 @@ foreach my $page (qw(news faq)) {
 
 get '/licenses' => sub {
     my $data_file = path config->{public}, 'data', 'licenses.json';
-    my $json = from_json slurp($data_file);
+    my $json = eval {from_json slurp($data_file)};
     template 'licenses', {
         licenses => $json,
     };
