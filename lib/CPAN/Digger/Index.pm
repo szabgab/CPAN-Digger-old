@@ -26,33 +26,33 @@ use CPAN::Digger::PPI;
 
 #has 'counter'    => (is => 'rw', isa => 'HASH');
 has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
-has 'dir'    => (is => 'ro', isa => 'ArrayRef');
+has 'dir'    => (is => 'ro', isa => 'Str');
+has 'prefix' => (is => 'ro', isa => 'Str');
 
 has 'authors'    => (is => 'rw', isa => 'Parse::CPAN::Authors');
 
 
-sub index_dirs {
+sub index_dir {
 	my $self = shift;
 
 	$ENV{PATH} = '/bin:/usr/bin';
-	my $dirs = $self->dir;
-	#die Dumper $dirs;
-	foreach my $dir (@$dirs) {
-		my $dist    = 'Local-A'; #?
-		my $version = '1.00';
-		my $author  = 'ANONIMUS';
-		my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2), $author; 
-		my $d = Parse::CPAN::Packages::Distribution->new(
-			dist      => $dist,
-			prefix    => "$path/$dist-$version",
-			cpanid    => $author,
-			distvname => "$dist-$version",
-			# version =>
-			# filename =>
-			# maturity =>
-		);
-		$self->process_distro($d, abs_path $dir);
-	}
+	my $dir = $self->dir;
+	
+	# prefix should be something like  AUTHOR/Module-Name-1.00
+	my $prefix = $self->prefix;
+	my ($author, $distvname)  = split m{/}, $prefix;
+	my ($dist, $version)      = split m{-(?=\d)}, $distvname;
+	my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2); 
+	my $d = Parse::CPAN::Packages::Distribution->new(
+		dist      => $dist,
+		prefix    => "$path/$prefix",
+		cpanid    => $author,
+		distvname => $distvname,
+		version   => $version,
+		# filename =>
+		# maturity =>
+	);
+	$self->process_distro($d, abs_path $dir);
 
 	return;
 }
@@ -186,8 +186,12 @@ sub process_distro {
 		return;
 	}
 
-	chdir $d->distvname;
-	
+	if ($source_dir) {
+		chdir $source_dir;
+	} else {
+		chdir $d->distvname;
+	}
+
 	my $pods = $self->generate_html_from_pod($dist_dir);
 	$data{modules} = $pods->{modules};
 	if (@{ $pods->{pods} }) {
@@ -249,10 +253,12 @@ sub process_distro {
 
 	# additional fields needed for the main page of the distribution
 	my $author = $self->author_info($data{author});
-	if ($author) {
-		$data{author_name} = $author->name;
-	} else {
-		WARN("Could not find details of '$data{author}'");
+	if (not $source_dir) {
+		if ($author) {
+			$data{author_name} = $author->name;
+		} else {
+			WARN("Could not find details of '$data{author}'");
+		}
 	}
 
 	$data{author_name} ||= $data{author};

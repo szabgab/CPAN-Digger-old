@@ -34,7 +34,7 @@ sub get_tt {
 		my $root = $self->root;
 	
 		my $config = {
-			INCLUDE_PATH => "$root/tt",
+			INCLUDE_PATH => "$root/views",
 			INTERPOLATE  => 1,
 			POST_CHOMP   => 1,
 		#	PRE_PROCESS  => 'incl/header.tt',

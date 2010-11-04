@@ -30,7 +30,8 @@ GetOptions(\%opt,
 	'cpan=s',
 	'output=s',
 	'filter=s',
-	'dir=s@',
+	'dir=s',
+	'prefix=s',
 	'pod',
 	'dropdb',
 ) or usage();
@@ -44,6 +45,8 @@ if ($opt{dropdb}) {
 
 usage("--cpan or --dir required")
 	if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
+usage("if --dir is given then --prefix also need to be supplied")
+	if $opt{cpan} and not $opt{prefix};
 usage("--output required") if not $opt{output};
 usage("--output must be given an existing directory") if not -d $opt{output};
 
@@ -65,10 +68,10 @@ if ($cpan->cpan) {
 }
 if ($cpan->dir) {
 	eval {
-		$cpan->index_dirs;
+		$cpan->index_dir;
 	};
 	if ($@) {
-		warn "Exception in index_dirs: $@";
+		warn "Exception in index_dir: $@";
 	}
 }
 
@@ -87,7 +90,8 @@ Usage: perl -T $0
 
 At least one of these is required:
    --cpan PATH_TO_CPAN_MIRROR
-   --dir PATH_TO_SOURCE_DIR   (can appear several times)
+   --dir PATH_TO_SOURCE_DIR
+   --prefix USERNAME/Module-Name-1.00  (prefix is required if --dir is given)
 
 Optional:
    --filter REGEX   only packages that match the regex will be indexed
