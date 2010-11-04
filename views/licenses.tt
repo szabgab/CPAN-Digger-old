@@ -13,7 +13,7 @@ The following licenses were found in the META.yml files.
 <div id="licenses">
 <ul>
 [% FOR license IN licenses %]
-  <li><a href="/q?license=[% license %]">[% license %]</a></li>
+  <li><a href="/license/[% license %]">[% license %]</a></li>
 [% END %]
 </ul>
 </div>
