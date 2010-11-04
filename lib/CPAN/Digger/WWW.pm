@@ -4,8 +4,7 @@ use Dancer ':syntax';
 our $VERSION = '0.1';
 
 use CPAN::Digger::DB;
-#use autodie;
-#use Time::HiRes           qw(time);
+use Time::HiRes           qw(time);
 
 # for development:
 # on the real server the index file will be static
@@ -47,55 +46,48 @@ get '/dancer' => sub {
 get '/license/:query' => sub {
     my $license = params->{query}|| '';
     $license =~ s/[^\w:.*+?-]//g; # sanitize for now
-    my $result = CPAN::Digger::DB->db->distro->find({ 'meta.license' => $license });
-    return _data($result);
+    return _data({ 'meta.license' => $license });
 };
 
 get '/q/:query' => sub {
     my $term = params->{query} || '';
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
-    my $result = CPAN::Digger::DB->db->distro->find({ 'name' => qr/$term/i });
-    return _data($result);
+    return _data({ 'name' => qr/$term/i });
 };
 
 get '/m/:query' => sub {
-    my $m = params->{query} || '';
-    $m =~ s/[^\w:.*+?-]//g; # sanitize for now
-    my $result = CPAN::Digger::DB->db->distro->find({ 'modules.name' => $m });
-    return _data($result);
+    my $module = params->{query} || '';
+    $module =~ s/[^\w:.*+?-]//g; # sanitize for now
+    return _data({ 'modules.name' => $module });
 };
 
-# my $start_time = time;
-# 
-# } else {
-        # $data{not_term_found} = 1;
-        # $tt->process('result.tt', \%data) or die $tt->error;
-        # return;
-# }
-# 
-#
 sub _data {
-    my ($result) = @_;
+    my ($params) = @_;
 
+    my $start_time = time;
+
+    my $result = CPAN::Digger::DB->db->distro->find($params);
     my @results;
     my $count = 0;
     while (my $d = $result->next) {
         $count++;
-        delete $d->{_id};
-        push @results, $d;
+        #delete $d->{_id};
+        my %data = (
+            name => $d->{name},
+            author => $d->{author},
+        );
+        push @results, \%data;
     }
+
+    my $end_time = time;
+
     content_type 'text/plain';
 
-    return to_json({results => \@results}, utf8 => 1, convert_blessed => 1);
-#    return to_dumper {results => \@results};
+    return to_json({
+        results => \@results,
+        ellapsed_time => $end_time - $start_time,
+        }, utf8 => 1, convert_blessed => 1);
 }
-
-# if (not $count) {
-        # $data{not_found} = 1;
-# }
-# 
-# my $end_time = time;
-# $data{ellapsed_time} = $end_time - $start_time;
 
 
 sub slurp {
