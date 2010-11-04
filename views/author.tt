@@ -1,0 +1,40 @@
+<%
+   title=  name
+   description= name
+%>
+<% INCLUDE incl/header.tt %>
+<% INCLUDE incl/form.tt %>
+
+<div id="path">
+<a href="/id/<% pauseid %>/"><% name %></a> <a href="http://backpan.perl.org/authors/id/<% backpan %>">Archive on Backpan</a>
+</div>
+
+<!--
+<div id="email">
+Email:
+<% IF email %>
+  <a href="<% email %>"><% email %></a>
+<% ELSE %>
+   No e-mail available.  
+<% END %>
+</div>
+-->
+
+<div id="cpan_testers">
+CPAN Testers: 
+[ <a href="http://www.cpantesters.org/author/<% pauseid %>.html">Module test results</a> ]
+[ <a href="http://matrix.cpantesters.org/?author=<% pauseid %>">CPAN Testers Author Matrix</a> ]
+</div>
+
+
+<div id="packages">
+Packages:
+<ul>
+<% FOR p IN packages %>
+  <li><a href="/dist/<% p.name %>"><% p.name %></a></li>
+<% END %>
+</ul>
+</div>
+
+
+<% INCLUDE incl/footer.tt %>

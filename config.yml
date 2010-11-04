@@ -1,4 +1,8 @@
-layout: "main"
+#layout: "main"
 logger: "file"
 appname: "CPAN::Digger::WWW"
-
+template: template_toolkit
+engines:
+  template_toolkit:
+    start_tag: '[%'
+    stop_tag: '%]'
