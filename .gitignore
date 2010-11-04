@@ -7,3 +7,4 @@ inc
 logs
 pm_to_blib
 *.swp
+public/data
