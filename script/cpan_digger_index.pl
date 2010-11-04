@@ -53,7 +53,6 @@ $opt{root} = $root;
 my $cpan = CPAN::Digger::Index->new(%opt);
 
 $cpan->generate_central_files;
-$cpan->copy_static_files;
 
 if ($cpan->cpan) {
 	eval {

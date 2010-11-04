@@ -380,21 +380,6 @@ sub generate_central_files {
 	return;
 }
 
-sub copy_static_files {
-	my $self = shift;
-	foreach my $file (File::Find::Rule->file->relative->in(File::Spec->catdir($self->root, 'static'))) {
-		$file = _untaint_path($file);
-		my $output = _untaint_path(File::Spec->catdir($self->output, $file));
-		$file = File::Spec->catfile($self->root, 'static', $file);
-		mkpath dirname $output;
-		LOG("Copy $file to $output");
-		copy ($file, $output) or die $!;
-	}
-	return;
-}
-
-
-
 sub WARN {
 	LOG("WARN: $_[0]");
 }
