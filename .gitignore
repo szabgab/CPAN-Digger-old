@@ -8,3 +8,5 @@ logs
 pm_to_blib
 *.swp
 public/data
+public/dist
+public/src
