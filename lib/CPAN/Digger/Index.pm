@@ -146,20 +146,27 @@ sub process_distro {
 		author => lc $d->cpanid,
 	);
 
+	if (not $d->distvname) {
+		WARN("distvname is empty, skipping database update");
+		#$counter{distvname_empty}++;
+		return;
+	}
+
 	mkpath $dist_dir;
 	mkpath $src_dir;
 	chdir $src_dir;
-	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
+	my $distv_dir = File::Spec->catdir($src_dir, $d->distvname);
+	if (not -e $distv_dir) {
 		if ($source_dir) {
 			LOG("Source directory $source_dir");
 			# just copy the files
 			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
-				next if $file =~ /\.svn|\.git|CVS/;
+				next if $file =~ /\.svn|\.git|CVS|blib/;
 				my $from = File::Spec->catfile($source_dir, $file);
-				my $to   = File::Spec->catfile($src_dir, $d->distvname, $file);
-				LOG("Copy $from to $to");
+				my $to   = File::Spec->catfile($d->distvname, $file);
+				#LOG("Copy $from to $to");
 				mkpath dirname $to;
-				copy $from, $to or die $!;
+				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
 			}
 		} else {
 			my $unzip = $self->unzip($d, $src);
@@ -173,19 +180,12 @@ sub process_distro {
 			}
 		}
 	}
-	if (not -e File::Spec->catdir($src_dir, $d->distvname)) {
-		WARN("No directory for $src_dir " . $d->distvname);
+	if (not -e $d->distvname) {
+		WARN("No directory for '" . $d->distvname . "'");
 		#$counter{no_directory}++;
 		return;
 	}
 	
-
-	if (not $d->distvname) {
-		WARN("distvname is empty, skipping database update");
-		#$counter{distvname_empty}++;
-		return;
-	}
-
 	if ($source_dir) {
 		chdir $source_dir;
 	} else {
@@ -277,6 +277,10 @@ sub process_distro {
 	$data{distvname} = $d->distvname;
 	my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 	my $tt = $self->get_tt;
+	
+	foreach my $t (@{$data{modules}}, @{$data{pods}}) {
+		$t->{path} =~ s{\\}{/}g;
+	}
 	$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 
 	return;
@@ -295,7 +299,7 @@ sub generate_html_from_pod {
 }
 
 sub _generate_outline {
-	my ($self, $dir, $files) = @_;
+	my ($dir, $files) = @_;
 
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
@@ -303,7 +307,8 @@ sub _generate_outline {
 
 		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
 		my $outline = $ppi->process;
-		open my $out, '>', $$outfile;
+		LOG("Save outline in $outfile");
+		open my $out, '>', $outfile;
 		print $out to_json($outline);
 	}
 	return;
