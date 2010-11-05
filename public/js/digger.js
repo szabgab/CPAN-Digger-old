@@ -25,6 +25,7 @@ $(function(){
     $('#dig').click(function() {
             var query = $('#query').val();
             $.get('/q/' + query, {} , function(data) {
+                    $("#content").hide();
                     $('#result').html(data);
             });
 //            alert("done");
