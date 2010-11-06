@@ -49,3 +49,17 @@ sub get_tt {
 
 
 1;
+
+=head1 NAME
+
+CPAN::Digger - To dig CPAN
+
+=head1 AUTHOR
+
+Gabor Szabo L<gabor@szabgab.com>
+
+=head1 LICENSE
+
+perl
+
+=cut
