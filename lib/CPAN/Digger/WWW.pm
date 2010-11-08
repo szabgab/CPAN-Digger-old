@@ -67,17 +67,33 @@ get '/m/:query' => sub {
     my $results = _fetch_from_db({ 'modules.name' => $module });
 
     if (not @$results) {
-        return template 'error', {
+        template 'error', {
             no_such_module => 1, 
             module => $module,
         };
+    } elsif (@$results == 1) {
+        $module =~ s{::}{/}g;
+        return redirect "/dist/$results->[0]{name}/lib/$module.pm";
+    } else {
+        my $path = $module;
+        $path =~ s{::}{/}g;
+        my @links;
+        foreach my $r (@$results) {
+            push @links, {
+                distro => $r->{name},
+                module => $module,
+                path   => $path,
+            };
+        }
+        template => 'modules', {
+            module => $module,
+            links  => \@links,
+        }
     }
-    
 
-    $module =~ s{::}{/}g;
+
     # TODO what if we received several results? 
     # Should we show a list of links?
-    redirect "/dist/$results->[0]{name}/lib/$module.pm";
 };
 
 
