@@ -140,7 +140,11 @@ Depends on (requires):
 Modules:
 <ul>
 [% FOR m IN modules %]
-  <li><a href="/dist/[% name %]/[% m.path %]">[% m.name %]</a></li>
+  [% IF m.html %]
+     <li><a href="/dist/[% name %]/[% m.path %]">[% m.name %]</a></li>
+  [% ELSE %]
+     <li>[% m.name %]</li>
+  [% END %]
 [% END %]
 </ul>
 </div>

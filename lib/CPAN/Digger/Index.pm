@@ -332,16 +332,17 @@ sub _generate_html {
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
 		
+		my %info = (
+			path => $infile,
+			name => $module,
+		);
 		if ($self->pod) {
 			require CPAN::Digger::Pod;
 			LOG("POD: $infile -> $outfile");
 			my $pod = CPAN::Digger::Pod->new();
-			$pod->process($infile, $outfile);
+			$info{html} = $pod->process($infile, $outfile);
 		}
-		push @data, {
-			path => $infile,
-			name => $module,
-		};
+		push @data, \%info;
 	}
 	return \@data;
 }

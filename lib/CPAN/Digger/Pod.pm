@@ -23,8 +23,11 @@ sub process {
 	);
 	$self->output_string( \$html );
 	$self->parse_file( $infile );
+	return if not $html;
+
 	open my $out, '>', $outfile;
 	print $out $html;
+	return 1;
 }
 
 
