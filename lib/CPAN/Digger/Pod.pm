@@ -12,6 +12,30 @@ use CPAN::Digger::Index;
 
 use autodie;
 
+$Pod::Simple::HTML::Perldoc_URL_Prefix = '/m/';
+# see also the perldoc_url_prefix method.
+
+# partially taken from Pod::Simple::HTML
+sub resolve_pod_page_linkx {
+	my($self, $it) = @_;
+	return undef unless defined $it and length $it;
+
+	# TODO better e-mail check here
+	# TODO inject javascript obfuscated e-mail address
+	#if ($it =~ /^\w+\@[\w.]*$/) {
+	#	return "mailto:$it";
+	#}
+
+	my $url = $self->pagepath_url_escape($it);
+  
+	$url =~ s{::$}{}s; # probably never comes up anyway
+	$url =~ s{::}{/}g unless $self->perldoc_url_prefix =~ m/\?/s; # sane DWIM?
+
+	return undef unless length $url;
+	print "URL: $url\n";
+	return "/m/$url";
+}
+
 sub process {
 	my ($self, $infile, $outfile) = @_;
 

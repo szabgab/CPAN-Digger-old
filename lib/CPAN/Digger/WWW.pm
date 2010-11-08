@@ -55,16 +55,42 @@ get '/q/:query' => sub {
     return _data({ 'name' => qr/$term/i });
 };
 
-get '/m/:query' => sub {
+get '/module/:query' => sub {
     my $module = params->{query} || '';
     $module =~ s/[^\w:.*+?-]//g; # sanitize for now
     return _data({ 'modules.name' => $module });
+};
+
+get '/m/:query' => sub {
+    my $module = params->{query} || '';
+    $module =~ s/[^\w:.*+?-]//g; # sanitize for now
+    my $results = _fetch_from_db({ 'modules.name' => $module });
+    $module =~ s{::}{/}g;
+    # TODO what if we received several results? 
+    # Should we show a list of links?
+    # What if there were no hits?
+    redirect "/dist/$results->[0]{name}/lib/$module.pm";
 };
 
 sub _data {
     my ($params) = @_;
 
     my $start_time = time;
+
+    my $results = _fetch_from_db($params);
+
+    my $end_time = time;
+
+    content_type 'text/plain';
+
+    return to_json({
+        results => $results,
+        ellapsed_time => $end_time - $start_time,
+        }, utf8 => 1, convert_blessed => 1);
+}
+
+sub _fetch_from_db {
+    my ($params) = @_;
 
     my $result = CPAN::Digger::DB->db->distro->find($params);
     my @results;
@@ -78,16 +104,9 @@ sub _data {
         );
         push @results, \%data;
     }
-
-    my $end_time = time;
-
-    content_type 'text/plain';
-
-    return to_json({
-        results => \@results,
-        ellapsed_time => $end_time - $start_time,
-        }, utf8 => 1, convert_blessed => 1);
+    return \@results;
 }
+
 
 # this part is only needed in the stand alone environment
 # if used under Apache, then Apache should be configured

@@ -340,6 +340,7 @@ sub _generate_html {
 			require CPAN::Digger::Pod;
 			LOG("POD: $infile -> $outfile");
 			my $pod = CPAN::Digger::Pod->new();
+			#$pod->batch_mode(1);
 			$info{html} = $pod->process($infile, $outfile);
 		}
 		push @data, \%info;
