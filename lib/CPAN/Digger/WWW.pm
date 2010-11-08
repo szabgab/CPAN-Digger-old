@@ -65,12 +65,21 @@ get '/m/:query' => sub {
     my $module = params->{query} || '';
     $module =~ s/[^\w:.*+?-]//g; # sanitize for now
     my $results = _fetch_from_db({ 'modules.name' => $module });
+
+    if (not @$results) {
+        return template 'error', {
+            no_such_module => 1, 
+            module => $module,
+        };
+    }
+    
+
     $module =~ s{::}{/}g;
     # TODO what if we received several results? 
     # Should we show a list of links?
-    # What if there were no hits?
     redirect "/dist/$results->[0]{name}/lib/$module.pm";
 };
+
 
 sub _data {
     my ($params) = @_;
