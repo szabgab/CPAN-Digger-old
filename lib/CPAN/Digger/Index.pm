@@ -325,6 +325,7 @@ sub _generate_html {
 		return [];
 	}
 	my @data;
+	my $tt = $self->get_tt;
 	foreach my $infile (@files) {
 		my $module = substr($infile, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
@@ -341,6 +342,16 @@ sub _generate_html {
 			LOG("POD: $infile -> $outfile");
 			my $pod = CPAN::Digger::Pod->new();
 			#$pod->batch_mode(1);
+			# description?
+			# keywords?
+			my ($header_top, $header_bottom, $footer);
+			$tt->process('incl/header_top.tt', {}, \$header_top) or die $tt->error;
+			$tt->process('incl/header_bottom.tt', {}, \$header_bottom) or die $tt->error;
+			$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
+			$pod->html_header_before_title( $header_top );
+			$pod->html_header_after_title( $header_bottom );
+			$pod->html_footer( $footer );
+
 			$info{html} = $pod->process($infile, $outfile);
 		}
 		push @data, \%info;

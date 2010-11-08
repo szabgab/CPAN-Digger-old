@@ -66,6 +66,8 @@ get '/m/:query' => sub {
     $module =~ s/[^\w:.*+?-]//g; # sanitize for now
     my $results = _fetch_from_db({ 'modules.name' => $module });
 
+    # TODO: maybe in case of no hit, run the query with regex and find
+    # all the modules (or packages?) that have this string in their name
     if (not @$results) {
         template 'error', {
             no_such_module => 1, 
