@@ -46,7 +46,7 @@ if ($opt{dropdb}) {
 usage("--cpan or --dir required")
 	if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
 usage("if --dir is given then --prefix also need to be supplied")
-	if $opt{cpan} and not $opt{prefix};
+	if $opt{dir} and not $opt{prefix};
 usage("--output required") if not $opt{output};
 usage("--output must be given an existing directory") if not -d $opt{output};
 
