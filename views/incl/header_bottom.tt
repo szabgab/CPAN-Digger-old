@@ -17,8 +17,4 @@
   <li><a href="/licenses">Licenses</a></li>
 </ul>
 </div>
-<a id="dialog_link" href="#">dialog</a>
-<div id="dialog" title="Dialog Title">
-<p>Text of the dialog</p>
-</div>
 
