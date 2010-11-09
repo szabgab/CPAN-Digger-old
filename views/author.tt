@@ -3,7 +3,6 @@
    description= name
 %]
 [% INCLUDE incl/header.tt %]
-[% INCLUDE incl/form.tt %]
 
 <div id="path">
 <a href="/id/[% pauseid %]/">[% name %]</a> <a href="http://backpan.perl.org/authors/id/[% backpan %]">Archive on Backpan</a>

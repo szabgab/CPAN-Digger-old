@@ -3,7 +3,6 @@
    description=""
 %]
 [% INCLUDE incl/header.tt %]
-[% INCLUDE incl/form.tt %]
-<div id="content">
-</div>
+
+
 [% INCLUDE incl/footer.tt %]

@@ -3,10 +3,6 @@
    description= name
 %]
 [% INCLUDE incl/header.tt %]
-[% INCLUDE incl/form.tt %]
-
-
-<div id="content">
 
 <p>
 When searching for the module [% module %] we found several places:
@@ -16,7 +12,7 @@ When searching for the module [% module %] we found several places:
   <li><a href="/dist/[% m.distro %]/lib/[% m.path].pm">[% m.module %]</a></li>
 [% END %]
 </ul>
-</div>
+
 
 
 [% INCLUDE incl/footer.tt %]

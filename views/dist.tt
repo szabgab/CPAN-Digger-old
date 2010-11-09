@@ -3,7 +3,6 @@
    description=meta.abstract
 %]
 [% INCLUDE incl/header.tt %]
-[% INCLUDE incl/form.tt %]
 
 <div id="path">
 <a href="/id/[% author %]/">[% author_name %]</a> - [% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a>

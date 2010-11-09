@@ -3,7 +3,6 @@
    description=""
 %]
 [% INCLUDE incl/header.tt %]
-[% INCLUDE incl/form.tt %]
 
 [% IF not_found %]
 Nothing found for the term "[% q %]".

@@ -17,3 +17,15 @@ body {
 #special_files li {
   display:   inline;
 }
+
+#content {
+  float: left;
+  width: 700px;
+/*  background-color: yellow; */
+}
+
+#right_column {
+  float: right;
+  width: 300px;
+/*  background-color: red; */
+}
