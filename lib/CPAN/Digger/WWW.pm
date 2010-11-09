@@ -150,15 +150,26 @@ get qr{/(src|dist|data)(/.*)?} => sub {
     # to point to a directory relative to the appdir ?
     my $full_path = path config->{appdir}, '..', 'digger', $path;
     if (-d $full_path) {
+        if ($path !~ m{/$}) {
+            return redirect request->path . '/';
+        }
         if (-e path($full_path, 'index.html')) {
             $full_path = path($full_path, 'index.html');
         } else {
             if (opendir my $dh, $full_path) {
-                my @dir = grep {$_ ne '.' and $_ ne '..'} readdir $dh;
-                my $html = "<ul>\n";
-                $html .= join "\n", map { qq(<li><a href="$_">$_</a></li>) } sort @dir;
-                $html .= "\n</ul>\n";
-                return $html;
+                my (@dirs, @files);
+                while (my $thing = readdir $dh) {
+                    next if $thing eq '.' or $thing eq '..';
+                    if (-d path $full_path, $thing) {
+                        push @dirs, $thing;
+                    } else {
+                        push @files, $thing;
+                    }
+                }
+                return template 'directory', {
+                    dirs  => \@dirs,
+                    files => \@files,
+                };
             } else {
                 return "Cannot provide directory listing";
             }
