@@ -192,7 +192,7 @@ sub process_distro {
 		chdir $d->distvname;
 	}
 
-	my $pods = $self->generate_html_from_pod($dist_dir);
+	my $pods = $self->generate_html_from_pod($dist_dir, $d);
 	$data{modules} = $pods->{modules};
 	if (@{ $pods->{pods} }) {
 		$data{pods} = $pods->{pods};
@@ -289,11 +289,11 @@ sub process_distro {
 
 # starting from current directory
 sub generate_html_from_pod {
-	my ($self, $dir) = @_;
+	my ($self, $dir, $d) = @_;
 
 	my %ret;
-	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib');
-	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib');
+	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib', $d);
+	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib', $d);
 
 	return \%ret;
 }
@@ -315,7 +315,7 @@ sub _generate_outline {
 }
 
 sub _generate_html {
-	my ($self, $dir, $ext, $path) = @_;
+	my ($self, $dir, $ext, $path, $d) = @_;
 
 	my @files = eval { sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path) };
 	# id/K/KA/KAWASAKI/WSST-0.1.1.tar.gz
@@ -326,10 +326,12 @@ sub _generate_html {
 	}
 	my @data;
 	my $tt = $self->get_tt;
-	foreach my $infile (@files) {
-		my $module = substr($infile, 0, -1 * length($ext));
+	my $author = lc $d->cpanid;
+	my $distvname = $d->distvname;
+	foreach my $file (@files) {
+		my $module = substr($file, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
-		$infile = File::Spec->catdir($path, $infile);
+		my $infile = File::Spec->catdir($path, $file);
 		my $outfile = File::Spec->catfile($dir, $infile);
 		mkpath dirname $outfile;
 		
@@ -349,7 +351,8 @@ sub _generate_html {
 			$tt->process('incl/header_bottom.tt', {}, \$header_bottom) or die $tt->error;
 			$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
 			$pod->html_header_before_title( $header_top );
-			$pod->html_header_after_title( $header_bottom );
+			$header_bottom .= qq((<a href="/src/$author/$distvname/$path/$file">source</a>));
+			$pod->html_header_after_title( $header_bottom);
 			$pod->html_footer( $footer );
 
 			$info{html} = $pod->process($infile, $outfile);
