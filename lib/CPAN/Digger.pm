@@ -1,5 +1,5 @@
 package CPAN::Digger;
-use 5.010;
+use 5.008008;
 use Moose;
 
 our $VERSION = '0.01';

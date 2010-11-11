@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # remove tain mode till we know how to use Archive::Any
 # -T
-use 5.010;
+use 5.008008;
 use strict;
 use warnings;
 

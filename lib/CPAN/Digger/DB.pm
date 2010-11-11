@@ -1,5 +1,5 @@
 package CPAN::Digger::DB;
-use 5.010;
+use 5.008008;
 use Moose;
 
 use MongoDB;

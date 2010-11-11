@@ -1,5 +1,5 @@
 package CPAN::Digger::PPI;
-use 5.010;
+use 5.008008;
 use Moose;
 
 use PPI::Document;

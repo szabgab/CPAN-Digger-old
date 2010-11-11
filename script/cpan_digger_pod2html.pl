@@ -1,5 +1,5 @@
 #!/usr/bin/perl -T
-use 5.010;
+use 5.008008;
 use strict;
 use warnings;
 

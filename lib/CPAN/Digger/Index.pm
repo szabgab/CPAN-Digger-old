@@ -1,5 +1,5 @@
 package CPAN::Digger::Index;
-use 5.010;
+use 5.008008;
 use Moose;
 
 our $VERSION = '0.01';
@@ -515,21 +515,16 @@ sub _chmod {
 	}
 	foreach my $thing (@content) {
 		my $path = File::Spec->catfile($dir, $thing);
-		given ($path) {
-			when (-l $_) {
-				WARN("Symlink found '$path'");
-				unlink $path;
-			}
-			when (-d $_) {
-				chmod 0755, $path;
-				_chmod($path);
-			}
-			when (-f $_) {
-				chmod 0644, $path;
-			}
-			default {
-				WARN("Unknown thing '$path'");
-			}
+		if (-l $path) {
+			WARN("Symlink found '$path'");
+			unlink $path;
+		} elsif (-d $path) {
+			chmod 0755, $path;
+			_chmod($path);
+		} elsif (-f $path) {
+			chmod 0644, $path;
+		} else {
+			WARN("Unknown thing '$path'");
 		}
 	}
 	return;

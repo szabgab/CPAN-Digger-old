@@ -1,4 +1,4 @@
-use 5.010;
+use 5.008008;
 use strict;
 use inc::Module::Install 0.94;
 
@@ -20,7 +20,7 @@ license 'perl';
 author 'Gabor Szabo';
 all_from 'lib/CPAN/Digger.pm';
 
-requires 'perl'                  => '5.010';
+requires 'perl'                  => '5.008008';
 
 requires 'autodie';
 requires 'Archive::Any';
@@ -47,6 +47,8 @@ requires 'PPI::Document';
 requires 'PPI::Find';
 requires 'Template';
 requires 'YAML::Any';
+
+requires 'Plack::Runner';
 
 requires 'YAML';
 requires 'Dancer'     => '1.1901';
