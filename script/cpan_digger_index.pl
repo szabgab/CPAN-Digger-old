@@ -63,7 +63,7 @@ if ($cpan->cpan) {
 	};
 	if ($@) {
 		warn "Exception in run_index: $@";
-		say $cpan->counter_distro;
+		print $cpan->counter_distro, "\n";
 	}
 }
 if ($cpan->dir) {
