@@ -1,4 +1,4 @@
-#!C:\strawberry\perl\bin\perl.exe
+#!/usr/bin/perl
 use Plack::Handler::FCGI;
 use Dancer ':syntax';
 
