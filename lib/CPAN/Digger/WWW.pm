@@ -138,7 +138,7 @@ sub _fetch_from_db {
 # this part is only needed in the stand alone environment
 # if used under Apache, then Apache should be configured
 # to handle these static files
-get qr{/(src|dist|data)(/.*)?} => sub {
+get qr{/(syn|src|dist|data)(/.*)?} => sub {
     # TODO this gives a warning in Dancer::Router if we ask for dist only as the
     # capture in the () is an undef
     #my ($path) = splat; 

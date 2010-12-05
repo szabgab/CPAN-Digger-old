@@ -24,9 +24,23 @@ $(function(){
 
     $('#dig').click(function() {
             var query = $('#query').val();
-            $.get('/q/' + query, {} , function(data) {
-                    $("#content").hide();
-                    $('#result').html(data);
+            $.get('/q/' + query, {} , function(resp) {
+                    $('#content').hide();
+                    $('#result').html(resp);
+                    //alert('hello');
+                    //var dx = new Array;
+                    var dx = {a: 23, b:12};
+                    alert(1);
+                    //dx[0] = "first";
+                    //dx["abc"] = "sec";
+                    //alert(dx[0]);
+                    //alert(dx["abc"]);
+                    //var data = eval("{yxx: 23}");
+                    //var data = eval(resp);
+//                    $('#ellapsed_time').html(resp.ellapsed_time);
+                    //alert(data["ellapsed_time"]);
+                    //alert(data[0]);
+                    alert(dx.length);
             });
 //            alert("done");
             return false;

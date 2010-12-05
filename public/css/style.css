@@ -29,3 +29,32 @@ body {
   width: 300px;
 /*  background-color: red; */
 }
+
+/* syntax highlighting */
+.keyword {
+  color: yellow;
+}
+.Whitespace {
+}
+.Word {
+}
+.pragma {
+}
+.Single {
+}
+.Float {
+}
+.Symbol {
+}
+.Operator {
+}
+.Structure {
+}
+
+.Pod {
+  color: grey;
+}
+
+.Comment {
+  color: grey;
+}
