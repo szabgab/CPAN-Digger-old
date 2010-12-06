@@ -31,12 +31,25 @@ body {
 }
 
 /* syntax highlighting */
+#code a {
+  text-decoration: none;
+}
+
 .keyword {
+  color: green;
+}
+
+/*
+.keyword a:hover {
   color: yellow;
 }
+*/
+
 .Whitespace {
 }
+
 .Word {
+  color: #2323223;
 }
 .pragma {
 }

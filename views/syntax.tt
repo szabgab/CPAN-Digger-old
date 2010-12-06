@@ -4,7 +4,9 @@
 %]
 [% INCLUDE incl/header.tt %]
 
+<div id="code">
 [% code %]
+</div>
 
 [% INCLUDE incl/footer.tt %]
 

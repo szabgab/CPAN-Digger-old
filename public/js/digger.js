@@ -17,12 +17,21 @@ $(function(){
     }
     });
 
+    $('#tryme').click(function(){
+            alert("xxx");
+    });
+    
     $('#dialog_link').click(function(){
 	$('#dialog').dialog('open');
 	return false;
     });
 
-    $('#dig').click(function() {
+     $('.keyword').click(function() {
+        alert('Show popup with explanation about ' + this);
+	return false;
+     });
+
+     $('#dig').click(function() {
             var query = $('#query').val();
             $.get('/q/' + query, {} , function(resp) {
                     $('#content').hide();
