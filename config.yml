@@ -1,7 +1,10 @@
 #layout: "main"
-logger: "file"
+#environment: development
 appname: "CPAN::Digger::WWW"
+logger: "file"
 template: template_toolkit
+#daemon: 0  # setting to 1 does not do anything on Windows?
+charset: utf-8
 engines:
   template_toolkit:
     start_tag: '[%'
