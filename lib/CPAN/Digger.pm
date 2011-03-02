@@ -8,7 +8,7 @@ use autodie;
 use Carp                  ();
 use Template              ();
 
-use CPAN::Digger::DB;
+#use CPAN::Digger::DB;
 
 has 'root'   => (is => 'ro', isa => 'Str');
 has 'cpan'   => (is => 'ro', isa => 'Str');
@@ -16,13 +16,13 @@ has 'output' => (is => 'ro', isa => 'Str');
 has 'filter' => (is => 'ro', isa => 'Str');
 has 'pod'    => (is => 'ro', isa => 'Str');
 
-has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
+#has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
 
 has 'tt'     => (is => 'rw', isa => 'Template');
 
 sub BUILD {
 	my $self = shift;
-	$self->db(CPAN::Digger::DB->db);
+	#$self->db(CPAN::Digger::DB->db);
 };
 
 
@@ -64,13 +64,6 @@ For internal usage follow the SETUP section.
 =head1 SETUP
 
 Download the tar.gz file. Open it and install all its dependencies.
-
-MongoDB need to be downloaded from L<http://www.mongodb.org/> 
-and launched with the following options:
-
- --dbpath PATH
- --logpath PATH
- --port 27016
 
 Running perl script\cpan_digger_index.pl will create a local database
 using the module given in the directory given with the --dir option.

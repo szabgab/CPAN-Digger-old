@@ -35,6 +35,7 @@ has 'authors'    => (is => 'rw', isa => 'Parse::CPAN::Authors');
 sub index_dir {
 	my $self = shift;
 
+	return;
 	$ENV{PATH} = '/bin:/usr/bin';
 	my $dir = $self->dir;
 	
@@ -366,6 +367,19 @@ sub _generate_html {
 sub generate_central_files {
 	my $self = shift;
 
+	# copy static files from public/ to --outdir
+	use File::Copy::Recursive qw(fcopy);
+	my $outdir = _untaint_path($self->output);
+	mkpath $outdir;
+
+	foreach my $file ( 'public/robots.txt', 'public/favicon.ico', glob('public/css/*'), glob('public/js/*')) {
+		my $src = substr($file, 7);
+		print "Copy $src\n";
+		fcopy($file, "$outdir/$src") or die $!;
+	}
+
+	return;
+
 	# my $tt = $self->get_tt;
 	# my %map = (
 		# 'licenses.tt' => 'licenses.html',
@@ -384,8 +398,6 @@ sub generate_central_files {
 		push @licenses, $license;
 	}
 
-	my $outdir = _untaint_path($self->output);
-	mkpath $outdir;
 	# foreach my $infile (keys %map) {
 		# my $outfile = File::Spec->catfile($outdir, $map{$infile});
 		# my %data;

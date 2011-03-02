@@ -2,9 +2,6 @@ package CPAN::Digger::DB;
 use 5.008008;
 use Moose;
 
-use MongoDB;
-
-#has 'mydb'     => (is => 'rw', isa => 'MongoDB::Database');
 my $db;
 
 sub db {
