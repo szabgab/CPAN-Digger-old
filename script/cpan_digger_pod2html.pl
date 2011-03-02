@@ -1,4 +1,5 @@
-#!/usr/bin/perl -T
+#!/usr/bin/perl
+## -T
 use 5.008008;
 use strict;
 use warnings;
