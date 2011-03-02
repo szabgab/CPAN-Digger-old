@@ -1,8 +1,51 @@
+Providing a deep view to the CPAN Perl packages
+or for any application written in Perl.
 
-Mirror CPAN (?) Done by rsync:
+WARNING: This is a very early version of the application.
+Most of the planned things won't work.
+
+The package contains both the tools to process 
+and index the Perl code and the web interface
+for it.
+
+It is designed to be able to handle 
+- a single perl script 
+- a Perl application that lives in a directory tree
+- a mirror of CPAN
+
+
+Platforms:
+The application is being developer on Linux and Windows
+at the same time so it *should* work on both of them.
+
+
+
+SETUP
+=======
+Mirroring CPAN is done externally.
+For example by rsync:
 /usr/bin/rsync -av --delete ftp.funet.fi::CPAN /opt/cpan
 
 
+perl Makefile.PL
+make
+make test
+
+There is no need to run "make install"
+
+
+Scripts in the scripts/  directory
+=====================================
+cpan_digger.pl            - temporary script to load the web application, probably needs refactoring
+cpan_digger_index.pl      - indexing CPAN tree or directory tree
+
+cpan_digger_pod2html.pl   - process a single perl (or .pod) file to generate HTML
+                            this is mostly used for development
+cpan_digger_ppi.pl        - process a single perl file with ppi
+                            this is mostly used for development
+
+
+========================================
 Index CPAN:
    save the results in the database and ceate static pages
    - unzip file if it is not yet unzipped
