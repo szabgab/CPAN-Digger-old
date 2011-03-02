@@ -49,7 +49,7 @@ usage("if --dir is given then --prefix also need to be supplied")
 	if $opt{dir} and not $opt{prefix};
 usage("--output required") if not $opt{output};
 usage("--output must be given an existing directory") if not -d $opt{output};
-if ($opt{prefix} and $opt{prefix} !~ m{^[A-Z]+  /  \w+(-\w+)  -\d+\.\d+$}x) {
+if ($opt{prefix} and $opt{prefix} !~ m{^[A-Z]+  /  \w+(-\w+)*  -\d+\.\d+$}x) {
 	usage('--prefix should similar to AUTHOR/Module-Name-1.00');
 }
 
