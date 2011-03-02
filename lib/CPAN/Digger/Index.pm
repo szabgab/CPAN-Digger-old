@@ -35,7 +35,6 @@ has 'authors'    => (is => 'rw', isa => 'Parse::CPAN::Authors');
 sub index_dir {
 	my $self = shift;
 
-	return;
 	$ENV{PATH} = '/bin:/usr/bin';
 	my $dir = $self->dir;
 	
@@ -243,12 +242,12 @@ sub process_distro {
 	my @changes_files = qw(Changes CHANGES ChangeLog);
 
 	LOG("Update DB");
-	eval {
-		$self->db->distro->update({ name => $d->dist }, \%data , { upsert => 1 });
-	};
-	if ($@) {
-		WARN("Exception in MongoDB: $@");
-	}
+	#eval {
+	#	$self->db->distro->update({ name => $d->dist }, \%data , { upsert => 1 });
+	#};
+	#if ($@) {
+	#	WARN("Exception in MongoDB: $@");
+	#}
 
 	my @readme_files = qw('README');
 
