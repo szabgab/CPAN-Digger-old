@@ -24,8 +24,9 @@ use lib File::Spec->catdir($root, 'lib');
 
 
 my %opt;
-GetOptions(\%opt, "infile=s", "outfile=s") or usage();
+GetOptions(\%opt, "infile=s", "outfile=s", 'help') or usage();
 usage() if not $opt{infile} or not $opt{outfile};
+usage() if $opt{help};
 
 
 #use CPAN::Digger::PPI;
@@ -43,6 +44,13 @@ sub usage {
 Usage: $0
       --infile SOME_PM_FILE
       --outfile SOME_HTML_FILE
+
+      --help
+
+Take a single perl script or module and send through the PPI processor
+generating an html file. It is mostly here to be able to process a single
+file during development. 
+
 END_USAGE
 	exit;
 }

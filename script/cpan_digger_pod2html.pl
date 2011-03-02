@@ -28,7 +28,9 @@ my %opt;
 GetOptions(\%opt,
 	'podfile=s',
 	'output=s',
+	'help',
 ) or usage();
+usage() if $opt{help};
 
 usage() if not $opt{podfile} or not -f $opt{podfile};
 usage() if not $opt{output};
@@ -42,6 +44,13 @@ sub usage {
 Usage: $0
    --podfile PATH_TO_FILE_WITH_POD
    --output PATH_TO_OUTPUT_FILE
+
+   --help
+
+Take a single perl script or module and send through the POD2HTML processor
+generating an html file. It is mostly here to be able to process a single
+file during development. 
+
 END_USAGE
 }
 
