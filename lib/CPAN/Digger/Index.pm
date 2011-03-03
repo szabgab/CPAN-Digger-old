@@ -377,33 +377,35 @@ sub generate_central_files {
 		fcopy($file, "$outdir/$src") or die $!;
 	}
 
-	return;
+	my $tt = $self->get_tt;
+	my %map = (
+		'licenses.tt' => 'licenses.html',
+		'news.tt'     => 'news.html',
+		'faq.tt'      => 'faq.html',
+	);
 
-	# my $tt = $self->get_tt;
-	# my %map = (
-		# 'licenses.tt' => 'licenses.html',
-	# );
-
-	my $result = $self->db->run_command([
-		"distinct" => "distro",
-		"key"      => "meta.license",
-		"query"    => {}
-	]);
+	# my $result = $self->db->run_command([
+		# "distinct" => "distro",
+		# "key"      => "meta.license",
+		# "query"    => {}
+	# ]);
 
 	my @licenses;
-	foreach my $license ( @{ $result->{values} } ) {
-#		print "D: $license\n";
-		next if not defined $license or $license =~ /^\s*$/;
-		push @licenses, $license;
+	# foreach my $license ( @{ $result->{values} } ) {
+# #		print "D: $license\n";
+		# next if not defined $license or $license =~ /^\s*$/;
+		# push @licenses, $license;
+	# }
+
+	foreach my $infile (keys %map) {
+		my $outfile = File::Spec->catfile($outdir, $map{$infile});
+		my %data;
+		#$data{licenses} = \@licenses;
+		LOG("Processing $infile to $outfile");
+		$tt->process($infile, \%data, $outfile) or die $tt->error;
 	}
 
-	# foreach my $infile (keys %map) {
-		# my $outfile = File::Spec->catfile($outdir, $map{$infile});
-		# my %data;
-		# $data{licenses} = \@licenses;
-		# LOG("Processing $infile to $outfile");
-		# $tt->process($infile, \%data, $outfile) or die $tt->error;
-	# }
+	return;
 
 	mkpath(File::Spec->catfile($outdir, 'data'));
 	open my $out, '>', File::Spec->catfile($outdir, 'data', 'licenses.json');
