@@ -27,6 +27,9 @@ foreach my $page (qw(news faq)) {
     }
 };
 
+# get qr{^/(news|faq)/?$} => sub {
+    # template splat;
+# };
 
 get '/licenses' => sub {
     my $data_file = path config->{public}, 'data', 'licenses.json';
