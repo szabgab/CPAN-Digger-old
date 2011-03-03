@@ -309,7 +309,7 @@ sub _generate_outline {
 		my $outline = $ppi->process;
 		LOG("Save outline in $outfile");
 		open my $out, '>', $outfile;
-		print $out to_json($outline);
+		print $out to_json($outline, { pretty => 1 });
 	}
 	return;
 }
