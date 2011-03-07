@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-# remove tain mode till we know how to use Archive::Any
-# -T
 use 5.008008;
 use strict;
 use warnings;
@@ -11,18 +9,7 @@ use File::Basename qw(dirname);
 use File::Spec;
 use Getopt::Long qw(GetOptions);
 
-my $root;
-BEGIN {
-	$root = dirname dirname abs_path $0;
-
-	# sanitize variables to make Taint mode happy
-	($root) = $root =~ m{   ([\w/:\\-]+)  }x;
-	if ($ENV{PERL5LIB}) {
-		my ($path) = $ENV{PERL5LIB} =~ m{   ([\w/:-]+)  }x;
-		unshift @INC, split /:/, $path;
-	}
-}
-use lib File::Spec->catdir($root, 'lib');
+my $root = dirname dirname abs_path $0;
 use CPAN::Digger::Index;
 
 my %opt;
