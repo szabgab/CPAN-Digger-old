@@ -22,6 +22,7 @@ use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
 use CPAN::Digger::PPI;
+use CPAN::Digger::Pod;
 
 
 #has 'counter'    => (is => 'rw', isa => 'HASH');
@@ -340,7 +341,6 @@ sub _generate_html {
 			name => $module,
 		);
 		if ($self->pod) {
-			require CPAN::Digger::Pod;
 			LOG("POD: $infile -> $outfile");
 			my $pod = CPAN::Digger::Pod->new();
 			#$pod->batch_mode(1);

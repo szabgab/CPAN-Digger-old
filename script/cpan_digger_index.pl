@@ -20,6 +20,7 @@ GetOptions(\%opt,
 	'dir=s',
 	'prefix=s',
 	'pod',
+	'syn',
 #	'dropdb',
 ) or usage();
 
@@ -86,6 +87,7 @@ At least one of these is required:
 Optional:
    --filter REGEX   only packages that match the regex will be indexed
    --pod            generate HTML pages from POD
+   --syn            generate syntax highlighted source files
 
 Or:
    --dropdb         to drop the whole database
