@@ -5,7 +5,8 @@ use Moose;
 use PPI::Document;
 use PPI::Find;
 
-has 'infile' => (is => 'rw');
+has 'infile' => (is => 'rw', isa => 'Str');
+has 'ppi'    => (is => 'rw', isa => 'PPI::Document');
 
 sub read_file {
 	my $self = shift;
@@ -19,14 +20,23 @@ sub read_file {
 	return $text;
 }
 
+sub get_ppi {
+	my ($self) = @_;
+
+	if (not $self->ppi) {
+		my $text = $self->read_file;
+		my $ppi = PPI::Document->new( \$text );
+		die if not defined $ppi;
+		$ppi->index_locations;
+		$self->ppi($ppi);
+	}
+	return $self->ppi;
+}
+
 sub process {
 	my $self = shift;
 
-	my $text = $self->read_file;
-
-	my $ppi = PPI::Document->new( \$text );
-	die if not defined $ppi;
-	$ppi->index_locations;
+	my $ppi = $self->get_ppi;
 
 	my @things = PPI::Find->new(
 		sub {
