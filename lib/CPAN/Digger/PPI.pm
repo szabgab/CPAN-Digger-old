@@ -9,7 +9,7 @@ has 'infile' => (is => 'rw', isa => 'Str');
 has 'ppi'    => (is => 'rw', isa => 'PPI::Document');
 
 sub read_file {
-	my $self = shift;
+	my ($self) = @_;
 	
 	my $file = $self->infile;
 	my $text = do {
@@ -33,8 +33,8 @@ sub get_ppi {
 	return $self->ppi;
 }
 
-sub process {
-	my $self = shift;
+sub get_outline {
+	my ($self) = @_;
 
 	my $ppi = $self->get_ppi;
 
