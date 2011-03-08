@@ -1,6 +1,7 @@
 package CPAN::Digger;
 use 5.008008;
 use Moose;
+use MooseX::StrictConstructor;
 
 our $VERSION = '0.01';
 
@@ -15,6 +16,7 @@ has 'cpan'   => (is => 'ro', isa => 'Str');
 has 'output' => (is => 'ro', isa => 'Str');
 has 'filter' => (is => 'ro', isa => 'Str');
 has 'pod'    => (is => 'ro', isa => 'Str');
+has 'syn'    => (is => 'ro', isa => 'Str');
 
 #has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
 

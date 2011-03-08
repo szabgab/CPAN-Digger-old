@@ -41,6 +41,7 @@ requires 'Getopt::Long';
 requires 'JSON';
 requires 'MongoDB'                 => '0.39';
 requires 'Moose';
+requires 'MooseX::StrictConstructor';
 requires 'Parse::CPAN::Packages';
 requires 'Parse::CPAN::Authors';
 requires 'Pod::Simple';

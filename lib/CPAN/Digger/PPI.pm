@@ -5,10 +5,11 @@ use Moose;
 use PPI::Document;
 use PPI::Find;
 
-has 'infile' => (is => 'rw');
+has 'infile' => (is => 'rw', isa => 'Str');
+has 'ppi'    => (is => 'rw', isa => 'PPI::Document');
 
 sub read_file {
-	my $self = shift;
+	my ($self) = @_;
 	
 	my $file = $self->infile;
 	my $text = do {
@@ -19,14 +20,23 @@ sub read_file {
 	return $text;
 }
 
-sub process {
-	my $self = shift;
+sub get_ppi {
+	my ($self) = @_;
 
-	my $text = $self->read_file;
+	if (not $self->ppi) {
+		my $text = $self->read_file;
+		my $ppi = PPI::Document->new( \$text );
+		die if not defined $ppi;
+		$ppi->index_locations;
+		$self->ppi($ppi);
+	}
+	return $self->ppi;
+}
 
-	my $ppi = PPI::Document->new( \$text );
-	die if not defined $ppi;
-	$ppi->index_locations;
+sub get_outline {
+	my ($self) = @_;
+
+	my $ppi = $self->get_ppi;
 
 	my @things = PPI::Find->new(
 		sub {
@@ -119,6 +129,43 @@ sub process {
 	push @outline, $cur_pkg;
 
 	return \@outline;
+}
+
+sub syntax {
+	my ($self) = @_;
+
+	my $ppi => $self->get_ppi;
+
+	my @tokens = $ppi->tokens;
+	foreach my $t (@tokens) {
+
+		print $t->content, "\n";
+		next;
+
+		my ( $row, $rowchar, $col ) = @{ $t->location };
+
+		#		next if $row < $first;
+		#		next if $row > $first + $lines;
+		my $css = $self->_css_class($t);
+
+		#		if ($row > $first and $row < $first + 5) {
+		#			print "$row, $rowchar, ", $t->length, "  ", $t->class, "  ", $css, "  ", $t->content, "\n";
+		#		}
+		#		last if $row > 10;
+		#my $color = $colors{$css};
+		#if ( not defined $color ) {
+		#	TRACE("Missing definition for '$css'\n") if DEBUG;
+		#	next;
+		#}
+		#next if not $color;
+
+		my $start = 0; #$editor->PositionFromLine( $row - 1 ) + $rowchar - 1;
+		my $len   = $t->length;
+
+		#$editor->StartStyling( $start, $color );
+		#$editor->SetStyling( $len, $color );
+	}
+	return;
 }
 
 
