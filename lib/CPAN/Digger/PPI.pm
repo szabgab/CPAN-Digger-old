@@ -131,5 +131,42 @@ sub get_outline {
 	return \@outline;
 }
 
+sub syntax {
+	my ($self) = @_;
+
+	my $ppi => $self->get_ppi;
+
+	my @tokens = $ppi->tokens;
+	foreach my $t (@tokens) {
+
+		print $t->content, "\n";
+		next;
+
+		my ( $row, $rowchar, $col ) = @{ $t->location };
+
+		#		next if $row < $first;
+		#		next if $row > $first + $lines;
+		my $css = $self->_css_class($t);
+
+		#		if ($row > $first and $row < $first + 5) {
+		#			print "$row, $rowchar, ", $t->length, "  ", $t->class, "  ", $css, "  ", $t->content, "\n";
+		#		}
+		#		last if $row > 10;
+		#my $color = $colors{$css};
+		#if ( not defined $color ) {
+		#	TRACE("Missing definition for '$css'\n") if DEBUG;
+		#	next;
+		#}
+		#next if not $color;
+
+		my $start = 0; #$editor->PositionFromLine( $row - 1 ) + $rowchar - 1;
+		my $len   = $t->length;
+
+		#$editor->StartStyling( $start, $color );
+		#$editor->SetStyling( $len, $color );
+	}
+	return;
+}
+
 
 1;
