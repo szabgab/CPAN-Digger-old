@@ -132,8 +132,9 @@ sub process_distro {
 	my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
 	my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
 	my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
+	my $syn_dir  = File::Spec->catdir( $self->output, 'syn', $d->dist);
 
-	foreach my $p ($src, $src_dir, $dist_dir) {
+	foreach my $p ($src, $src_dir, $dist_dir, $syn_dir) {
 		$p = eval {_untaint_path($p)};
 		if ($@) {
 			chomp $@;
@@ -153,8 +154,7 @@ sub process_distro {
 		return;
 	}
 
-	mkpath $dist_dir;
-	mkpath $src_dir;
+	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
 	chdir $src_dir;
 	my $distv_dir = File::Spec->catdir($src_dir, $d->distvname);
 	if (not -e $distv_dir) {
@@ -199,7 +199,12 @@ sub process_distro {
 		$data{pods} = $pods->{pods};
 	}
 
-	_generate_outline($dist_dir, $data{modules});
+	$self->generate_outline($dist_dir, $data{modules});
+
+	if ($self->syn) {
+		$self->generate_syn($syn_dir, $data{modules});
+	}
+
 
 	$data{has_meta} = -e 'META.yml';
 	# TODO we need to make sure the data we read from META.yml is correct and
@@ -299,8 +304,22 @@ sub generate_html_from_pod {
 	return \%ret;
 }
 
-sub _generate_outline {
-	my ($dir, $files) = @_;
+sub generate_syn {
+	my ($self, $dir, $files) = @_;
+
+	foreach my $file (@$files) {
+		my $outfile = File::Spec->catfile($dir, $file->{path});
+		mkpath dirname $outfile;
+		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
+		my $html = $ppi->get_syntax;
+		LOG("Save syn in $outfile");
+		open my $out, '>', $outfile;
+		print $out $html;
+	}
+}
+
+sub generate_outline {
+	my ($self, $dir, $files) = @_;
 
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
@@ -555,6 +574,7 @@ sub _untaint_path {
 	}
 	return $p;
 }
+
 
 
 1;

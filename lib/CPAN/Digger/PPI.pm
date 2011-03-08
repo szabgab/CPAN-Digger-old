@@ -131,22 +131,40 @@ sub get_outline {
 	return \@outline;
 }
 
-sub syntax {
+sub get_syntax {
 	my ($self) = @_;
 
-	my $ppi => $self->get_ppi;
+	my $ppi = $self->get_ppi;
+	my $html = <<"END_HTML";
+<html><head>
+  <link rel="stylesheet" type="text/css" href="/css/style.css" /> 
+
+  <script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="/js/jquery-ui-1.8.5.custom.min.js"></script>
+  <script type="text/javascript" src="/js/digger.js"></script>
+</head><body>
+<div id="code">
+END_HTML
 
 	my @tokens = $ppi->tokens;
+	my $current_row;
 	foreach my $t (@tokens) {
 
-		print $t->content, "\n";
-		next;
+		#print $t->content, "\n";
+		#next;
 
 		my ( $row, $rowchar, $col ) = @{ $t->location };
 
 		#		next if $row < $first;
 		#		next if $row > $first + $lines;
 		my $css = $self->_css_class($t);
+		my $content = $t->content;
+		#$html .= "$row - $rowchar - $col - $content - $css\n";
+		if (not defined $current_row or $current_row < $row) {
+			$current_row = $row;
+			$html .= qq(<div class="rownumber">$current_row</div>);
+		}
+		$html .= qq(<div class="$css">$content</div>\n);
 
 		#		if ($row > $first and $row < $first + 5) {
 		#			print "$row, $rowchar, ", $t->length, "  ", $t->class, "  ", $css, "  ", $t->content, "\n";
@@ -159,14 +177,65 @@ sub syntax {
 		#}
 		#next if not $color;
 
-		my $start = 0; #$editor->PositionFromLine( $row - 1 ) + $rowchar - 1;
-		my $len   = $t->length;
+		#my $start = 0; #$editor->PositionFromLine( $row - 1 ) + $rowchar - 1;
+		#my $len   = $t->length;
 
 		#$editor->StartStyling( $start, $color );
 		#$editor->SetStyling( $len, $color );
 	}
-	return;
+	$html .= "</div></body></html>\n";
+
+	return $html;
 }
 
+sub _css_class {
+	my $self  = shift;
+	my $Token = shift;
+
+	if ( $Token->isa('PPI::Token::Word') ) {
+
+		# There are some words we can be very confident are
+		# being used as keywords
+		unless ( $Token->snext_sibling and $Token->snext_sibling->content eq '=>' ) {
+			if ( $Token->content =~ /^(?:sub|return)$/ ) {
+				return 'keyword';
+			} elsif ( $Token->content =~ /^(?:undef|shift|defined|bless)$/ ) {
+				return 'core';
+			}
+		}
+		if ( $Token->previous_sibling and $Token->previous_sibling->content eq '->' ) {
+			if ( $Token->content =~ /^(?:new)$/ ) {
+				return 'core';
+			}
+		}
+		if ( $Token->parent->isa('PPI::Statement::Include') ) {
+			if ( $Token->content =~ /^(?:use|no)$/ ) {
+				return 'keyword';
+			}
+			if ( $Token->content eq $Token->parent->pragma ) {
+				return 'pragma';
+			}
+		} elsif ( $Token->parent->isa('PPI::Statement::Variable') ) {
+			if ( $Token->content =~ /^(?:my|local|our)$/ ) {
+				return 'keyword';
+			}
+		} elsif ( $Token->parent->isa('PPI::Statement::Compound') ) {
+			if ( $Token->content =~ /^(?:if|else|elsif|unless|for|foreach|while|my)$/ ) {
+				return 'keyword';
+			}
+		} elsif ( $Token->parent->isa('PPI::Statement::Package') ) {
+			if ( $Token->content eq 'package' ) {
+				return 'keyword';
+			}
+		} elsif ( $Token->parent->isa('PPI::Statement::Scheduled') ) {
+			return 'keyword';
+		}
+	}
+
+	# Normal coloring
+	my $css = ref $Token;
+	$css =~ s/^.+:://;
+	$css;
+}
 
 1;
