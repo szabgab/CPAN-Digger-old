@@ -136,14 +136,6 @@ sub get_syntax {
 
 	my $ppi = $self->get_ppi;
 	my $html = <<"END_HTML";
-<html><head>
-  <link rel="stylesheet" type="text/css" href="/css/style.css" /> 
-
-  <script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
-  <script type="text/javascript" src="/js/jquery-ui-1.8.5.custom.min.js"></script>
-  <script type="text/javascript" src="/js/digger.js"></script>
-</head><body>
-<div class="code">
 END_HTML
 
 	my @tokens = $ppi->tokens;
@@ -194,7 +186,6 @@ END_HTML
 		#next if not $color;
 	}
 	$html .= "</div>\n"; #close the last row;
-	$html .= "</div></body></html>\n";
 
 	return $html;
 }

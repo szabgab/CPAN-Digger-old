@@ -313,8 +313,15 @@ sub generate_syn {
 		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
 		my $html = $ppi->get_syntax;
 		LOG("Save syn in $outfile");
-		open my $out, '>', $outfile;
-		print $out $html;
+		
+		my %data = (
+			#filename => $opt{infile},
+			code => $html,
+		);
+		my $tt = $self->get_tt;
+		$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
+
+		
 	}
 }
 
