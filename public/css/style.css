@@ -46,6 +46,10 @@ body {
 }
 */
 
+.ws {
+  display:   inline;
+}
+
 .Whitespace {
   display:   inline;
 }

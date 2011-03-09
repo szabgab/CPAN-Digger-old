@@ -160,12 +160,22 @@ END_HTML
 		my $css = $self->_css_class($t);
 		my $content = $t->content;
 		#$html .= "$row - $rowchar - $col - $content - $css\n";
+
+		# TODO set the width of the rownumber constant
+		# TODO allow the user to turn on/off row numbers
+		#      (this should be some javascript setting hide/show)
 		if (not defined $current_row or $current_row < $row) {
                         if (defined $current_row) {
 				$html .= "</div>\n"; #close the row;
                         }
 			$current_row = $row;
 			$html .= qq(<div class="row">$current_row );
+		}
+
+
+		# TODO: how handle tabs and indentation in general??
+		if ($t->isa('PPI::Token::Whitespace') and (length $content > 1)) {
+			$content = qq(<pre class="ws">$content</pre>);
 		}
 		$html .= qq(<div class="$css">$content</div>\n);
 
