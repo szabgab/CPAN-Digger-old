@@ -35,13 +35,13 @@ body {
   text-decoration: none;
 }
 
+.code a:hover {
+  text-decoration: underline;
+}
+
 .keyword {
   color: green;
   display:   inline;
-}
-
-.keyword a:hover {
-  text-decoration: underline;
 }
 
 .ws {

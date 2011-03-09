@@ -168,7 +168,7 @@ END_HTML
 			}
 		}
 
-		if ($css eq 'keyword' and $content eq 'package') {
+		if ($css eq 'keyword' or $css eq 'core' or $css eq 'pragma') {
 			$content = qq(<a>$content</a>);
 		}
 
