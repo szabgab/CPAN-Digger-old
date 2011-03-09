@@ -143,7 +143,7 @@ sub get_syntax {
   <script type="text/javascript" src="/js/jquery-ui-1.8.5.custom.min.js"></script>
   <script type="text/javascript" src="/js/digger.js"></script>
 </head><body>
-<div id="code">
+<div class="code">
 END_HTML
 
 	my @tokens = $ppi->tokens;
@@ -172,6 +172,11 @@ END_HTML
 		if ($t->isa('PPI::Token::Whitespace') and (length $content > 1)) {
 			$content = qq(<pre class="ws">$content</pre>);
 		}
+
+		if ($css eq 'keyword' and $content eq 'package') {
+			$content = qq(<a>$content</a>);
+		}
+
 		$html .= qq(<div class="$css">$content</div>);
 
 		#		if ($row > $first and $row < $first + 5) {
@@ -184,12 +189,6 @@ END_HTML
 		#	next;
 		#}
 		#next if not $color;
-
-		#my $start = 0; #$editor->PositionFromLine( $row - 1 ) + $rowchar - 1;
-		#my $len   = $t->length;
-
-		#$editor->StartStyling( $start, $color );
-		#$editor->SetStyling( $len, $color );
 	}
 	$html .= "</div>\n"; #close the last row;
 	$html .= "</div></body></html>\n";

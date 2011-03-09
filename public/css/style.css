@@ -31,7 +31,7 @@ body {
 }
 
 /* syntax highlighting */
-#code a {
+.code a {
   text-decoration: none;
 }
 
@@ -40,11 +40,9 @@ body {
   display:   inline;
 }
 
-/*
 .keyword a:hover {
-  color: yellow;
+  text-decoration: underline;
 }
-*/
 
 .ws {
   display:   inline;
