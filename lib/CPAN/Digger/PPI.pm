@@ -161,8 +161,11 @@ END_HTML
 		my $content = $t->content;
 		#$html .= "$row - $rowchar - $col - $content - $css\n";
 		if (not defined $current_row or $current_row < $row) {
+                        if (defined $current_row) {
+				$html .= "</div>\n"; #close the row;
+                        }
 			$current_row = $row;
-			$html .= qq(<div class="rownumber">$current_row</div>);
+			$html .= qq(<div class="row">$current_row );
 		}
 		$html .= qq(<div class="$css">$content</div>\n);
 
@@ -183,6 +186,7 @@ END_HTML
 		#$editor->StartStyling( $start, $color );
 		#$editor->SetStyling( $len, $color );
 	}
+	$html .= "</div>\n"; #close the last row;
 	$html .= "</div></body></html>\n";
 
 	return $html;

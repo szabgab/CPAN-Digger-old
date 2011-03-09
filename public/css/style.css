@@ -37,6 +37,7 @@ body {
 
 .keyword {
   color: green;
+  display:   inline;
 }
 
 /*
@@ -46,28 +47,78 @@ body {
 */
 
 .Whitespace {
+  display:   inline;
 }
 
 .Word {
   color: #2323223;
+  display:   inline;
 }
 .pragma {
+  display:   inline;
 }
 .Single {
+  display:   inline;
 }
 .Float {
+  display:   inline;
 }
 .Symbol {
+  display:   inline;
 }
 .Operator {
+  display:   inline;
 }
 .Structure {
+  display:   inline;
+  color: green;
 }
 
 .Pod {
+  display:   inline;
   color: grey;
 }
 
+
 .Comment {
   color: grey;
+  display:   inline;
 }
+
+.ArrayIndex {
+  display:   inline;
+}
+
+.Label {
+  display:   inline;
+}
+
+.Separator {
+  display:   inline;
+}
+
+.Cast {
+  display:   inline;
+}
+
+.Number {
+  display:   inline;
+}
+
+.core {
+  display:   inline;
+}
+
+.Magic {
+  display:   inline;
+}
+
+.Words {
+  display:   inline;
+}
+
+.row {
+  color: blue;
+  display:   block;
+}
+
