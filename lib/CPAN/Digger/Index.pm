@@ -348,6 +348,7 @@ sub _generate_html {
 	my $tt = $self->get_tt;
 	my $author = lc $d->cpanid;
 	my $distvname = $d->distvname;
+	my $dist = $d->dist;
 	foreach my $file (@files) {
 		my $module = substr($file, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
@@ -371,6 +372,7 @@ sub _generate_html {
 			$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
 			$pod->html_header_before_title( $header_top );
 			$header_bottom .= qq((<a href="/src/$author/$distvname/$path/$file">source</a>));
+			$header_bottom .= qq((<a href="/syn/$dist/$path/$file">syn</a>));
 			$pod->html_header_after_title( $header_bottom);
 			$pod->html_footer( $footer );
 
