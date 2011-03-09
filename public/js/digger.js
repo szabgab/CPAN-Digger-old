@@ -27,7 +27,7 @@ $(function(){
     });
 
      $('.keyword').click(function() {
-        alert('Show popup with explanation about ' + this);
+        alert('Show popup with explanation about ' + this.firstChild.innerHTML);
 	return false;
      });
 
