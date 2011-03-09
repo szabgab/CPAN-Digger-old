@@ -150,16 +150,11 @@ END_HTML
 	my $current_row;
 	foreach my $t (@tokens) {
 
-		#print $t->content, "\n";
-		#next;
-
 		my ( $row, $rowchar, $col ) = @{ $t->location };
 
-		#		next if $row < $first;
-		#		next if $row > $first + $lines;
 		my $css = $self->_css_class($t);
 		my $content = $t->content;
-		#$html .= "$row - $rowchar - $col - $content - $css\n";
+		chomp $content;
 
 		# TODO set the width of the rownumber constant
 		# TODO allow the user to turn on/off row numbers
@@ -177,7 +172,7 @@ END_HTML
 		if ($t->isa('PPI::Token::Whitespace') and (length $content > 1)) {
 			$content = qq(<pre class="ws">$content</pre>);
 		}
-		$html .= qq(<div class="$css">$content</div>\n);
+		$html .= qq(<div class="$css">$content</div>);
 
 		#		if ($row > $first and $row < $first + 5) {
 		#			print "$row, $rowchar, ", $t->length, "  ", $t->class, "  ", $css, "  ", $t->content, "\n";
