@@ -168,9 +168,12 @@ END_HTML
 		}
 
 
-		# TODO: how handle tabs and indentation in general??
-		if ($t->isa('PPI::Token::Whitespace') and (length $content > 1)) {
-			$content = qq(<pre class="ws">$content</pre>);
+		# TODO: how handle tabs and indentation in general?? for now we replace TABs by 4 spaces
+		if ($t->isa('PPI::Token::Whitespace')) {
+			$content =~ s/\t/    /s;
+			if (length $content > 1) {
+				$content = qq(<pre class="ws">$content</pre>);
+			}
 		}
 
 		if ($css eq 'keyword' and $content eq 'package') {
