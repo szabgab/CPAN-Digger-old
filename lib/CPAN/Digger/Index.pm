@@ -399,10 +399,15 @@ sub generate_central_files {
 	my $outdir = _untaint_path($self->output);
 	mkpath $outdir;
 
-	foreach my $file ( 'public/robots.txt', 'public/favicon.ico', glob('public/css/*'), glob('public/js/*')) {
+	foreach my $file ( 'public/robots.txt', 'public/favicon.ico', glob('public/css/*'), glob('public/js/*'),
+		glob('public/css/ui-lightness/*'),
+		glob('public/css/ui-lightness/images/*'),
+		) {
 		my $src = substr($file, 7);
 		print "Copy $src\n";
-		fcopy($file, "$outdir/$src") or die $!;
+		if (-f $file) {
+			fcopy($file, "$outdir/$src") or die $!;
+		}
 	}
 
 	my $tt = $self->get_tt;

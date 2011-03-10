@@ -1,10 +1,11 @@
     </title>
   <link rel="stylesheet" type="text/css" href="/css/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/css/ui-lightness/jquery-ui-1.8.10.custom.css" /> 
   <meta name="description" content="[% description %]" />
   <meta name="keywords" content="[% keywords %]" />
 
-  <script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
-  <script type="text/javascript" src="/js/jquery-ui-1.8.5.custom.min.js"></script>
+  <script type="text/javascript" src="/js/jquery-1.4.4.min.js"></script>
+  <script type="text/javascript" src="/js/jquery-ui-1.8.10.custom.min.js"></script>
   <script type="text/javascript" src="/js/digger.js"></script>
 </head>
 <body>

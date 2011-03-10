@@ -1,5 +1,15 @@
-$(function(){
-    $("#dialog").dialog({
+$(document).ready(function() {
+    var $dlg = $('<div></div>')
+         .html('Hello world')
+         .dialog({
+               autoOpen: false,
+               title: 'Basic dialog',
+               closeOnEscape: true,
+		modal: true,
+               resizable: true,
+         });
+
+     $("#dialog").dialog({
 					autoOpen: false,
     buttons: {
         'button 1': function() {
@@ -27,7 +37,9 @@ $(function(){
     });
 
      $('.keyword').click(function() {
-        alert('Show popup with explanation about ' + this.firstChild.innerHTML);
+        //alert('Show popup with explanation about ' + this.firstChild.innerHTML);
+        $dlg.dialog("option", "title", this.firstChild.innerHTML);
+        $dlg.dialog('open');
 	return false;
      });
 
