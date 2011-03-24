@@ -47,6 +47,7 @@ requires 'Parse::CPAN::Authors';
 requires 'Pod::Simple';
 requires 'PPI::Document';
 requires 'PPI::Find';
+requires 'PPIx::EditorTools'       => '0.12';
 requires 'Template';
 requires 'YAML::Any';
 

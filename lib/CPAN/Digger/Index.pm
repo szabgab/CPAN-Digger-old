@@ -333,7 +333,9 @@ sub generate_outline {
 		mkpath dirname $outfile;
 
 		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
-		my $outline = $ppi->get_outline;
+		require PPIx::EditorTools::Outline;
+		my $outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
+
 		LOG("Save outline in $outfile");
 		open my $out, '>', $outfile;
 		print $out to_json($outline, { pretty => 1 });
