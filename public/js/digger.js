@@ -54,9 +54,9 @@ $(document).ready(function() {
                        $('#result').html('ok');
                        var html = '';
                        for (var i=0; i<resp.length; i++) {
-                           html += 'Author: <a href="http://search.cpan.org/~' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a>';
-                           html += 'Name:   <a href="http://search.cpan.org/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a>';
-                           html += 'Version' + resp[i]["version"];
+                           html += '<div class="author"><a href="http://search.cpan.org/~' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a></div>';
+                           html += '<div class="name"><a href="http://search.cpan.org/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a></div>';
+                           html += '<div class="version">' + resp[i]["version"] + '</div>';
                            html += '<br>';
                        }
                        $('#result').html(html);
