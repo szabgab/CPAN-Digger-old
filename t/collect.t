@@ -6,11 +6,12 @@ use File::Basename qw(dirname);
 use File::Copy qw(copy);
 use File::Path qw(mkpath);
 use File::Temp qw(tempdir);
+use Storable qw(dclone);
 
 use Test::More;
 use Test::Deep;
 
-plan tests => 4;
+plan tests => 6;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -21,6 +22,8 @@ diag "dbdir: $dbdir";
 
 my $dbfile = "$dbdir/a.db";
 
+use CPAN::Digger::DB;
+use DBI;
 
 ### setup cpan
 create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.meta" );
@@ -32,7 +35,6 @@ copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/";
 system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
 
 ### check database
-use DBI;
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
 my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY id ASC');
 $sth->execute;
@@ -49,12 +51,7 @@ cmp_deeply(\@data, [
    [2, 'FAKE1', 'Package-Name', '0.02', 'authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
 ], 'data is ok');
 
-{
-    use CPAN::Digger::DB;
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
-    my $data = $db->get_distros('Pack');
-    cmp_deeply($data, 
+my $expected_data = 
          [
             { 
               author => 'FAKE1',
@@ -66,7 +63,16 @@ cmp_deeply(\@data, [
               name => 'Package-Name',
               version => '0.02'
             },
-          ], 'get_distros');
+          ];
+my $expected_data2 = dclone($expected_data);
+$expected_data2->[0]{id} = 1;
+$expected_data2->[1]{id} = 2;
+
+{
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+    my $data = $db->get_distros('Pack');
+    cmp_deeply($data, $expected_data, 'get_distros');
 }
 #diag explain $data;
 
@@ -74,23 +80,12 @@ cmp_deeply(\@data, [
 # run collect again without any update to CPAN
 system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
 {
-    use CPAN::Digger::DB;
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
     my $data = $db->get_distros('Pack');
-    cmp_deeply($data, 
-         [
-            { 
-              author => 'FAKE1',
-              name => 'My-Package',
-              version => '1.02'
-            },
-            {
-              author => 'FAKE1',
-              name => 'Package-Name',
-              version => '0.02'
-            },
-          ], 'get_distros');
+    my $data2 = $db->get_distros_latest_version('Pack');
+    cmp_deeply($data, $expected_data, 'get_distros');
+    cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
 }
 
 
@@ -103,12 +98,7 @@ copy 't/files/Some-Package-2.01.tar.gz', "$cpan/authors/id/F/FA/FAKE2/";
 system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
 
 ### check database
-{
-    use CPAN::Digger::DB;
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
-    my $data = $db->get_distros('Pack');
-    cmp_deeply($data, 
+my $exp_data =  
          [
             { 
               author => 'FAKE1',
@@ -130,7 +120,21 @@ system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
               name => 'Some-Package',
               version => '2.01'
             },
-            ], 'get_distros');
+            ];
+my $exp_data2 = dclone $exp_data;
+splice(@$exp_data2, 2,1);
+$exp_data2->[0]{id} = 1;
+$exp_data2->[1]{id} = 2;
+$exp_data2->[2]{id} = 4;
+
+{
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+    my $data = $db->get_distros('Pack');
+    cmp_deeply($data, $exp_data, 'get_distros');
+
+    my $data2 = $db->get_distros_latest_version('Pack');
+    cmp_deeply($data2, $exp_data2, 'get_distros_latest_version');
 }
 
 
