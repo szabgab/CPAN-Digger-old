@@ -9,7 +9,7 @@ use File::Temp qw(tempdir);
 use Test::More;
 use Test::Deep;
 
-plan tests => 1;
+plan tests => 2;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -56,6 +56,24 @@ cmp_deeply(\@data, [
    [2, 'FAKE1', 'Package-Name', '0.02', 'authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
 ], 'data is ok');
 
+use CPAN::Digger::DB;
+my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+$db->setup;
+my $data = $db->get_distros('Pack');
+cmp_deeply($data, 
+     [
+        [
+          'FAKE1',
+          'My-Package',
+          '1.02'
+        ],
+        [
+          'FAKE1',
+          'Package-Name',
+          '0.02'
+        ]
+      ], 'get_distros');
+#diag explain $data;
 
 #
 # change cpan

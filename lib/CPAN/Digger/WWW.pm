@@ -55,6 +55,17 @@ get '/license/:query' => sub {
 get '/q/:query' => sub {
     my $term = params->{query} || '';
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
+    content_type 'text/plain';
+    #my $data = { 'abc' => $term };
+
+    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
+    return to_json { error => 'no db configuration' } if not $dbfile;
+
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+    my $data = $db->get_distros($term);
+    return to_json($data);
+
     return _data({ 'name' => qr/$term/i });
 };
 
@@ -121,20 +132,6 @@ sub _data {
 
 sub _fetch_from_db {
     my ($params) = @_;
-
-    my $result = CPAN::Digger::DB->db->distro->find($params);
-    my @results;
-    my $count = 0;
-    while (my $d = $result->next) {
-        $count++;
-        #delete $d->{_id};
-        my %data = (
-            name => $d->{name},
-            author => $d->{author},
-        );
-        push @results, \%data;
-    }
-    return \@results;
 }
 
 

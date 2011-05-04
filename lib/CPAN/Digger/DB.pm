@@ -28,4 +28,18 @@ sub insert_distro {
     $self->dbh->do($sql_insert, {}, @args);
 }
 
+sub get_distros {
+    my ($self, $str) = @_;
+
+    $str = '%' . $str . '%';
+    my $sth = $self->dbh->prepare('SELECT author, name, version FROM distro WHERE name LIKE ? LIMIT 100');
+    $sth->execute($str);
+    my @results;
+    while (my $hr = $sth->fetchrow_hashref) {
+       push @results, $hr;
+    }
+    return \@results;
+}
+
+
 1;

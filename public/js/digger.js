@@ -45,25 +45,26 @@ $(document).ready(function() {
 
      $('#dig').click(function() {
             var query = $('#query').val();
-            $.get('/q/' + query, {} , function(resp) {
+            $.get('q/' + query, function(resp) {
                     $('#content').hide();
-                    $('#result').html(resp);
-                    //alert('hello');
-                    //var dx = new Array;
-                    var dx = {a: 23, b:12};
-                    alert(1);
-                    //dx[0] = "first";
-                    //dx["abc"] = "sec";
-                    //alert(dx[0]);
-                    //alert(dx["abc"]);
-                    //var data = eval("{yxx: 23}");
-                    //var data = eval(resp);
-//                    $('#ellapsed_time').html(resp.ellapsed_time);
-                    //alert(data["ellapsed_time"]);
-                    //alert(data[0]);
-                    alert(dx.length);
-            });
-//            alert("done");
+                    if (resp["error"]) {
+                       alert(resp["error"]);
+                    } else {
+//alert(resp);
+                       $('#result').html('ok');
+                       var html = '';
+                       for (var i=0; i<resp.length; i++) {
+                           html += 'Author: <a href="http://search.cpan.org/~' + resp[i]["author"] + '">' + resp[i]["author"] + '<a>';
+                           html += 'Name: ' + resp[i]["name"];
+                           html += 'Version' + resp[i]["version"];
+                           html += '<br>';
+                       }
+                       $('#result').html(html);
+                    }
+                    if (resp["ellapsed_time"]) {
+                        $('#ellapsed_time').html(resp.ellapsed_time);
+                    }
+            }, 'json');
             return false;
     });
 });
