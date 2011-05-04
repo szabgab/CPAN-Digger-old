@@ -125,7 +125,7 @@ Alternate plan:
 TODO: add more test cases
 TODO: go over all the files and report what are we missing
 
-*) Add search engine that can find packages base on their name - fetch always the latest
+*) Add search engine that can find packages based on their name - fetch always the latest
 TODO: have a table where the distro name is unique to make it easier to search ?
 TODO: show exact hits first
 TODO: link to package description

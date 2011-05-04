@@ -54,8 +54,8 @@ $(document).ready(function() {
                        $('#result').html('ok');
                        var html = '';
                        for (var i=0; i<resp.length; i++) {
-                           html += 'Author: <a href="http://search.cpan.org/~' + resp[i]["author"] + '">' + resp[i]["author"] + '<a>';
-                           html += 'Name: ' + resp[i]["name"];
+                           html += 'Author: <a href="http://search.cpan.org/~' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a>';
+                           html += 'Name:   <a href="http://search.cpan.org/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a>';
                            html += 'Version' + resp[i]["version"];
                            html += '<br>';
                        }

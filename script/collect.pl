@@ -31,9 +31,9 @@ my $files = File::Find::Rule
 
 while (my $file = $files->match) {
     # authors/id/F/FA/FAKE1/My-Package-1.02.tar.gz
-    print "$file\n";
+    #print "$file\n";
     if ($file =~ m{^authors/id/\w/\w\w/(\w+)/([\w-]*?)-([\d.]+)(\.tar\.gz)$} ) {
-        print "$1  - $2 - $3\n";
+        #print "$1  - $2 - $3\n";
         $db->insert_distro($1, $2, $3, $file, (stat "$opt{cpan}/$file")[9], time);
     } else {
         warn "ERROR - could not parse filename $file\n";

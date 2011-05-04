@@ -22,17 +22,21 @@ sub setup {
     return;
 }
 
+
 sub insert_distro {
     my ($self, @args) = @_;
 
-    $self->dbh->do($sql_insert, {}, @args);
+    my $count = $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro WHERE path = ?', {}, $args[3]);
+    if (not $count) {
+        $self->dbh->do($sql_insert, {}, @args);
+    }
 }
 
 sub get_distros {
     my ($self, $str) = @_;
 
     $str = '%' . $str . '%';
-    my $sth = $self->dbh->prepare('SELECT author, name, version FROM distro WHERE name LIKE ? LIMIT 100');
+    my $sth = $self->dbh->prepare("SELECT author, name, version FROM distro WHERE name LIKE ? LIMIT 100");
     $sth->execute($str);
     my @results;
     while (my $hr = $sth->fetchrow_hashref) {
