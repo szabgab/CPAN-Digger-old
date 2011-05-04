@@ -27,14 +27,15 @@ my $files = File::Find::Rule
    ->file()
    ->relative
    ->name( '*.tar.gz' )
-   ->start($opt{cpan});
+   ->start( "$opt{cpan}/authors/id" );
 
 while (my $file = $files->match) {
-    # authors/id/F/FA/FAKE1/My-Package-1.02.tar.gz
+    # F/FA/FAKE1/My-Package-1.02.tar.gz
     #print "$file\n";
-    if ($file =~ m{^authors/id/\w/\w\w/(\w+)/([\w-]*?)-([\d.]+)(\.tar\.gz)$} ) {
+
+    if ($file =~ m{^\w/\w\w/(\w+)/([\w-]*?)-([\d.]+)(\.tar\.gz)$} ) {
         #print "$1  - $2 - $3\n";
-        $db->insert_distro($1, $2, $3, $file, (stat "$opt{cpan}/$file")[9], time);
+        $db->insert_distro($1, $2, $3, $file, (stat "$opt{cpan}/authors/id/$file")[9], time);
     } else {
         warn "ERROR - could not parse filename $file\n";
     }

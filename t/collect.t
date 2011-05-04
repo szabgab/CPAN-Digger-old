@@ -47,8 +47,8 @@ while (my @row = $sth->fetchrow_array) {
 
 my $TS = re('\d+');
 cmp_deeply(\@data, [
-   [1, 'FAKE1', 'My-Package', '1.02', 'authors/id/F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
-   [2, 'FAKE1', 'Package-Name', '0.02', 'authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
+   [1, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
+   [2, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
 ], 'data is ok');
 
 my $expected_data = 
