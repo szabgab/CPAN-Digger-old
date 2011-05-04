@@ -122,14 +122,19 @@ Alternate plan:
     go over all the CPAN mirror directory get all the files 
     - using a filter for our sanity that starts with id/A/AU/AUTHOR/Distro-Name-number.tar.gz and then expands
      For each file adds it to the database  AUTHOR, distname, version, path  date when we added to the database, date of the file???
-TODO add more test cases
-TODO go over all the files and report what are we missing
+TODO: add more test cases
+TODO: go over all the files and report what are we missing
+
+*) Add search engine that can find packages base on their name - fetch always the latest
+TODO: have a table where the distro name is unique to make it easier to search ?
+TODO: show exact hits first
+TODO: link to package description
+
 
 *) Remove distros:
     Go over all the distros in the database and check if they are still in the CPAN mirror.
     If not, mark them as "removed" in the database and maybe also remove them from the extracted directory and/or 
     maybe remove them from the database as well.
-*) Add search engine that can find packages base on their name - fetch always the latest
 
 
 *) Extract:
