@@ -24,13 +24,13 @@ system "sqlite3 $dbfile < schema/digger.sql" if not -e $dbfile;
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {RaiseError => 1, PrintError => 0, AutoCommit => 1});
 my $sql_insert = 'INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) VALUES (?, ?, ?, ?, ?, ?)';
 
-my @files = File::Find::Rule
+my $files = File::Find::Rule
    ->file()
    ->relative
    ->name( '*.tar.gz' )
-   ->in($opt{cpan});
+   ->start($opt{cpan});
 
-foreach my $file (@files) {
+while (my $file = $files->match) {
     # authors/id/F/FA/FAKE1/My-Package-1.02.tar.gz
     print "$file\n";
     if ($file =~ m{^authors/id/\w/\w\w/(\w+)/([\w-]*?)-([\d.]+)(\.tar\.gz)$} ) {
