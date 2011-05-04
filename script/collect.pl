@@ -2,10 +2,12 @@
 use strict;
 use warnings;
 
-use DBI;
-use File::Basename qw(dirname);
 use File::Find::Rule;
 use Getopt::Long qw(GetOptions);
+
+use lib 'lib';
+use CPAN::Digger::DB;
+
 
 my %opt;
 GetOptions(\%opt,
@@ -16,13 +18,10 @@ usage() if not $opt{cpan} or not -d $opt{cpan};
 usage() if not $opt{dbfile};
 
 
-my $dbfile = $opt{dbfile};
-my $dbdir = dirname $dbfile;
+# $ENV{CPAN_DIGGER_DBFILE} = 
 
-mkdir $dbdir if not -d $dbdir;
-system "sqlite3 $dbfile < schema/digger.sql" if not -e $dbfile;
-my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","", {RaiseError => 1, PrintError => 0, AutoCommit => 1});
-my $sql_insert = 'INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) VALUES (?, ?, ?, ?, ?, ?)';
+my $db = CPAN::Digger::DB->new(dbfile => $opt{dbfile});
+$db->setup;
 
 my $files = File::Find::Rule
    ->file()
@@ -35,9 +34,9 @@ while (my $file = $files->match) {
     print "$file\n";
     if ($file =~ m{^authors/id/\w/\w\w/(\w+)/([\w-]*?)-([\d.]+)(\.tar\.gz)$} ) {
         print "$1  - $2 - $3\n";
-        $dbh->do($sql_insert, {}, $1, $2, $3, $file, (stat "$opt{cpan}/$file")[9], time);
+        $db->insert_distro($1, $2, $3, $file, (stat "$opt{cpan}/$file")[9], time);
     } else {
-        print "ERROR - could not parse path\n";
+        warn "ERROR - could not parse filename $file\n";
     }
 }
 
