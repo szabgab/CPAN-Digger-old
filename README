@@ -115,4 +115,28 @@ Be able to index
   3) list of directories (e.g. for the @INC of some other perl or file of
      a project in a version control system)
 
+=========================================================
+Alternate plan:
+*) run CPAN mirror
+*) Collect distros:
+    go over all the CPAN mirror directory get all the files 
+    - using a filter for our sanity that starts with id/A/AU/AUTHOR/Distro-Name-number.tar.gz and then expands
+     For each file adds it to the database  AUTHOR, distname, version, path  date when we added to the database, date of the file???
+TODO add more test cases
+TODO go over all the files and report what are we missing
+
+*) Remove distros:
+    Go over all the distros in the database and check if they are still in the CPAN mirror.
+    If not, mark them as "removed" in the database and maybe also remove them from the extracted directory and/or 
+    maybe remove them from the database as well.
+*) Add search engine that can find packages base on their name - fetch always the latest
+
+
+*) Extract:
+    go over all the distros in the database and check if they have been extracted to the 'src' directory already
+    if not yet, then try to extract them
+    report distros that cannot be extracted (and don't try them again)
+*) Generate package/version distro pages:
+   Static or dynamic? 
+   listing all the versions we have in the database
 
