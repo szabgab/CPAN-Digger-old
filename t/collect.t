@@ -11,8 +11,13 @@ use Test::Deep;
 
 plan tests => 1;
 
-my $cpan = tempdir( CLEANUP => 1 );
-my $dbdir = tempdir( CLEANUP => 1 );
+my $cleanup = !$ENV{KEEP};
+
+my $cpan = tempdir( CLEANUP => $cleanup );
+my $dbdir = tempdir( CLEANUP => $cleanup );
+diag "cpan: $cpan";
+diag "dbdir: $dbdir";
+
 my $dbfile = "$dbdir/a.db";
 
 
