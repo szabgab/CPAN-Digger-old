@@ -128,9 +128,7 @@ TODO: go over all the files and report what are we missing
 *) Add search engine that can find packages based on their name - fetch always the latest
 SELECT version, A.name, A.id FROM distro A, (SELECT max(version) AS v, name FROM distro where name like 'padre%' GROUP BY name) AS B WHERE A.version=B.v and A.name=B.name ORDER BY A.name;
 
-TODO: have a table where the distro name is unique to make it easier to search ?
 TODO: show exact hits first
-TODO: link to package description
 
 
 *) Remove distros:
