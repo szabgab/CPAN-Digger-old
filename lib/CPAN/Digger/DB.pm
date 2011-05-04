@@ -34,16 +34,21 @@ sub insert_distro {
 
 sub get_distros {
     my ($self, $str) = @_;
-    return $self->_get_distros($str, "SELECT author, name, version FROM distro WHERE name LIKE ? LIMIT 100");
+    return $self->_get_distros($str, qq{
+       SELECT author, name, version 
+       FROM distro 
+       WHERE name LIKE ? 
+       ORDER BY name
+       LIMIT 100});
 }
 sub get_distros_latest_version {
     my ($self, $str) = @_;
-    return $self->_get_distros($str,
-                              "SELECT author, version, A.name, A.id
-                               FROM distro A, (SELECT max(version) AS v, name
-                                               FROM distro where name like ?
-                                               GROUP BY name) AS B
-                               WHERE A.version=B.v and A.name=B.name ORDER BY A.name");
+    return $self->_get_distros($str, qq{
+        SELECT author, version, A.name, A.id
+        FROM distro A, (SELECT max(version) AS v, name
+                        FROM distro where name like ?
+                        GROUP BY name) AS B
+        WHERE A.version=B.v and A.name=B.name ORDER BY A.name});
 }
 
 sub _get_distros {
