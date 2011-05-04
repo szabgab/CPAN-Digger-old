@@ -26,10 +26,22 @@ $db->setup;
 my $files = File::Find::Rule
    ->file()
    ->relative
-   ->name( '*.tar.gz' )
+#   ->name( '*.tar.gz' )
    ->start( "$opt{cpan}/authors/id" );
 
 while (my $file = $files->match) {
+    next if $file =~ m{.meta$};
+    next if $file =~ m{.readme$};
+    next if $file =~ m{.pl$};
+    next if $file =~ m{.pm$};
+    next if $file =~ m{.txt$};
+    next if $file =~ m{.png$};
+    next if $file =~ m{.html$};
+    next if $file =~ m{CHECKSUMS$};
+    next if $file =~ m{/\w+$};
+
+
+
     # Sample files:
     # F/FA/FAKE1/My-Package-1.02.tar.gz
     # Z/ZI/ZIGOROU/Module-Install-TestVars-0.01_02.tar.gz
@@ -40,7 +52,7 @@ while (my $file = $files->match) {
     my $PACKAGE    = qr{([\w-]*?)};
     my $VERSION_NO = qr{[\d._]+};
     my $CRAZY_VERSION_NO = qr {[\w.]+};
-    my $EXTENSION  = qr{(?:\.tar\.gz)};
+    my $EXTENSION  = qr{(?:\.tar\.gz|\.tgz|\.zip|\.tar\.bz2)};
     if ($file =~ m{^$PREFIX           # P/PA/PAUSEID
                    $SUBDIRS?          # optional garbage
                    $PACKAGE
