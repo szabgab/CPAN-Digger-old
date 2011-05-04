@@ -63,7 +63,7 @@ get '/q/:query' => sub {
 
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
-    my $data = $db->get_distros($term);
+    my $data = $db->get_distros_latest_version($term);
     return to_json($data);
 
     return _data({ 'name' => qr/$term/i });
