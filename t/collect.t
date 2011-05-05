@@ -36,7 +36,7 @@ system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
 
 ### check database
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
-my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY id ASC');
+my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY name');
 $sth->execute;
 my @data;
 while (my @row = $sth->fetchrow_array) {
@@ -45,11 +45,12 @@ while (my @row = $sth->fetchrow_array) {
 }
 #diag explain @data;
 
-my $TS = re('\d+');
+my $TS = re('\d+'); # don't care about exact timestamps
+my $ID = re('\d+'); # don't care about IDs as they are just helpers and they get allocated based on file-order
 cmp_deeply(\@data, [
-   [1, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
-   [2, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
-], 'data is ok');
+   [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
+   [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
+], 'data is ok') or diag explain \@data;
 
 my $expected_data = 
          [
@@ -65,8 +66,8 @@ my $expected_data =
             },
           ];
 my $expected_data2 = dclone($expected_data);
-$expected_data2->[0]{id} = 1;
-$expected_data2->[1]{id} = 2;
+$expected_data2->[0]{id} = $ID;
+$expected_data2->[1]{id} = $ID;
 
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
@@ -123,9 +124,9 @@ my $exp_data =
             ];
 my $exp_data2 = dclone $exp_data;
 splice(@$exp_data2, 2,1);
-$exp_data2->[0]{id} = 1;
-$exp_data2->[1]{id} = 2;
-$exp_data2->[2]{id} = 4;
+$exp_data2->[0]{id} = $ID;
+$exp_data2->[1]{id} = $ID;
+$exp_data2->[2]{id} = $ID;
 
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);

@@ -9,7 +9,10 @@ use DBI;
 use File::Basename qw(dirname);
 use File::Path     qw(mkpath);
 
-my $sql_insert = 'INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) VALUES (?, ?, ?, ?, ?, ?)';
+my $sql_insert = q{
+    INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) 
+                VALUES (?, ?, ?, ?, ?, ?)
+};
 sub setup {
     my ($self) = @_;
 
@@ -34,16 +37,16 @@ sub insert_distro {
 
 sub get_distros {
     my ($self, $str) = @_;
-    return $self->_get_distros($str, qq{
+    return $self->_get_distros($str, q{
        SELECT author, name, version 
        FROM distro 
        WHERE name LIKE ? 
-       ORDER BY name
+       ORDER BY name, version
        LIMIT 100});
 }
 sub get_distros_latest_version {
     my ($self, $str) = @_;
-    return $self->_get_distros($str, qq{
+    return $self->_get_distros($str, q{
         SELECT author, version, A.name, A.id
         FROM distro A, (SELECT max(version) AS v, name
                         FROM distro where name like ?
