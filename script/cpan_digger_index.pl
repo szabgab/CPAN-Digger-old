@@ -21,6 +21,7 @@ GetOptions(\%opt,
 	'prefix=s',
 	'pod',
 	'syn',
+	'whois',
 #	'dropdb',
 ) or usage();
 
@@ -45,6 +46,11 @@ $opt{root} = $root;
 
 
 my $cpan = CPAN::Digger::Index->new(%opt);
+
+if ($opt{whois}) {
+	$cpan->update_from_whois;
+	exit;
+}
 
 $cpan->generate_central_files;
 
@@ -88,6 +94,7 @@ Optional:
    --filter REGEX   only packages that match the regex will be indexed
    --pod            generate HTML pages from POD
    --syn            generate syntax highlighted source files
+   --whois          update authors table of the database from the 00whois.xml file
 
 Or:
    --dropdb         to drop the whole database

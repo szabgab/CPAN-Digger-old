@@ -17,7 +17,8 @@ use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
 use JSON                  qw(to_json);
-use Parse::CPAN::Authors  ();
+use Parse::CPAN::Whois    ();
+#use Parse::CPAN::Authors  ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
@@ -591,6 +592,21 @@ sub _untaint_path {
 	return $p;
 }
 
+sub update_from_whois {
+	my $db = CPAN::Digger::DB->new;
+	$db->setup;
+
+	my $file = $self->cpan . '/authors/00whois.xml';
+	my $whois = Parse::CPAN::Whois->new($file);
+	foreach my $who ($whois->authors) {
+		my $have = $db->get_author($who->pauseid);
+		my %new_data;
+		foreach my $field (qw(email name pauseid asciiname homepage)) {
+			$new_data{$field} = $who->$field;
+		}
+	}
+
+}
 
 
 1;
