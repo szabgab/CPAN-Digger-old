@@ -8,3 +8,16 @@ CREATE TABLE distro (
     added_timestamp DATE
 );
 
+CREATE TABLE author (
+    pauseid   VARCHAR(50) PRIMARY KEY,
+    name      VARCHAR(255),
+    email     VARCHAR(255),
+    asciiname VARCHAR(255),
+    homepage  VARCHAR(255)
+);
+
+CREATE TABLE modules (
+    id       INTEGER PRIMARY KEY,
+    name     VARCHAR(255) UNIQUE NOT NULL
+);
+
