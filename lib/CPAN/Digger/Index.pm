@@ -656,19 +656,31 @@ sub collect_distributions {
 sub update_from_whois {
 	my ($self) = @_;
 
-	my $db = CPAN::Digger::DB->new;
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
 
 	my $file = $self->cpan . '/authors/00whois.xml';
 	my $whois = Parse::CPAN::Whois->new($file);
 	foreach my $who ($whois->authors) {
 		my $have = $db->get_author($who->pauseid);
+		#print Dumper $have;
 		my %new_data;
-		foreach my $field (qw(email name pauseid asciiname homepage)) {
+		my $changed;
+		foreach my $field (qw(email name asciiname homepage)) {
 			$new_data{$field} = $who->$field;
+			if ($have) {
+				no warnings;
+				$changed = 1 if $new_data{$field} ne $have->{$field};
+			}
+		}
+		#print Dumper \%new_data;
+		if (not $have) {
+			$db->add_author(\%new_data, $who->pauseid);
+		} elsif ($changed) {
+			$db->update_author(\%new_data, $who->pauseid);
 		}
 	}
-
+	return;
 }
 
 

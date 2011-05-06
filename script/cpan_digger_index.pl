@@ -47,14 +47,15 @@ if ($opt{prefix} and $opt{prefix} !~ m{^[A-Z]+  /  \w+(-\w+)*  -\d+\.\d+$}x) {
 
 $opt{root} = $root;
 
-my $collect = delete $opt{collect};
+my %run;
+$run{$_} = delete $opt{$_} for qw(collect whois);
 my $cpan = CPAN::Digger::Index->new(%opt);
 
-if ($collect) {
+if ($run{collect}) {
 	$cpan->collect_distributions;
 }
 
-if ($opt{whois}) {
+if ($run{whois}) {
 	$cpan->update_from_whois;
 }
 exit;

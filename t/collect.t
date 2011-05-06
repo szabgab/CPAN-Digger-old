@@ -11,7 +11,7 @@ use Storable qw(dclone);
 use Test::More;
 use Test::Deep;
 
-plan tests => 6;
+plan tests => 9;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -26,31 +26,80 @@ my $dbfile = "$dbdir/a.db";
 use CPAN::Digger::DB;
 use DBI;
 
-### setup cpan
+my $TS = re('\d+'); # don't care about exact timestamps
+my $ID = re('\d+'); # don't care about IDs as they are just helpers and they get allocated based on file-order
+
+
+############################ setup cpan
 create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.meta" );
 create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
 
-copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/";
-
+copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/"  or die $!;
+copy 't/files/02whois.xml', "$cpan/authors/00whois.xml" or die $!;
 collect();
 
 ### check database
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
 my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY name');
-$sth->execute;
-my @data;
-while (my @row = $sth->fetchrow_array) {
-#    diag "@row";
-    push @data, \@row;
-}
-#diag explain @data;
 
-my $TS = re('\d+'); # don't care about exact timestamps
-my $ID = re('\d+'); # don't care about IDs as they are just helpers and they get allocated based on file-order
-cmp_deeply(\@data, [
-   [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
-   [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
-], 'data is ok') or diag explain \@data;
+my $expected_authors = [
+  [
+    'AFOXSON',
+   '',
+   undef,
+   undef,
+   undef
+ ],
+ [
+   'KORSHAK',
+   'Ярослав Коршак',
+   'CENSORED',
+   undef,
+   undef
+ ],
+ [
+   'SPECTRUM',
+   'Черненко Эдуард Павлович',
+   'edwardspec@gmail.com',
+   'Edward Chernenko',
+   'http://absurdopedia.net/wiki/User:Edward_Chernenko'
+ ],
+ [
+   'SZABGAB',
+   'גאבור סבו - Gábor Szabó',
+   'gabor@pti.co.il',
+   'Gabor Szabo',
+   'http://szabgab.com/'
+ ],
+ [
+   'YKO',
+   'Ярослав Коршак',
+   'ykorshak@gmail.com',
+   'Yaroslav Korshak',
+   'http://korshak.name/'
+ ]
+];
+
+{
+  $sth->execute;
+  my @data;
+  while (my @row = $sth->fetchrow_array) {
+  #    diag "@row";
+      push @data, \@row;
+  }
+  #diag explain @data;
+
+  cmp_deeply(\@data, [
+    [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
+    [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
+  ], 'data is ok') or diag explain \@data;
+
+  my $authors = $dbh->selectall_arrayref("SELECT * FROM author ORDER BY pauseid");
+  #diag explain $authors;
+  cmp_deeply $authors, $expected_authors, 'authors';
+}
+
+
 
 my $expected_data = 
          [
@@ -73,12 +122,14 @@ $expected_data2->[1]{id} = $ID;
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
     my $data = $db->get_distros('Pack');
+    my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data, $expected_data, 'get_distros');
+    cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
 }
 #diag explain $data;
 
 
-# run collect again without any update to CPAN
+############################# run collect again without any update to CPAN
 collect();
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
@@ -90,10 +141,11 @@ collect();
 }
 
 
-### change cpan
+##################################### change cpan
 mkpath  "$cpan/authors/id/F/FA/FAKE2/";
 copy 't/files/Some-Package-2.00.tar.gz', "$cpan/authors/id/F/FA/FAKE2/";
 copy 't/files/Some-Package-2.01.tar.gz', "$cpan/authors/id/F/FA/FAKE2/";
+copy 't/files/03whois.xml', "$cpan/authors/00whois.xml" or die $!;
 
 collect();
 
@@ -135,8 +187,22 @@ $exp_data2->[2]{id} = $ID;
 
     my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data2, $exp_data2, 'get_distros_latest_version');
+
+splice @$expected_authors, 2, 0, [
+    'NUFFIN',
+    'יובל קוג\'מן (Yuval Kogman)',
+    'nothingmuch@woobling.org',
+    'Yuval Kogman',
+    'http://nothingmuch.woobling.org/'
+  ];
+
+    my $authors = $dbh->selectall_arrayref("SELECT * FROM author ORDER BY pauseid");
+    #diag explain $authors;
+    cmp_deeply $authors, $expected_authors, 'authors';
 }
 
+
+#################################################### end
 
 sub create_file {
     my $file = shift;
@@ -147,5 +213,5 @@ sub create_file {
 }
 
 sub collect {
-   system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect");
+   system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
 }

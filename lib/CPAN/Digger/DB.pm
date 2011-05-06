@@ -66,5 +66,46 @@ sub _get_distros {
     return \@results;
 }
 
+# get all the data from the 'author' table for a single pauseid
+sub get_author {
+    my ($self, $pauseid) = @_;
+    my $sth = $self->dbh->prepare('SELECT * FROM author WHERE pauseid = ?');
+    $sth->execute($pauseid);
+    my $data = $sth->fetchrow_hashref('NAME_lc');
+    $sth->finish;
+
+    return $data;
+}
+
+sub add_author {
+    my ($self, $data, $pauseid) = @_;
+    
+    Carp::croak('pauseid is required') if not $pauseid;
+    my @fields = qw(name email asciiname homepage);
+    my $fields = join ', ', grep { defined $data->{$_} } @fields;
+    my @values = map { $data->{$_} } grep { defined $data->{$_} } @fields;
+    my $placeholders = join ', ', ('?') x scalar @values;
+    
+    my $sql = "INSERT INTO author (pauseid, $fields) VALUES(?, $placeholders)";
+    #print "$sql\n";
+    $self->dbh->do($sql, {}, $pauseid, @values);
+
+    return;
+}
+sub update_author {
+    my ($self, $data, $pauseid) = @_;
+
+    Carp::croak('pauseid is required') if not $pauseid;
+    my @fields = qw(name email asciiname homepage);
+
+    my $sql = "UPDATE author SET ";
+    $sql .= join ', ', map {"$_ = ?"} @fields;
+   
+    $sql .= " WHERE pauseid = ?";
+    #print "$sql\n";
+    #$self->dbh->do($sql, {}, @$data->{@fields}, $pauseid);
+
+    return;
+}
 
 1;
