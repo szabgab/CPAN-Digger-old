@@ -17,6 +17,7 @@ my $cleanup = !$ENV{KEEP};
 
 my $cpan = tempdir( CLEANUP => $cleanup );
 my $dbdir = tempdir( CLEANUP => $cleanup );
+my $outdir = tempdir( CLEANUP => $cleanup );
 diag "cpan: $cpan";
 diag "dbdir: $dbdir";
 
@@ -31,8 +32,7 @@ create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
 
 copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/";
 
-### run collect
-system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
+collect();
 
 ### check database
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
@@ -79,7 +79,7 @@ $expected_data2->[1]{id} = $ID;
 
 
 # run collect again without any update to CPAN
-system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
+collect();
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
@@ -95,8 +95,7 @@ mkpath  "$cpan/authors/id/F/FA/FAKE2/";
 copy 't/files/Some-Package-2.00.tar.gz', "$cpan/authors/id/F/FA/FAKE2/";
 copy 't/files/Some-Package-2.01.tar.gz', "$cpan/authors/id/F/FA/FAKE2/";
 
-### run collect
-system("$^X script/collect.pl --cpan $cpan --dbfile $dbfile");
+collect();
 
 ### check database
 my $exp_data =  
@@ -145,4 +144,8 @@ sub create_file {
     open my $fh, '>', $file;
     print $fh "some text";
     close $fh;
+}
+
+sub collect {
+   system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect");
 }

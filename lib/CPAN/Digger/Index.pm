@@ -24,14 +24,13 @@ use YAML::Any             ();
 
 use CPAN::Digger::PPI;
 use CPAN::Digger::Pod;
-
+use CPAN::Digger::DB;
 
 #has 'counter'    => (is => 'rw', isa => 'HASH');
 has 'counter_distro'    => (is => 'rw', isa => 'Int', default => 0);
-has 'dir'    => (is => 'ro', isa => 'Str');
-has 'prefix' => (is => 'ro', isa => 'Str');
-
-has 'authors'    => (is => 'rw', isa => 'Parse::CPAN::Authors');
+has 'dir'      => (is => 'ro', isa => 'Str');
+has 'prefix'   => (is => 'ro', isa => 'Str');
+has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 
 
 sub index_dir {
@@ -592,7 +591,71 @@ sub _untaint_path {
 	return $p;
 }
 
+sub collect_distributions {
+	my ($self) = @_;
+
+	return if not $self->cpan;
+
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	$db->setup;
+
+	my $files = File::Find::Rule
+	   ->file()
+	   ->relative
+	#   ->name( '*.tar.gz' )
+	   ->start( $self->cpan . '/authors/id' );
+
+	while (my $file = $files->match) {
+	    next if $file =~ m{.meta$};
+	    next if $file =~ m{.readme$};
+	    next if $file =~ m{.pl$};
+	    next if $file =~ m{.pm$};
+	    next if $file =~ m{.txt$};
+	    next if $file =~ m{.png$};
+	    next if $file =~ m{.html$};
+	    next if $file =~ m{CHECKSUMS$};
+	    next if $file =~ m{/\w+$};
+
+
+
+	    # Sample files:
+	    # F/FA/FAKE1/My-Package-1.02.tar.gz
+	    # Z/ZI/ZIGOROU/Module-Install-TestVars-0.01_02.tar.gz
+	    # G/GR/GREENBEAN/Asterisk-AMI-v0.2.0.tar.gz
+	    # Z/ZA/ZAG/Objects-Collection-029targz/Objects-Collection-0.29.tar.gz
+	    my $PREFIX     = qr{\w/\w\w/(\w+)/};
+	    my $SUBDIRS    = qr{(?:[\w/-]+/)};
+	    my $PACKAGE    = qr{([\w-]*?)};
+	    my $VERSION_NO = qr{[\d._]+};
+	    my $CRAZY_VERSION_NO = qr {[\w.]+};
+	    my $EXTENSION  = qr{(?:\.tar\.gz|\.tgz|\.zip|\.tar\.bz2)};
+	    my $full_path = $self->cpan . '/authors/id/' . $file;
+	    if ($file =~ m{^$PREFIX           # P/PA/PAUSEID
+			   $SUBDIRS?          # optional garbage
+			   $PACKAGE
+			   -v?($VERSION_NO)      # version
+			   $EXTENSION
+			   $}x ) {
+		#print "$1  - $2 - $3\n";
+		$db->insert_distro($1, $2, $3, $file, (stat $full_path)[9], time);
+
+	    # K/KR/KRAKEN/Net-Telnet-Cisco-IOS-0.4beta.tar.gz
+	    } elsif ($file =~ m{^$PREFIX           # P/PA/PAUSEID
+			   $SUBDIRS?          # optional garbage
+			   $PACKAGE
+			   -v?($CRAZY_VERSION_NO)      # version
+			   $EXTENSION
+			   $}x ) {
+		$db->insert_distro($1, $2, $3, $file, (stat $full_path)[9], time);
+	     } else {
+		warn "ERROR - could not parse filename $file\n";
+	    }
+	}
+}
+
 sub update_from_whois {
+	my ($self) = @_;
+
 	my $db = CPAN::Digger::DB->new;
 	$db->setup;
 

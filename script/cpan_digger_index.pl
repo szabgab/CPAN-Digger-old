@@ -16,12 +16,14 @@ my %opt;
 GetOptions(\%opt,
 	'cpan=s',
 	'output=s',
+	'dbfile=s',
 	'filter=s',
 	'dir=s',
 	'prefix=s',
 	'pod',
 	'syn',
 	'whois',
+	'collect',
 #	'dropdb',
 ) or usage();
 
@@ -32,6 +34,7 @@ GetOptions(\%opt,
 #	exit;
 #}
 
+usage('--dbfile required') if not $opt{dbfile};
 usage("--cpan or --dir required")
 	if (not $opt{cpan} or not -d $opt{cpan}) and not $opt{dir};
 usage("if --dir is given then --prefix also need to be supplied")
@@ -44,13 +47,17 @@ if ($opt{prefix} and $opt{prefix} !~ m{^[A-Z]+  /  \w+(-\w+)*  -\d+\.\d+$}x) {
 
 $opt{root} = $root;
 
-
+my $collect = delete $opt{collect};
 my $cpan = CPAN::Digger::Index->new(%opt);
+
+if ($collect) {
+	$cpan->collect_distributions;
+}
 
 if ($opt{whois}) {
 	$cpan->update_from_whois;
-	exit;
 }
+exit;
 
 $cpan->generate_central_files;
 
@@ -84,6 +91,7 @@ sub usage {
 	die <<"END_USAGE";
 Usage: perl -T $0
    --output PATH_TO_OUTPUT_DIRECTORY    (required)
+   --dbfile path/to/database.db
 
 At least one of these is required:
    --cpan PATH_TO_CPAN_MIRROR
@@ -95,10 +103,10 @@ Optional:
    --pod            generate HTML pages from POD
    --syn            generate syntax highlighted source files
    --whois          update authors table of the database from the 00whois.xml file
-
-Or:
-   --dropdb         to drop the whole database
+   --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
 
 END_USAGE
 }
 
+#Or:
+#   --dropdb         to drop the whole database

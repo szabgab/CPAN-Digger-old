@@ -126,8 +126,6 @@ TODO: add more test cases
 TODO: go over all the files and report what are we missing
 
 *) Add search engine that can find packages based on their name - fetch always the latest
-SELECT version, A.name, A.id FROM distro A, (SELECT max(version) AS v, name FROM distro where name like 'padre%' GROUP BY name) AS B WHERE A.version=B.v and A.name=B.name ORDER BY A.name;
-
 TODO: show exact hits first
 
 
@@ -136,6 +134,7 @@ TODO: show exact hits first
     If not, mark them as "removed" in the database and maybe also remove them from the extracted directory and/or 
     maybe remove them from the database as well.
 
+*) Parse the 00whois.xml file and update the 'author' table.
 
 *) Extract:
     go over all the distros in the database and check if they have been extracted to the 'src' directory already
