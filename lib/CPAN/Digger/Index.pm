@@ -78,47 +78,60 @@ sub run_index {
 
 # get all the authors from the database
 # for each author fetch the latest version of distributions
+# This took 75 minutes on my desktop
+# sub generate_author_pages {
+	# my ($self) = @_;
 # 
-sub generate_author_pages {
-	my ($self) = @_;
+	# my $tt = $self->get_tt;
+# 
+	# my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	# $db->setup;
+# 
+	# my $authors = $db->get_all_authors;
+	# foreach my $author (@$authors) {
+		# my $data = $db->get_author_page_data($pauseid);
+# 
+		# my $pauseid = $author->{pauseid};
+		# my $outdir = File::Spec->catdir( $self->output, 'id', lc $pauseid);
+		# #LOG($outdir);
+		# mkpath $outdir;
+		# my $outfile = File::Spec->catfile($outdir, 'index.html');
+		# $tt->process('author.tt', $data, $outfile) or die $tt->error;
+	# }
+# 
+	# return;
+# }
 
-	my $tt = $self->get_tt;
+# sub get_author_page_data {
+	# my ($self, $pauseid) = @_;
+# 
+	# my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	# $db->setup;
+# 
+	# my $author = 1;
+	# #LOG("Author: $pauseid");
+	# my @packages;
+# 
+	# my $distros = $db->get_distros_of($pauseid);
+	# foreach my $d (@$distros) {
+		# if ($d->{name}) {
+			# push @packages, {
+				# name => $d->{name},
+			# };
+		# } else {
+			# WARN("distro name is missing");
+		# }
+	# }
+	# my %data = (
+		# pauseid   => $pauseid,
+		# lcpauseid => lc($pauseid),
+		# name      => $author->{name},
+		# backpan   => join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid),
+		# packages  => \@packages,
+	# );
+	# return \%data;
+# }
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
-
-	my $authors = $db->get_all_authors;
-	foreach my $author (@$authors) {
-		my $pauseid = $author->{pauseid};
-		#LOG("Author: $pauseid");
-		my $outdir = File::Spec->catdir( $self->output, 'id', lc $pauseid);
-		#LOG($outdir);
-		mkpath $outdir;
-		my $outfile = File::Spec->catfile($outdir, 'index.html');
-		my @packages;
-
-		my $distros = $db->get_distros_of($pauseid);
-		foreach my $d (@$distros) {
-			if ($d->{name}) {
-				push @packages, {
-					name => $d->{name},
-				};
-			} else {
-				WARN("distro name is missing");
-			}
-		}
-		my %data = (
-			pauseid   => $pauseid,
-			lcpauseid => lc($pauseid),
-			name      => $author->{name},
-			backpan   => join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid),
-			packages  => \@packages,
-		);
-		$tt->process('author.tt', \%data, $outfile) or die $tt->error;
-	}
-
-	return;
-}
 
 sub author_info {
 	my ($self, $author) = @_;

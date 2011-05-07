@@ -5,19 +5,21 @@
 [% INCLUDE incl/header.tt %]
 
 <div id="path">
-<a href="/id/[% pauseid %]/">[% name %]</a> <a href="http://backpan.perl.org/authors/id/[% backpan %]">Archive on Backpan</a>
+<a href="/id/[% pauseid %]">[% name %]</a><br />
+<a href="http://backpan.perl.org/authors/id/[% backpan %]">Archive on Backpan</a><br />
+<a href="http://search.cpan.org/CPAN/authors/id/[% backpan %]">[% pauseid %]</a><br />
+Homepage: <a href="[% homepage %]">[% homepage %]</a><br />
+Last upload: [% last_upload %]<br />
 </div>
 
-<!--
 <div id="email">
 Email:
 [% IF email %]
-  <a href="[% email %]">[% email %]</a>
+  <a href="mailto:[% email %]">[% email %]</a>
 [% ELSE %]
    No e-mail available.  
 [% END %]
 </div>
--->
 
 <div id="cpan_testers">
 CPAN Testers: 
@@ -26,11 +28,19 @@ CPAN Testers:
 </div>
 
 
-<div id="packages">
-Packages:
+<div id="distributions">
+Distributions:
 <ul>
-[% FOR p IN packages %]
-  <li><a href="/dist/[% p.name %]">[% p.name %]</a></li>
+[% FOR d IN distributions %]
+  <li>
+    <ul>
+      <li><a href="/dist/[% d.name %]">[% d.name %]</a></li>
+      <li>[% d.version %]</li>
+      <li>[<a href="http://search.cpan.org/CPAN/authors/id/[% backpan %]/[% d.filename %]">Download</a>]</li>
+      <li>[<a href="http://search.cpan.org/src/[% pauseid %]/[% d.distrover %]">Browse</a>]</li>
+      <li>[% d.release %]</li>
+    </ul>
+  </li>
 [% END %]
 </ul>
 </div>

@@ -65,7 +65,7 @@ sub get_distros_of {
     my ($self, $pauseid) = @_;
 
     my $sth = $self->dbh->prepare(q{
-        SELECT author, version, A.name, A.id
+        SELECT author, version, A.name, A.id, A.file_timestamp, A.path
         FROM distro A, (SELECT max(version) AS v, name
                         FROM distro GROUP BY name) AS B
         WHERE A.version=B.v and A.name=B.name AND A.author = ? ORDER BY A.name});
@@ -91,6 +91,7 @@ sub _get_distros {
 }
 
 # get all the data from the 'author' table for a single pauseid
+# returns a HASH ref.
 sub get_author {
     my ($self, $pauseid) = @_;
     my $sth = $self->dbh->prepare('SELECT * FROM author WHERE pauseid = ?');

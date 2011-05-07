@@ -47,7 +47,7 @@ $(document).ready(function() {
             var query = $('#query').val();
             //alert($('#what').val());
             var what = $('#what').val();
-            $.get('q/' + query + '/' + what, function(resp) {
+            $.get('/q/' + query + '/' + what, function(resp) {
                     $('#content').hide();
                     if (resp["error"]) {
                        alert(resp["error"]);
@@ -68,7 +68,7 @@ $(document).ready(function() {
                                 if (resp[i]["name"]) {
                                         name = resp[i]["name"];
                                 }
-                                html += '<div class="name"><a href="http://search.cpan.org/~' + resp[i]["pauseid"] + '">' + resp[i]["pauseid"] + '(' + name + ')' + '</a></div>';
+                                html += '<div class="name"><a href="/id/' + resp[i]["pauseid"] + '">' + resp[i]["pauseid"] + '(' + name + ')' + '</a></div>';
                                 if (resp[i]["homepage"]) {
                                         html += '<div class="name"><a href="' + resp[i]["homepage"] + '">' + resp[i]["homepage"]   + '</a></div>';
                                 }

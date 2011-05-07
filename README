@@ -137,7 +137,10 @@ TODO: show exact hits first
 TODO: collect data from the new author.json files
 
 TODO: Create a static page for each author with data from the database and 
-link the results to these pages.
+link the results to these pages. - For not we will go with dynamic pages as
+generating all the static pages takes 75 min on my desktop and I don't know
+how to decide which pages will need to be updated.
+TODO: "Registered modules" on the authors page
 
 TODO: setup an easy way to generate the database with new code base while the old one is still working
 and setup the web site with the first version.
@@ -150,4 +153,9 @@ and setup the web site with the first version.
 *) Generate package/version distro pages:
    Static or dynamic? 
    listing all the versions we have in the database
+
+*) Script that can process an individual distribution which is give as either a zip file
+   so we start with unzipping or an already open directory for projects and companies
+   that don't package as zip files.
+
 

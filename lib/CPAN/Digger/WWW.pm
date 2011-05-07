@@ -4,7 +4,13 @@ use Dancer ':syntax';
 our $VERSION = '0.1';
 
 use CPAN::Digger::DB;
-use Time::HiRes           qw(time);
+
+use Data::Dumper  qw(Dumper);
+use Encode        qw(decode);
+use File::Basename qw(basename);
+use List::Util    qw(max);
+use POSIX         ();
+use Time::HiRes   qw(time);
 
 # for development:
 # on the real server the index file will be static
@@ -21,36 +27,72 @@ get '/' => sub {
         keywords => 'x,y',
     };
 };
-foreach my $page (qw(news faq)) {
-    get "/$page" => sub {
-        template $page;
+
+get '/id/:pauseid' => sub {
+    my $pauseid = lc(params->{pauseid} || '');
+    
+    # TODO show error if no pauseid received
+    $pauseid =~ s/\W//g; # sanitise
+
+    debug($pauseid);
+    
+    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+
+    my $author = $db->get_author(uc $pauseid);
+    debug(Dumper $author);
+    my $distributions = $db->get_distros_of(uc $pauseid);
+    my $last_upload = max(map {$_->{file_timestamp}} @$distributions);
+
+    foreach my $d (@$distributions) {
+        $d->{release} = POSIX::strftime("%Y %b %d", gmtime delete $d->{file_timestamp});
+        $d->{distrover} = "$d->{name}-$d->{version}";
+        $d->{filename}  = basename($d->{path});
     }
+    my %data = (
+        name        => decode('utf8', $author->{name} || $author->{asciiname} || ''),
+        last_upload => POSIX::strftime("%Y %b %d", gmtime $last_upload),
+	pauseid     => uc($pauseid),
+	lcpauseid   => lc($pauseid),
+	email       => $author->{email},
+	homepage    => $author->{homepage},
+	backpan     => uc(join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid)),
+	distributions => $distributions,
+    );
+    return template 'author.tt', \%data;
 };
+
+# foreach my $page (qw(news faq)) {
+    # get "/$page" => sub {
+        # template $page;
+    # }
+# };
 
 # get qr{^/(news|faq)/?$} => sub {
     # template splat;
 # };
 
-get '/licenses' => sub {
-    my $data_file = path config->{public}, 'data', 'licenses.json';
-    my $json = eval {from_json slurp($data_file)};
-    template 'licenses', {
-        licenses => $json,
-    };
-};
+# get '/licenses' => sub {
+    # my $data_file = path config->{public}, 'data', 'licenses.json';
+    # my $json = eval {from_json slurp($data_file)};
+    # template 'licenses', {
+        # licenses => $json,
+    # };
+# };
 
 
-get '/dancer' => sub {
-    content_type 'text/plain';
-    to_dumper config;
-};
+# get '/dancer' => sub {
+    # content_type 'text/plain';
+    # to_dumper config;
+# };
 
 
-get '/license/:query' => sub {
-    my $license = params->{query}|| '';
-    $license =~ s/[^\w:.*+?-]//g; # sanitize for now
-    return _data({ 'meta.license' => $license });
-};
+# get '/license/:query' => sub {
+    # my $license = params->{query}|| '';
+    # $license =~ s/[^\w:.*+?-]//g; # sanitize for now
+    # return _data({ 'meta.license' => $license });
+# };
 
 get '/q/:query/:what' => sub {
     my $term = params->{query} || '';
@@ -77,7 +119,6 @@ get '/q/:query/:what' => sub {
     if ($what eq 'author') {
         my $data = $db->get_authors($term);
         $_->{type} = 'a' for @$data;
-        use Encode qw(decode);
         foreach my $d (@$data) {
             $d->{name} = decode('utf8', $d->{name});
         }
@@ -89,71 +130,71 @@ get '/q/:query/:what' => sub {
     return to_json { error => 'strange error' }
 };
 
-get '/module/:query' => sub {
-    my $module = params->{query} || '';
-    $module =~ s/[^\w:.*+?-]//g; # sanitize for now
-    return _data({ 'modules.name' => $module });
-};
+# get '/module/:query' => sub {
+    # my $module = params->{query} || '';
+    # $module =~ s/[^\w:.*+?-]//g; # sanitize for now
+    # return _data({ 'modules.name' => $module });
+# };
 
-get '/m/:query' => sub {
-    my $module = params->{query} || '';
-    $module =~ s/[^\w:.*+?-]//g; # sanitize for now
-    my $results = _fetch_from_db({ 'modules.name' => $module });
+# get '/m/:query' => sub {
+    # my $module = params->{query} || '';
+    # $module =~ s/[^\w:.*+?-]//g; # sanitize for now
+    # my $results = _fetch_from_db({ 'modules.name' => $module });
+# 
+    # # TODO: maybe in case of no hit, run the query with regex and find
+    # # all the modules (or packages?) that have this string in their name
+    # if (not @$results) {
+        # template 'error', {
+            # no_such_module => 1, 
+            # module => $module,
+        # };
+    # } elsif (@$results == 1) {
+        # $module =~ s{::}{/}g;
+        # return redirect "/dist/$results->[0]{name}/lib/$module.pm";
+    # } else {
+        # my $path = $module;
+        # $path =~ s{::}{/}g;
+        # my @links;
+        # foreach my $r (@$results) {
+            # push @links, {
+                # distro => $r->{name},
+                # module => $module,
+                # path   => $path,
+            # };
+        # }
+        # template => 'modules', {
+            # module => $module,
+            # links  => \@links,
+        # }
+    # }
+# 
+# 
+    # # TODO what if we received several results? 
+    # # Should we show a list of links?
+# };
 
-    # TODO: maybe in case of no hit, run the query with regex and find
-    # all the modules (or packages?) that have this string in their name
-    if (not @$results) {
-        template 'error', {
-            no_such_module => 1, 
-            module => $module,
-        };
-    } elsif (@$results == 1) {
-        $module =~ s{::}{/}g;
-        return redirect "/dist/$results->[0]{name}/lib/$module.pm";
-    } else {
-        my $path = $module;
-        $path =~ s{::}{/}g;
-        my @links;
-        foreach my $r (@$results) {
-            push @links, {
-                distro => $r->{name},
-                module => $module,
-                path   => $path,
-            };
-        }
-        template => 'modules', {
-            module => $module,
-            links  => \@links,
-        }
-    }
 
-
-    # TODO what if we received several results? 
-    # Should we show a list of links?
-};
-
-
-sub _data {
-    my ($params) = @_;
-
-    my $start_time = time;
-
-    my $results = _fetch_from_db($params);
-
-    my $end_time = time;
-
-    content_type 'text/plain';
-
-    return to_json({
-        results => $results,
-        ellapsed_time => $end_time - $start_time,
-        }, utf8 => 1, convert_blessed => 1);
-}
-
-sub _fetch_from_db {
-    my ($params) = @_;
-}
-
+# sub _data {
+    # my ($params) = @_;
+# 
+    # my $start_time = time;
+# 
+    # my $results = _fetch_from_db($params);
+# 
+    # my $end_time = time;
+# 
+    # content_type 'text/plain';
+# 
+    # return to_json({
+        # results => $results,
+        # ellapsed_time => $end_time - $start_time,
+        # }, utf8 => 1, convert_blessed => 1);
+# }
+# 
+# sub _fetch_from_db {
+    # my ($params) = @_;
+# }
+# 
 
 # this part is only needed in the stand alone environment
 # if used under Apache, then Apache should be configured

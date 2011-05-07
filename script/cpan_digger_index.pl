@@ -60,9 +60,9 @@ if ($run{whois}) {
 	$cpan->update_from_whois;
 }
 
-if ($run{authors}) {
-	$cpan->generate_author_pages;
-}
+# if ($run{authors}) {
+	# $cpan->generate_author_pages;
+# }
 
 exit;
 

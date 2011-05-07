@@ -137,7 +137,13 @@ $expected_data2->[1]{id} = $ID;
     cmp_deeply $db->get_authors('K'), [ map {$expected_authors{$_}} qw(FAKE1 KORSHAK YKO) ], 'authors with K';
     cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON) ], 'authors with N';
     
-    cmp_deeply($db->get_distros_of('FAKE1'), $expected_data2, 'get_distros_of FAKE1');
+    my $exp = dclone $expected_data;
+    foreach my $i (0..1) {
+      $exp->[$i]{id} = $ID;
+      $exp->[$i]{file_timestamp} = $TS;
+      $exp->[$i]{path} = ignore();
+    }
+    cmp_deeply($db->get_distros_of('FAKE1'), $exp, 'get_distros_of FAKE1');
 }
 #diag explain $data;
 
