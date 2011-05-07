@@ -35,6 +35,7 @@ sub insert_distro {
     }
 }
 
+# search by the name of the distribution
 sub get_distros {
     my ($self, $str) = @_;
     return $self->_get_distros($str, q{
@@ -44,8 +45,11 @@ sub get_distros {
        ORDER BY name, version
        LIMIT 100});
 }
+
+# search by the name of the distribution - latest version for each distribution
 sub get_distros_latest_version {
     my ($self, $str) = @_;
+
     return $self->_get_distros($str, q{
         SELECT author, version, A.name, A.id
         FROM distro A, (SELECT max(version) AS v, name
@@ -53,6 +57,26 @@ sub get_distros_latest_version {
                         GROUP BY name) AS B
         WHERE A.version=B.v and A.name=B.name ORDER BY A.name});
 }
+
+# list all the distributions (latest version only) of a specific author (pauseid)
+# if the latest version was uploaded by someone else, don't list it
+# returns and ARRAY ref of HASH-es
+sub get_distros_of {
+    my ($self, $pauseid) = @_;
+
+    my $sth = $self->dbh->prepare(q{
+        SELECT author, version, A.name, A.id
+        FROM distro A, (SELECT max(version) AS v, name
+                        FROM distro GROUP BY name) AS B
+        WHERE A.version=B.v and A.name=B.name AND A.author = ? ORDER BY A.name});
+    $sth->execute($pauseid);
+    my @results;
+    while (my $hr = $sth->fetchrow_hashref) {
+       push @results, $hr;
+    }
+    return \@results;
+}
+
 
 sub _get_distros {
     my ($self, $str, $sql) = @_;
@@ -75,6 +99,12 @@ sub get_author {
     $sth->finish;
 
     return $data;
+}
+
+sub get_all_authors {
+    my ($self) = @_;
+    return $self->get_authors('');
+    #return $self->_get_distros($str, q{SELECT * FROM author ORDER BY pauseid});
 }
 
 sub get_authors {

@@ -22,8 +22,10 @@ GetOptions(\%opt,
 	'prefix=s',
 	'pod',
 	'syn',
+
 	'whois',
 	'collect',
+	'authors',
 #	'dropdb',
 ) or usage();
 
@@ -47,7 +49,7 @@ usage('--prefix should similar to AUTHOR/Module-Name-1.00')
 $opt{root} = $root;
 
 my %run;
-$run{$_} = delete $opt{$_} for qw(collect whois);
+$run{$_} = delete $opt{$_} for qw(collect whois authors);
 my $cpan = CPAN::Digger::Index->new(%opt);
 
 if ($run{collect}) {
@@ -57,6 +59,11 @@ if ($run{collect}) {
 if ($run{whois}) {
 	$cpan->update_from_whois;
 }
+
+if ($run{authors}) {
+	$cpan->generate_author_pages;
+}
+
 exit;
 
 $cpan->generate_central_files;
@@ -102,9 +109,10 @@ Optional:
    --filter REGEX   only packages that match the regex will be indexed
    --pod            generate HTML pages from POD
    --syn            generate syntax highlighted source files
+
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
-
+   --authors        generate an html page for each author
 END_USAGE
 }
 

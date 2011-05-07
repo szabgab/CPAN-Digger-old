@@ -11,7 +11,7 @@ use Storable qw(dclone);
 use Test::More;
 use Test::Deep;
 
-plan tests => 12;
+plan tests => 13;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -136,6 +136,8 @@ $expected_data2->[1]{id} = $ID;
 
     cmp_deeply $db->get_authors('K'), [ map {$expected_authors{$_}} qw(FAKE1 KORSHAK YKO) ], 'authors with K';
     cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON) ], 'authors with N';
+    
+    cmp_deeply($db->get_distros_of('FAKE1'), $expected_data2, 'get_distros_of FAKE1');
 }
 #diag explain $data;
 

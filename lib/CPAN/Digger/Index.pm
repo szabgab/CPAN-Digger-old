@@ -61,7 +61,7 @@ sub index_dir {
 sub run_index {
 	my $self = shift;
 
-	$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
+	#$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
 	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
 
 	$ENV{PATH} = '/bin:/usr/bin';
@@ -73,16 +73,32 @@ sub run_index {
 		$self->process_distro($d);
 	}
 
-	my @authors = $self->authors->authors;
-	foreach my $author (@authors) {
-		my $pauseid = $author->pauseid;
+	return;
+}
+
+# get all the authors from the database
+# for each author fetch the latest version of distributions
+# 
+sub generate_author_pages {
+	my ($self) = @_;
+
+	my $tt = $self->get_tt;
+
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	$db->setup;
+
+	my $authors = $db->get_all_authors;
+	foreach my $author (@$authors) {
+		my $pauseid = $author->{pauseid};
 		#LOG("Author: $pauseid");
-		my $outdir = _untaint_path( File::Spec->catdir( $self->output, 'id', lc $pauseid) );
+		my $outdir = File::Spec->catdir( $self->output, 'id', lc $pauseid);
+		#LOG($outdir);
 		mkpath $outdir;
 		my $outfile = File::Spec->catfile($outdir, 'index.html');
 		my @packages;
-		my $distros = $self->db->distro->find({ author => lc($pauseid) });
-		while (my $d = $distros->next) {
+
+		my $distros = $db->get_distros_of($pauseid);
+		foreach my $d (@$distros) {
 			if ($d->{name}) {
 				push @packages, {
 					name => $d->{name},
@@ -94,13 +110,12 @@ sub run_index {
 		my %data = (
 			pauseid   => $pauseid,
 			lcpauseid => lc($pauseid),
-			name      => $author->name,
+			name      => $author->{name},
 			backpan   => join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid),
 			packages  => \@packages,
 		);
 		$tt->process('author.tt', \%data, $outfile) or die $tt->error;
 	}
-
 
 	return;
 }
@@ -656,7 +671,7 @@ sub collect_distributions {
 sub update_from_whois {
 	my ($self) = @_;
 
-	LOGGER('start whois');
+	LOG('start whois');
 
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
@@ -683,11 +698,6 @@ sub update_from_whois {
 		}
 	}
 	return;
-}
-
-sub LOGGER {
-	my ($msg) = @_;
-	print STDERR "$msg\n";
 }
 
 1;

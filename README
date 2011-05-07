@@ -122,7 +122,6 @@ Alternate plan:
     go over all the CPAN mirror directory get all the files 
     - using a filter for our sanity that starts with id/A/AU/AUTHOR/Distro-Name-number.tar.gz and then expands
      For each file adds it to the database  AUTHOR, distname, version, path  date when we added to the database, date of the file???
-TODO: add more test cases
 TODO: go over all the files and report what are we missing
 
 *) Add search engine that can find packages based on their name - fetch always the latest
@@ -136,6 +135,13 @@ TODO: show exact hits first
 
 *) Parse the 00whois.xml file and update the 'author' table.
 TODO: collect data from the new author.json files
+
+TODO: Create a static page for each author with data from the database and 
+link the results to these pages.
+
+TODO: setup an easy way to generate the database with new code base while the old one is still working
+and setup the web site with the first version.
+
 
 *) Extract:
     go over all the distros in the database and check if they have been extracted to the 'src' directory already
