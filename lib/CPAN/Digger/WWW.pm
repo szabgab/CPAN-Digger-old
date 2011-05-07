@@ -52,8 +52,13 @@ get '/license/:query' => sub {
     return _data({ 'meta.license' => $license });
 };
 
-get '/q/:query' => sub {
+get '/q/:query/:what' => sub {
     my $term = params->{query} || '';
+    my $what = params->{what} || '';
+    if ($what !~ /^(distribution|author)$/) {
+        return to_json { error => 'Invalid search type' };
+    }
+
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
     content_type 'text/plain';
     #my $data = { 'abc' => $term };
@@ -63,10 +68,25 @@ get '/q/:query' => sub {
 
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
-    my $data = $db->get_distros_latest_version($term);
-    return to_json($data);
 
-    return _data({ 'name' => qr/$term/i });
+    if ($what eq 'distribution') {
+        my $data = $db->get_distros_latest_version($term);
+        $_->{type} = 'd' for @$data;
+        return to_json($data);
+    }
+    if ($what eq 'author') {
+        my $data = $db->get_authors($term);
+        $_->{type} = 'a' for @$data;
+        use Encode qw(decode);
+        foreach my $d (@$data) {
+            $d->{name} = decode('utf8', $d->{name});
+        }
+        #use Data::Dumper;
+        #print STDERR Dumper $data;
+        return to_json($data, {utf8 => 0});
+    }
+    
+    return to_json { error => 'strange error' }
 };
 
 get '/module/:query' => sub {

@@ -135,6 +135,7 @@ TODO: show exact hits first
     maybe remove them from the database as well.
 
 *) Parse the 00whois.xml file and update the 'author' table.
+TODO: collect data from the new author.json files
 
 *) Extract:
     go over all the distros in the database and check if they have been extracted to the 'src' directory already

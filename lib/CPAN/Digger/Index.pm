@@ -656,6 +656,8 @@ sub collect_distributions {
 sub update_from_whois {
 	my ($self) = @_;
 
+	LOGGER('start whois');
+
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
 
@@ -683,5 +685,9 @@ sub update_from_whois {
 	return;
 }
 
+sub LOGGER {
+	my ($msg) = @_;
+	print STDERR "$msg\n";
+}
 
 1;
