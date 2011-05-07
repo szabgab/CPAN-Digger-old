@@ -64,8 +64,8 @@ my %expected_authors = (
    asciiname => 'Edward Chernenko',
    homepage  => 'http://absurdopedia.net/wiki/User:Edward_Chernenko'
  },
- 'SZABGAB' => {
-   pauseid   => 'SZABGAB',
+ 'FAKE1' => {
+   pauseid   => 'FAKE1',
    name      => 'גאבור סבו - Gábor Szabó',
    email     => 'gabor@pti.co.il',
    asciiname => 'Gabor Szabo',
@@ -105,7 +105,7 @@ my %expected_authors = (
   my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
   #diag explain $authors;
   cmp_deeply $authors, {
-    map {$_ => $expected_authors{$_}} qw(AFOXSON KORSHAK SPECTRUM SZABGAB YKO)
+    map {$_ => $expected_authors{$_}} qw(AFOXSON KORSHAK SPECTRUM FAKE1 YKO)
     } , 'authors';
 }
 
@@ -134,7 +134,7 @@ $expected_data2->[1]{id} = $ID;
     cmp_deeply($data, $expected_data, 'get_distros');
     cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
 
-    cmp_deeply $db->get_authors('K'), [ map {$expected_authors{$_}} qw(KORSHAK YKO) ], 'authors with K';
+    cmp_deeply $db->get_authors('K'), [ map {$expected_authors{$_}} qw(FAKE1 KORSHAK YKO) ], 'authors with K';
     cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON) ], 'authors with N';
 }
 #diag explain $data;
