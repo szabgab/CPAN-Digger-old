@@ -63,11 +63,11 @@ get '/id/:pauseid' => sub {
     return template 'author.tt', \%data;
 };
 
-# foreach my $page (qw(news faq)) {
-    # get "/$page" => sub {
-        # template $page;
-    # }
-# };
+foreach my $page (qw(news faq)) {
+    get "/$page" => sub {
+        template $page;
+    }
+};
 
 # get qr{^/(news|faq)/?$} => sub {
     # template splat;

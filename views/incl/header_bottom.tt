@@ -13,9 +13,9 @@
 <div id="menu">
 <ul>
   <li><a href="/">CPAN::Digger</a></li>
+  <li><a href="/news">News</a></li>
+  <li><a href="/faq">FAQ</a></li>
 <!--
-  <li><a href="/news.html">News</a></li>
-  <li><a href="/faq.html">FAQ</a></li>
   <li><a href="/licenses.html">Licenses</a></li>
 -->
 </ul>
