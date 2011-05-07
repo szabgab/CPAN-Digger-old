@@ -77,6 +77,11 @@ sub get_author {
     return $data;
 }
 
+sub get_authors {
+    my ($self, $str) = @_;
+    return $self->_get_distros($str, q{SELECT * FROM author where pauseid LIKE ? ORDER BY pauseid});
+}
+
 sub add_author {
     my ($self, $data, $pauseid) = @_;
     

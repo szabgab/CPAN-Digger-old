@@ -11,7 +11,7 @@ use Storable qw(dclone);
 use Test::More;
 use Test::Deep;
 
-plan tests => 9;
+plan tests => 12;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -42,43 +42,51 @@ collect();
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
 my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY name');
 
-my $expected_authors = [
-  [
-    'AFOXSON',
-   '',
-   undef,
-   undef,
-   undef
- ],
- [
-   'KORSHAK',
-   'Ярослав Коршак',
-   'CENSORED',
-   undef,
-   undef
- ],
- [
-   'SPECTRUM',
-   'Черненко Эдуард Павлович',
-   'edwardspec@gmail.com',
-   'Edward Chernenko',
-   'http://absurdopedia.net/wiki/User:Edward_Chernenko'
- ],
- [
-   'SZABGAB',
-   'גאבור סבו - Gábor Szabó',
-   'gabor@pti.co.il',
-   'Gabor Szabo',
-   'http://szabgab.com/'
- ],
- [
-   'YKO',
-   'Ярослав Коршак',
-   'ykorshak@gmail.com',
-   'Yaroslav Korshak',
-   'http://korshak.name/'
- ]
-];
+my %expected_authors = (
+  'AFOXSON' => {
+   pauseid   => 'AFOXSON',
+   name      => '',
+   asciiname => undef,
+   email     => undef,
+   homepage  => undef
+ },
+ 'KORSHAK' => {
+   pauseid   => 'KORSHAK',
+   name      => 'Ярослав Коршак',
+   email     => 'CENSORED',
+   asciiname => undef,
+   homepage  => undef
+ },
+ 'SPECTRUM' => {
+   pauseid   => 'SPECTRUM',
+   name      => 'Черненко Эдуард Павлович',
+   email     => 'edwardspec@gmail.com',
+   asciiname => 'Edward Chernenko',
+   homepage  => 'http://absurdopedia.net/wiki/User:Edward_Chernenko'
+ },
+ 'SZABGAB' => {
+   pauseid   => 'SZABGAB',
+   name      => 'גאבור סבו - Gábor Szabó',
+   email     => 'gabor@pti.co.il',
+   asciiname => 'Gabor Szabo',
+   homepage  => 'http://szabgab.com/'
+ },
+ 'YKO' => {
+   pauseid   => 'YKO',
+   name      => 'Ярослав Коршак',
+   email     => 'ykorshak@gmail.com',
+   asciiname => 'Yaroslav Korshak',
+   homepage  => 'http://korshak.name/'
+ },
+ 'NUFFIN' => {
+   pauseid   => 'NUFFIN',
+   name      => 'יובל קוג\'מן (Yuval Kogman)',
+   email     => 'nothingmuch@woobling.org',
+   asciiname => 'Yuval Kogman',
+   homepage  => 'http://nothingmuch.woobling.org/'
+  },
+);
+
 
 {
   $sth->execute;
@@ -94,12 +102,12 @@ my $expected_authors = [
     [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
   ], 'data is ok') or diag explain \@data;
 
-  my $authors = $dbh->selectall_arrayref("SELECT * FROM author ORDER BY pauseid");
+  my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
   #diag explain $authors;
-  cmp_deeply $authors, $expected_authors, 'authors';
+  cmp_deeply $authors, {
+    map {$_ => $expected_authors{$_}} qw(AFOXSON KORSHAK SPECTRUM SZABGAB YKO)
+    } , 'authors';
 }
-
-
 
 my $expected_data = 
          [
@@ -125,6 +133,9 @@ $expected_data2->[1]{id} = $ID;
     my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data, $expected_data, 'get_distros');
     cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
+
+    cmp_deeply $db->get_authors('K'), [ map {$expected_authors{$_}} qw(KORSHAK YKO) ], 'authors with K';
+    cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON) ], 'authors with N';
 }
 #diag explain $data;
 
@@ -179,6 +190,10 @@ $exp_data2->[0]{id} = $ID;
 $exp_data2->[1]{id} = $ID;
 $exp_data2->[2]{id} = $ID;
 
+my %expected_authors2 = (
+  'NUFFIN' => $expected_authors{'NUFFIN'},
+);
+
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
@@ -188,17 +203,12 @@ $exp_data2->[2]{id} = $ID;
     my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data2, $exp_data2, 'get_distros_latest_version');
 
-splice @$expected_authors, 2, 0, [
-    'NUFFIN',
-    'יובל קוג\'מן (Yuval Kogman)',
-    'nothingmuch@woobling.org',
-    'Yuval Kogman',
-    'http://nothingmuch.woobling.org/'
-  ];
 
-    my $authors = $dbh->selectall_arrayref("SELECT * FROM author ORDER BY pauseid");
+    my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
     #diag explain $authors;
-    cmp_deeply $authors, $expected_authors, 'authors';
+    cmp_deeply $authors, \%expected_authors, 'authors';
+
+    cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON NUFFIN) ], 'authors with N';
 }
 
 
