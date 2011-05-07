@@ -46,13 +46,13 @@ get '/id/:pauseid' => sub {
     my $last_upload = max(map {$_->{file_timestamp}} @$distributions);
 
     foreach my $d (@$distributions) {
-        $d->{release} = POSIX::strftime("%Y %b %d", gmtime delete $d->{file_timestamp});
+        $d->{release} = _date(delete $d->{file_timestamp});
         $d->{distrover} = "$d->{name}-$d->{version}";
         $d->{filename}  = basename($d->{path});
     }
     my %data = (
         name        => decode('utf8', $author->{name} || $author->{asciiname} || ''),
-        last_upload => POSIX::strftime("%Y %b %d", gmtime $last_upload),
+        last_upload => _date($last_upload),
 	pauseid     => uc($pauseid),
 	lcpauseid   => lc($pauseid),
 	email       => $author->{email},
@@ -63,11 +63,48 @@ get '/id/:pauseid' => sub {
     return template 'author.tt', \%data;
 };
 
+get '/dist/:name' => sub {
+    my $name = params->{name} || '';
+    
+    # TODO show error if no name received
+    $name =~ s/[^\w-]//g; # sanitise
+
+    debug($name);
+    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+
+    my $d = $db->get_distro_latest($name);
+    debug(Dumper $d);
+
+    my $author = $db->get_author(uc $d->{author});
+
+debug($d->{file_timestamp});
+debug(_date($d->{file_timestamp}));
+
+    my %data = (
+        name      => $name,
+        version   => $d->{version},
+        pauseid   => $d->{author},
+        released  => _date($d->{file_timestamp}),
+        distvname => "$name-$d->{version}",
+        author    => {
+            name => decode('utf8', $author->{name}),
+        },
+        meta_data => {
+            abstract => '',
+        },
+    );
+    debug(Dumper \%data);
+    return template 'dist.tt', \%data;
+};
+
 foreach my $page (qw(news faq)) {
     get "/$page" => sub {
         template $page;
     }
 };
+
 
 # get qr{^/(news|faq)/?$} => sub {
     # template splat;
@@ -129,6 +166,7 @@ get '/q/:query/:what' => sub {
     
     return to_json { error => 'strange error' }
 };
+
 
 # get '/module/:query' => sub {
     # my $module = params->{query} || '';
@@ -199,7 +237,7 @@ get '/q/:query/:what' => sub {
 # this part is only needed in the stand alone environment
 # if used under Apache, then Apache should be configured
 # to handle these static files
-get qr{/(syn|src|dist|data)(/.*)?} => sub {
+get qr{/(syn|src|data)(/.*)?} => sub {
     # TODO this gives a warning in Dancer::Router if we ask for dist only as the
     # capture in the () is an undef
     #my ($path) = splat; 
@@ -250,6 +288,10 @@ get qr{/(syn|src|dist|data)(/.*)?} => sub {
     }
     return "Cannot handle $path  $full_path";
 };
+
+sub _date {
+    return POSIX::strftime("%Y %b %d", gmtime shift);
+}
 
 sub slurp {
     my $file = shift;

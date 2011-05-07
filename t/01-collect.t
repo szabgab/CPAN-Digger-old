@@ -11,7 +11,7 @@ use Storable qw(dclone);
 use Test::More;
 use Test::Deep;
 
-plan tests => 13;
+plan tests => 14;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -144,6 +144,17 @@ $expected_data2->[1]{id} = $ID;
       $exp->[$i]{path} = ignore();
     }
     cmp_deeply($db->get_distros_of('FAKE1'), $exp, 'get_distros_of FAKE1');
+    
+    cmp_deeply($db->get_distro_latest('Package-Name'), {
+      'added_timestamp' => $TS,
+      'author'          => 'FAKE1',
+      'file_timestamp'  => $TS,
+      'id'              => $ID,
+      'name' => 'Package-Name',
+      'path' => 'F/FA/FAKE1/Package-Name-0.02.tar.gz',
+      'version' => '0.02',
+    }, 'get_distro_latest');
+
 }
 #diag explain $data;
 

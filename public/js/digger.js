@@ -58,8 +58,8 @@ $(document).ready(function() {
                        for (var i=0; i<resp.length; i++) {
                            // distribution
                            if (resp[i]["type"] == 'd') {
-                                html += '<div class="author"><a href="http://search.cpan.org/~' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a></div>';
-                                html += '<div class="name"><a href="http://search.cpan.org/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a></div>';
+                                html += '<div class="author"><a href="/id/' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a></div>';
+                                html += '<div class="name"><a href="/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a></div>';
                                 html += '<div class="version">' + resp[i]["version"] + '</div>';
                            }
                            // author

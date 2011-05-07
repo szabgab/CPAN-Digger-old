@@ -142,45 +142,38 @@ sub author_info {
 	}
 }
 
+# process a single distribution given the (relative) path to it
 sub process_distro {
-	my ($self, $d, $source_dir) = @_;
+	my ($self, $path, $source_dir) = @_;
 
-	$self->counter_distro($self->counter_distro +1);
-	if (not $d->dist) {
-		WARN("No dist provided. Skipping " . $d->prefix);
-		return;
-	}
+	#$self->counter_distro($self->counter_distro +1);
+	#if (not $d->dist) {
+	#	WARN("No dist provided. Skipping " . $d->prefix);
+	#	return;
+	#}
 
-	if (my $filter = $self->filter) {
-		return if $d->dist !~ /$filter/;
-	}
+	#if (my $filter = $self->filter) {
+	#	return if $d->dist !~ /$filter/;
+	#}
 
-	LOG("Working on " . $d->prefix);
-	my $path     = dirname $d->prefix;
+	#LOG("Working on " . $d->prefix);
+	my $d;
+	#my $path     = dirname $d->prefix;
 	my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
 	my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
 	my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
 	my $syn_dir  = File::Spec->catdir( $self->output, 'syn', $d->dist);
-
-	foreach my $p ($src, $src_dir, $dist_dir, $syn_dir) {
-		$p = eval {_untaint_path($p)};
-		if ($@) {
-			chomp $@;
-			WARN($@);
-			return;
-		}
-	}
 
 	my %data = (
 		name   => $d->dist,
 		author => lc $d->cpanid,
 	);
 
-	if (not $d->distvname) {
-		WARN("distvname is empty, skipping database update");
+#	if (not $d->distvname) {
+#		WARN("distvname is empty, skipping database update");
 		#$counter{distvname_empty}++;
-		return;
-	}
+#		return;
+#	}
 
 	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
 	chdir $src_dir;

@@ -77,6 +77,17 @@ sub get_distros_of {
     return \@results;
 }
 
+sub get_distro_latest {
+    my ($self, $name) = @_;
+
+    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE name = ? ORDER BY file_timestamp LIMIT 1');
+    $sth->execute($name);
+    my $r = $sth->fetchrow_hashref;
+    $sth->finish;
+
+    return $r;
+}
+
 
 sub _get_distros {
     my ($self, $str, $sql) = @_;
@@ -94,6 +105,7 @@ sub _get_distros {
 # returns a HASH ref.
 sub get_author {
     my ($self, $pauseid) = @_;
+
     my $sth = $self->dbh->prepare('SELECT * FROM author WHERE pauseid = ?');
     $sth->execute($pauseid);
     my $data = $sth->fetchrow_hashref('NAME_lc');

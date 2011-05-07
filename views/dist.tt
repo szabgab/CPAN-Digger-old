@@ -1,15 +1,19 @@
 [%
-   title=  meta.name
-   description=meta.abstract
+   title=  name
+   description=meta_data.abstract
 %]
 [% INCLUDE incl/header.tt %]
 
 <div id="path">
-<a href="/id/[% author %]/">[% author_name %]</a> - [% name %] <a href="/src/[% author %]/[% distvname %]/">Source</a>
+<a href="/id/[% pauseid %]">[% author.name %]</a> - [% name %] <a href="/src/[% pauseid %]/[% distvname %]/">Source</a>
+</div>
+
+<div id="release_date">
+Date: [% released %]
 </div>
 
 <div id="permalink">
-<a href="/dist/[% name %]/">permalink</a>
+<a href="/dist/[% name %]">permalink</a>
 </div>
 
 <div id="download">
@@ -17,16 +21,16 @@
 </div>
 
 <div id="version">
-Version: [% meta.version %]
+Version: [% version %]
 </div>
 
 <div id="abstract">
-Abstract: [% meta.abstract %]
+Abstract: [% meta_data.abstract %]
 </div>
 
 <div id="links">
 Links: 
-[ <a href="http://cpanforum.com/dist/[% name %]/">discussion</a> ]
+[ <a href="http://cpanforum.com/dist/[% name %]">discussion</a> ]
 [ <a href="https://rt.cpan.org/Public/Dist/Display.html?Name=[% name %]">View/Report bugs</a> ]
 [ <a href="http://deps.cpantesters.org/?module=[% name %];perl=latest">dependencies</a> ]
 </div>
@@ -37,8 +41,8 @@ Other tools (grep, diff)
 
 <div id="repository">
 Repository: 
-[% IF meta.resources.repository %]
-  <a href="[% meta.resources.repository.link %]">[% meta.resources.repository.display %]</a>
+[% IF meta_data.resources.repository %]
+  <a href="[% meta_data.resources.repository.link %]">[% meta_data.resources.repository.display %]</a>
 [% ELSE %]
   Not in META.yml
 [% END %]
@@ -46,8 +50,8 @@ Repository:
 
 <div id="home_page">
 Home page: 
-[% IF meta.resources.homepage %]
-  <a href="[% meta.resources.homepage %]">[% meta.resources.homepage %]</a>
+[% IF meta_data.resources.homepage %]
+  <a href="[% meta_data.resources.homepage %]">[% meta_data.resources.homepage %]</a>
 [% ELSE %]
   Not in META.yml
 [% END %]
@@ -56,7 +60,7 @@ Home page:
 <div id="cpan_testers">
 CPAN Testers:
 [ <a href="http://www.cpantesters.org/show/[% name %].html#[% distvname %]">View reports</a> ]
-[ <a href="http://matrix.cpantesters.org/?dist=[% name %]+[% meta.version %]">Perl/Platform Version Matrix</a> ]
+[ <a href="http://matrix.cpantesters.org/?dist=[% name %]+[% version %]">Perl/Platform Version Matrix</a> ]
 </div>
 
 <div id="cpan_rating">
@@ -73,16 +77,16 @@ Rating:
 
 <div id="license">
 License: 
-[% IF meta.license %]
-  [% IF meta.license == 'perl' %]
+[% IF meta_data.license %]
+  [% IF meta_data.license == 'perl' %]
      <a href="http://dev.perl.org/licenses/">Perl</a>
      (<a href="http://dev.perl.org/licenses/artistic.html">Artistic</a> and <a href="http://www.gnu.org/licenses/gpl-1.0.txt">GPL</a>)
   [% ELSE %]
-     [% meta.license %]
+     [% meta_data.license %]
   [% END %]
 [% ELSE %]
   [% IF has_meta %]
-    <a href="/faq.html#meta_license">Not found</a> in <a href="/src/[% author %]/[% distvname %]/META.ym">META.yml</a>
+    <a href="/faq.html#meta_license">Not found</a> in <a href="/src/[% pauseid %]/[% distvname %]/META.ym">META.yml</a>
   [% ELSE %]
     <a href="/faq.html#meta_yaml">No META.yml</a>
   [% END %]
@@ -92,7 +96,7 @@ License:
 <div id="examples">
 Examples: 
 [% IF examples %]
-<a href="/src/[% author %]/[% distvname %]/[% examples %]">[% examples %]</a>
+<a href="/src/[% pauseid %]/[% distvname %]/[% examples %]">[% examples %]</a>
 [% ELSE %]
 <a href="/faq.html#examples">Not found</a>.
 [% END %]
@@ -101,15 +105,15 @@ Examples:
 <div id="tests">
 Tests:
 [% IF t %]
-  in the <a href="/src/[% author %]/[% distvname %]/t/">t/</a> directory
+  in the <a href="/src/[% pauseid %]/[% distvname %]/t/">t/</a> directory
 [% ELSIF test_file %]
-  in the <a href="/src/[% author %]/[% distvname %]/test.pl">test.pl</a> file
+  in the <a href="/src/[% pauseid %]/[% distvname %]/test.pl">test.pl</a> file
 [% END %]
 </div>
 
 <div id="xt_tests">
 [% IF xt %]
-Author tests are in the <a href="/src/[% author %]/[% distvname %]/xt/">xt</a> directory.
+Author tests are in the <a href="/src/[% pauseid %]/[% distvname %]/xt/">xt</a> directory.
 [% END %]
 </div>
 
@@ -117,16 +121,16 @@ Author tests are in the <a href="/src/[% author %]/[% distvname %]/xt/">xt</a> d
 Special files:
 <ul>
 [% FOREACH file IN special_files %]
-  <li><a href="/src/[% author %]/[% distvname %]/[% file %]">[% file %]</a></li>
+  <li><a href="/src/[% pauseid %]/[% distvname %]/[% file %]">[% file %]</a></li>
 [% END %]
 </ul>
 </div>
 
 <div id="dependencies">
 Depends on (requires):
-[% IF meta.requires %]
+[% IF meta_data.requires %]
   <ul>
-  [% FOR e IN meta.requires %]
+  [% FOR e IN meta_data.requires %]
     <li><a href="/m/[% e.key %]">[% e.key %]</a> [% e.value %]</li>
   [% END %]
   </ul>
