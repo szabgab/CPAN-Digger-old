@@ -1,10 +1,11 @@
 <div id="search">
-<form action="/q">
+<form>
 <select id="what">
 <option value="distribution">Distribution</option>
 <option value="author">Author</option>
 </select>
-<input id="query" name="q" value=[% q %]> <input id="dig" type="button" value="Dig">
+<input id="query" name="q" value=[% q %]>
+<input id="dig" type="button" value="Dig">
 </form>
 </div>
 <div id="result">
