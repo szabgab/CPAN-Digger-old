@@ -17,7 +17,7 @@ Date: [% released %]
 </div>
 
 <div id="download">
-<a href="http://www.cpan.org/CPAN/authors/id/[% prefix %]">download</a>
+<a href="http://www.cpan.org/CPAN/authors/id/[% path %]">download</a>
 </div>
 
 <div id="version">

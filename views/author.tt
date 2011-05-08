@@ -29,13 +29,14 @@ CPAN Testers:
 
 
 <div id="distributions">
+Releases
 <table>
   <tr>
       <td>Distribution</td>
       <td></td>
       <td></td>
       <td></td>
-      <td></td>
+      <td>Released</td>
   </tr>
 [% FOR d IN distributions %]
   <tr>

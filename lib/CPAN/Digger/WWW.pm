@@ -108,6 +108,7 @@ debug(_date($d->{file_timestamp}));
         pauseid   => $d->{author},
         released  => _date($d->{file_timestamp}),
         distvname => "$name-$d->{version}",
+        path      => $d->{path},
         author    => {
             name => decode('utf8', $author->{name}),
         },
