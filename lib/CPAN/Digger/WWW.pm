@@ -28,6 +28,10 @@ get '/' => sub {
     };
 };
 
+get '/id/:pauseid/' => sub {
+    redirect '/id/' . params->{pauseid};
+};
+
 get '/id/:pauseid' => sub {
     my $pauseid = lc(params->{pauseid} || '');
     
@@ -61,6 +65,10 @@ get '/id/:pauseid' => sub {
 	distributions => $distributions,
     );
     return template 'author.tt', \%data;
+};
+
+get '/dist/:name/' => sub {
+    redirect '/dist/' . params->{name};
 };
 
 get '/dist/:name' => sub {
@@ -102,13 +110,11 @@ debug(_date($d->{file_timestamp}));
 foreach my $page (qw(news faq)) {
     get "/$page" => sub {
         template $page;
-    }
+    };
+    get "/$page/" => sub {
+        redirect "/$page";
+    };
 };
-
-
-# get qr{^/(news|faq)/?$} => sub {
-    # template splat;
-# };
 
 # get '/licenses' => sub {
     # my $data_file = path config->{public}, 'data', 'licenses.json';
@@ -116,12 +122,6 @@ foreach my $page (qw(news faq)) {
     # template 'licenses', {
         # licenses => $json,
     # };
-# };
-
-
-# get '/dancer' => sub {
-    # content_type 'text/plain';
-    # to_dumper config;
 # };
 
 
