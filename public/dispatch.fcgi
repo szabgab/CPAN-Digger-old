@@ -2,9 +2,13 @@
 
 BEGIN {
 $ENV{CPAN_DIGGER_DBFILE} = '/home/gabor/work/digger/digger.db';
-#warn "P: $ENV{PERL5LIB}";
+# in the production environment
     use lib '/home/gabor/perl5/local/lib/perl5';
     use lib '/home/gabor/perl5/local/lib/perl5/x86_64-linux-gnu-thread-multi';
+
+# in the development environment
+    use lib '/home/gabor/perl5/lib/perl5';
+    use lib '/home/gabor/perl5/lib/perl5/x86_64-linux-gnu-thread-multi';
 }
 
 use Dancer ':syntax';
