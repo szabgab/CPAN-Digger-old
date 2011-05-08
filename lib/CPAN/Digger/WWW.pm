@@ -28,6 +28,10 @@ get '/' => sub {
     };
 };
 
+# search.cpan.org keeps the users in ~pauseid 
+# This is a UNIXism so we have them under /id/pauseid
+# but we want to make it comfortable to those who used to the way
+# search.cpan.org does this
 get '/~*' => sub {
     my ($path) = splat;
     redirect '/id/' . $path;
