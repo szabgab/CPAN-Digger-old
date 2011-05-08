@@ -28,7 +28,7 @@ INSERT INTO word_types VALUES(2, 'abstract');
 INSERT INTO word_types VALUES(3, 'meta_keyword');
 
 
-CREATE TABEL words (
+CREATE TABLE words (
     word    VARCHAR(30) NOT NULL,
     type    INTEGER NOT NULL,
     distro  INTEGER NOT NULL,
