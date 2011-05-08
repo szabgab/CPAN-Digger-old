@@ -45,6 +45,14 @@ $(document).ready(function() {
 
      $('#dig').click(function() {
             send_query();
+            return false;
+     });
+
+     $('#query').bind('keypress', function(e) {
+        if(e.keyCode==13){
+           send_query();
+           return false;
+        }
      });
 });
 
@@ -52,6 +60,7 @@ function send_query() {
             var query = $('#query').val();
             //alert($('#what').val());
             var what = $('#what').val();
+            $('#result').html('Searching ...');
             $.get('/q/' + query + '/' + what, function(resp) {
                     $('#content').hide();
                     if (resp["error"]) {
