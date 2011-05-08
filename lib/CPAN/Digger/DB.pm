@@ -81,7 +81,7 @@ sub get_distros_of {
 sub get_distro_latest {
     my ($self, $name) = @_;
 
-    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE name = ? ORDER BY file_timestamp LIMIT 1');
+    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE name = ? ORDER BY file_timestamp DESC LIMIT 1');
     $sth->execute($name);
     my $r = $sth->fetchrow_hashref;
     $sth->finish;
