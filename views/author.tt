@@ -29,20 +29,24 @@ CPAN Testers:
 
 
 <div id="distributions">
-Distributions:
-<ul>
+<table>
+  <tr>
+      <td>Distribution</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+  </tr>
 [% FOR d IN distributions %]
-  <li>
-    <ul>
-      <li><a href="/dist/[% d.name %]">[% d.name %]</a></li>
-      <li>[% d.version %]</li>
-      <li>[<a href="http://search.cpan.org/CPAN/authors/id/[% backpan %]/[% d.filename %]">Download</a>]</li>
-      <li>[<a href="http://search.cpan.org/src/[% pauseid %]/[% d.distrover %]">Browse</a>]</li>
-      <li>[% d.release %]</li>
-    </ul>
-  </li>
+  <tr>
+      <td><a href="/dist/[% d.name %]">[% d.name %]</a></td>
+      <td>[% d.version %]</td>
+      <td>[<a href="http://search.cpan.org/CPAN/authors/id/[% backpan %]/[% d.filename %]">Download</a>]</td>
+      <td>[<a href="http://search.cpan.org/src/[% pauseid %]/[% d.distrover %]">Browse</a>]</td>
+      <td>[% d.release %]</td>
+  </tr>
 [% END %]
-</ul>
+</table>
 </div>
 
 

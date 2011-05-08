@@ -30,6 +30,14 @@ body {
 /*  background-color: red; */
 }
 
+
+#menu ul li {
+   display: inline;
+   font-size: 18px;
+   margin-left: 10px;
+}
+
+
 /* syntax highlighting */
 .code a {
   text-decoration: none;

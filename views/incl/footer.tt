@@ -1,4 +1,11 @@
 </div> <!-- content -->
 </div> <!-- body -->
+
+<div id="ellapsed_time">
+[% IF ellapsed_time %]
+Ellapsed time [% ellapsed_time %]
+[% END %]
+</div>
+
 </body>
 </html>

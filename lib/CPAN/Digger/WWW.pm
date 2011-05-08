@@ -34,6 +34,7 @@ get '/id/:pauseid/' => sub {
 
 get '/id/:pauseid' => sub {
     my $pauseid = lc(params->{pauseid} || '');
+    my $t0 = time;
     
     # TODO show error if no pauseid received
     $pauseid =~ s/\W//g; # sanitise
@@ -63,6 +64,7 @@ get '/id/:pauseid' => sub {
 	homepage    => $author->{homepage},
 	backpan     => uc(join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid)),
 	distributions => $distributions,
+        ellapsed_time => time - $t0,
     );
     return template 'author.tt', \%data;
 };
@@ -73,6 +75,7 @@ get '/dist/:name/' => sub {
 
 get '/dist/:name' => sub {
     my $name = params->{name} || '';
+    my $t0 = time;
     
     # TODO show error if no name received
     $name =~ s/[^\w-]//g; # sanitise
@@ -102,6 +105,7 @@ debug(_date($d->{file_timestamp}));
         meta_data => {
             abstract => '',
         },
+        ellapsed_time => time-$t0,
     );
     debug(Dumper \%data);
     return template 'dist.tt', \%data;
@@ -134,6 +138,7 @@ foreach my $page (qw(news faq)) {
 get '/q/:query/:what' => sub {
     my $term = params->{query} || '';
     my $what = params->{what} || '';
+    my $t0 = time;
     if ($what !~ /^(distribution|author)$/) {
         return to_json { error => 'Invalid search type' };
     }
@@ -148,23 +153,19 @@ get '/q/:query/:what' => sub {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
 
+    my $data;
     if ($what eq 'distribution') {
-        my $data = $db->get_distros_latest_version($term);
+        $data = $db->get_distros_latest_version($term);
         $_->{type} = 'd' for @$data;
-        return to_json($data);
     }
     if ($what eq 'author') {
-        my $data = $db->get_authors($term);
+        $data = $db->get_authors($term);
         $_->{type} = 'a' for @$data;
         foreach my $d (@$data) {
             $d->{name} = decode('utf8', $d->{name});
         }
-        #use Data::Dumper;
-        #print STDERR Dumper $data;
-        return to_json($data, {utf8 => 0});
     }
-    
-    return to_json { error => 'strange error' }
+    return to_json({data => $data, ellapsed_time => time-$t0}, {utf8 => 0});
 };
 
 

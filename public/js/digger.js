@@ -69,22 +69,23 @@ function send_query() {
 //alert(resp);
 //                     $('#result').html('ok');
                        var html = '';
-                       for (var i=0; i<resp.length; i++) {
+                       var data = resp["data"];
+                       for (var i=0; i<data.length; i++) {
                            // distribution
-                           if (resp[i]["type"] == 'd') {
-                                html += '<div class="author"><a href="/id/' + resp[i]["author"]   + '">' + resp[i]["author"] + '</a></div>';
-                                html += '<div class="name"><a href="/dist/' + resp[i]["name"] + '">' + resp[i]["name"]   + '</a></div>';
-                                html += '<div class="version">' + resp[i]["version"] + '</div>';
+                           if (data[i]["type"] == 'd') {
+                                html += '<div class="author"><a href="/id/' + data[i]["author"]   + '">' + data[i]["author"] + '</a></div>';
+                                html += '<div class="name"><a href="/dist/' + data[i]["name"] + '">' + data[i]["name"]   + '</a></div>';
+                                html += '<div class="version">' + data[i]["version"] + '</div>';
                            }
                            // author
-                           if (resp[i]["type"] == 'a') {
-                                var name = resp[i]["asciiname"];
-                                if (resp[i]["name"]) {
-                                        name = resp[i]["name"];
+                           if (data[i]["type"] == 'a') {
+                                var name = data[i]["asciiname"];
+                                if (data[i]["name"]) {
+                                        name = data[i]["name"];
                                 }
-                                html += '<div class="name"><a href="/id/' + resp[i]["pauseid"] + '">' + resp[i]["pauseid"] + '(' + name + ')' + '</a></div>';
-                                if (resp[i]["homepage"]) {
-                                        html += '<div class="name"><a href="' + resp[i]["homepage"] + '">' + resp[i]["homepage"]   + '</a></div>';
+                                html += '<div class="name"><a href="/id/' + data[i]["pauseid"] + '">' + data[i]["pauseid"] + '(' + name + ')' + '</a></div>';
+                                if (data[i]["homepage"]) {
+                                        html += '<div class="name"><a href="' + data[i]["homepage"] + '">' + data[i]["homepage"]   + '</a></div>';
                                 }
                            }
                           
@@ -93,7 +94,7 @@ function send_query() {
                        $('#result').html(html);
                     }
                     if (resp["ellapsed_time"]) {
-                        $('#ellapsed_time').html(resp.ellapsed_time);
+                        $('#ellapsed_time').html("Ellapsed time: " + resp.ellapsed_time);
                     }
             }, 'json');
             return false;
