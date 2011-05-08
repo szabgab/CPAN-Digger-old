@@ -10,8 +10,9 @@ use Storable qw(dclone);
 
 use Test::More;
 use Test::Deep;
+use Test::NoWarnings;
 
-plan tests => 14;
+plan tests => 14 + 8 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -230,6 +231,34 @@ my %expected_authors2 = (
     cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON NUFFIN) ], 'authors with N';
 }
 
+#################################################### Testing Dancer
+
+use CPAN::Digger::WWW;
+use Dancer::Test;
+
+response_content_like [GET => '/'], qr{CPAN Digger - digging CPAN packages and Perl code}, "GET /";
+response_content_like [GET => '/news'], qr{Development started}, "GET /news";
+response_content_like [GET => '/faq'], qr{Frequently asked questions}, "GET /faq";
+# TODO: check if the form is there?
+
+# TODO check how we respond to a bad request that we don't send details of the system?!
+{
+    my $r = dancer_response(GET => '/xyz');
+    is $r->{status}, 404, '404 as expected';
+}
+
+{
+    $ENV{CPAN_DIGGER_DBFILE} = $dbfile; 
+    my $r = dancer_response(GET => '/dist/Package-Name');
+    is $r->{status}, 200, 'OK';
+    like $r->{content}, qr{Package-Name};
+    like $r->{content}, qr{FAKE1};
+
+    #my $r = dancer_response(GET => '/id/FAKE1');
+    $r = dancer_response(GET => '/q/FA/author');
+    is $r->{status}, 200, 'OK';
+    #diag $r->{content};
+}
 
 #################################################### end
 

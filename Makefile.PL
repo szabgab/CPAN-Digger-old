@@ -55,7 +55,7 @@ requires 'YAML::Any';
 requires 'Plack::Runner';
 
 requires 'YAML';
-requires 'Dancer'     => '1.1901';
+requires 'Dancer'     => '1.3040';
 
 test_requires 'Test::More'         => '0.88';
 test_requires 'Test::NoWarnings'   => '0.084';
