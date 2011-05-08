@@ -2,17 +2,19 @@ use strict;
 use warnings;
 
 use autodie;
+use Encode         ();
 use File::Basename qw(dirname);
 use File::Copy qw(copy);
 use File::Path qw(mkpath);
 use File::Temp qw(tempdir);
+use JSON qw(from_json);
 use Storable qw(dclone);
 
 use Test::More;
 use Test::Deep;
 use Test::NoWarnings;
 
-plan tests => 14 + 8 + 1;
+plan tests => 14 + 10 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -247,17 +249,27 @@ response_content_like [GET => '/faq'], qr{Frequently asked questions}, "GET /faq
     is $r->{status}, 404, '404 as expected';
 }
 
+$ENV{CPAN_DIGGER_DBFILE} = $dbfile;
 {
-    $ENV{CPAN_DIGGER_DBFILE} = $dbfile; 
     my $r = dancer_response(GET => '/dist/Package-Name');
     is $r->{status}, 200, 'OK';
     like $r->{content}, qr{Package-Name};
     like $r->{content}, qr{FAKE1};
-
-    #my $r = dancer_response(GET => '/id/FAKE1');
-    $r = dancer_response(GET => '/q/FA/author');
+}
+{
+    my $r = dancer_response(GET => '/id/FAKE1');
     is $r->{status}, 200, 'OK';
-    #diag $r->{content};
+#    diag $r->{content};
+}
+
+{
+    my $r = dancer_response(GET => '/q/FA/author');
+    is $r->{status}, 200, 'OK';
+    my $data = from_json($r->{content});
+    my $exp = dclone($expected_authors{FAKE1});
+    $exp->{type} = 'a';
+    $data->[0]{name} = Encode::encode('utf8', $data->[0]{name});
+    cmp_deeply($data, [$exp], '/q/FA/author');
 }
 
 #################################################### end
