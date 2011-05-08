@@ -28,6 +28,11 @@ get '/' => sub {
     };
 };
 
+get '/~*' => sub {
+    my ($path) = splat;
+    redirect '/id/' . $path;
+};
+
 get '/id/:pauseid/' => sub {
     redirect '/id/' . params->{pauseid};
 };
