@@ -253,8 +253,8 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
 {
     my $r = dancer_response(GET => '/dist/Package-Name');
     is $r->{status}, 200, 'OK';
-    like $r->{content}, qr{Package-Name};
-    like $r->{content}, qr{FAKE1};
+    like $r->{content}, qr{Package-Name}, 'Package-Name in /dist/Package-Name';
+    like $r->{content}, qr{FAKE1}, 'FAKE1 in /dist/Package-Name';
 }
 {
     my $r = dancer_response(GET => '/id/FAKE1');
@@ -269,8 +269,8 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
     my $data = from_json($r->{content});
     my $exp = dclone($expected_authors{FAKE1});
     $exp->{type} = 'a';
-    $data->[0]{name} = Encode::encode('utf8', $data->[0]{name});
-    cmp_deeply($data, [$exp], '/q/FA/author');
+    $data->{data}[0]{name} = Encode::encode('utf8', $data->{data}[0]{name});
+    cmp_deeply($data, {data => [$exp], ellapsed_time => ignore()}, '/q/FA/author');
 }
 
 #################################################### end
