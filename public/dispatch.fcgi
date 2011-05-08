@@ -23,7 +23,9 @@ set apphandler => 'PSGI';
 set environment => 'test';
 
 my $psgi = path($RealBin, '..', 'bin', 'app.pl');
-my $app = do($psgi);
+my $app = Plack::Util::load_psgi($psgi);
+#my $app = do($psgi);
+die $! if not defined $app;
 my $server = Plack::Handler::FCGI->new(nproc => 5, detach => 1);
 
 $server->run($app);
