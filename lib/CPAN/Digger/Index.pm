@@ -147,37 +147,22 @@ sub process_distro {
 	my ($self, $path, $source_dir) = @_;
 
 	#$self->counter_distro($self->counter_distro +1);
-	#if (not $d->dist) {
-	#	WARN("No dist provided. Skipping " . $d->prefix);
-	#	return;
-	#}
-
-	#if (my $filter = $self->filter) {
-	#	return if $d->dist !~ /$filter/;
-	#}
-
 	#LOG("Working on " . $d->prefix);
-	my $d;
-	#my $path     = dirname $d->prefix;
-	my $src      = File::Spec->catfile( $self->cpan, 'authors', 'id', $d->prefix );
-	my $src_dir  = File::Spec->catdir( $self->output, 'src' , lc $d->cpanid);
-	my $dist_dir = File::Spec->catdir( $self->output, 'dist', $d->dist);
-	my $syn_dir  = File::Spec->catdir( $self->output, 'syn', $d->dist);
 
-	my %data = (
-		name   => $d->dist,
-		author => lc $d->cpanid,
-	);
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	$db->setup;
 
-#	if (not $d->distvname) {
-#		WARN("distvname is empty, skipping database update");
-		#$counter{distvname_empty}++;
-#		return;
-#	}
+	my $d = $db->get_distro_by_path($path);
+	
+	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
+	my $src_dir   = File::Spec->catdir( $self->output, 'src' , lc $d->{author});
+	my $dist_dir  = File::Spec->catdir( $self->output, 'dist', $d->{name});
+	my $syn_dir   = File::Spec->catdir( $self->output, 'syn', $d->{name});
 
+	my $distvname = "$d->{name}-$d->{version}";
 	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
 	chdir $src_dir;
-	my $distv_dir = File::Spec->catdir($src_dir, $d->distvname);
+	my $distv_dir = File::Spec->catdir($src_dir, $distvname);
 	if (not -e $distv_dir) {
 		if ($source_dir) {
 			LOG("Source directory $source_dir");
@@ -185,52 +170,48 @@ sub process_distro {
 			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
 				next if $file =~ /\.svn|\.git|CVS|blib/;
 				my $from = File::Spec->catfile($source_dir, $file);
-				my $to   = File::Spec->catfile($d->distvname, $file);
+				my $to   = File::Spec->catfile($distvname, $file);
 				#LOG("Copy $from to $to");
 				mkpath dirname $to;
 				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
 			}
 		} else {
-			my $unzip = $self->unzip($d, $src);
-			if (not $unzip) {
-				#$counter{unzip_failed}++;
-				return;
-			}
-			if ($unzip == 2) {
-				#$counter{unzip_without_subdir}++;
-				$data{unzip_without_subdir} = 1;
-			}
+			my $unzip = $self->unzip($db, $path, $full_path, $distvname);
+			return if not $unzip;
 		}
 	}
-	if (not -e $d->distvname) {
-		WARN("No directory for '" . $d->distvname . "'");
+
+	if (not -e $distvname) {
+		WARN("No directory for '" . $distvname . "'");
 		#$counter{no_directory}++;
+		$db->unzip_error($path, 'no directory', $distvname);
 		return;
 	}
 	
 	if ($source_dir) {
 		chdir $source_dir;
 	} else {
-		chdir $d->distvname;
+		chdir $distvname;
 	}
 
-	my $pods = $self->generate_html_from_pod($dist_dir, $d);
+	my $pods = $self->generate_html_from_pod($dist_dir, $d, $distvname);
+	my %data;
+
 	$data{modules} = $pods->{modules};
 	if (@{ $pods->{pods} }) {
 		$data{pods} = $pods->{pods};
 	}
 
 	$self->generate_outline($dist_dir, $data{modules});
-
+return;
 	if ($self->syn) {
 		$self->generate_syn($syn_dir, $data{modules});
 	}
 
-
-	$data{has_meta} = -e 'META.yml';
+	$data{has_meta_yml} = -e 'META.yml';
 	# TODO we need to make sure the data we read from META.yml is correct and
 	# someone does not try to fill it with garbage or too much data.
-	if ($data{has_meta}) {
+	if ($data{has_meta_yml}) {
 		eval {
 			my $meta = YAML::Any::LoadFile('META.yml');
 			#print Dumper $meta;
@@ -250,7 +231,8 @@ sub process_distro {
 			$data{exception_in_yaml} = $@;
 		}
 	}
-
+	$data{has_meta_json} = -e 'META.json';
+print 8;
 	if (-d 'xt') {
 		$data{xt} = 1;
 	}
@@ -301,14 +283,15 @@ sub process_distro {
 	}
 
 	$data{special_files} = \@special_files;
-	$data{distvname} = $d->distvname;
+	$data{distvname} = $distvname;
 	my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 	my $tt = $self->get_tt;
 	
 	foreach my $t (@{$data{modules}}, @{$data{pods}}) {
 		$t->{path} =~ s{\\}{/}g;
 	}
-	$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
+	print Dumper \%data;
+	#$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 
 	return;
 }
@@ -316,11 +299,11 @@ sub process_distro {
 
 # starting from current directory
 sub generate_html_from_pod {
-	my ($self, $dir, $d) = @_;
+	my ($self, $dir, $d, $distvname) = @_;
 
 	my %ret;
-	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib', $d);
-	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib', $d);
+	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib', $d, $distvname);
+	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib', $d, $distvname);
 
 	return \%ret;
 }
@@ -355,17 +338,19 @@ sub generate_outline {
 
 		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
 		require PPIx::EditorTools::Outline;
+		my $x = $ppi->get_ppi;
+
 		my $outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
 
 		LOG("Save outline in $outfile");
 		open my $out, '>', $outfile;
-		print $out to_json($outline, { pretty => 1 });
+		#print $out to_json($outline, { pretty => 1 });
 	}
 	return;
 }
 
 sub _generate_html {
-	my ($self, $dir, $ext, $path, $d) = @_;
+	my ($self, $dir, $ext, $path, $d, $distvname) = @_;
 
 	my @files = eval { sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path) };
 	# id/K/KA/KAWASAKI/WSST-0.1.1.tar.gz
@@ -376,9 +361,9 @@ sub _generate_html {
 	}
 	my @data;
 	my $tt = $self->get_tt;
-	my $author = lc $d->cpanid;
-	my $distvname = $d->distvname;
-	my $dist = $d->dist;
+	my $author = lc $d->{pauseid};
+	
+	my $dist = $d->{name};
 	foreach my $file (@files) {
 		my $module = substr($file, 0, -1 * length($ext));
 		$module =~ s{/}{::}g;
@@ -485,28 +470,31 @@ sub LOG {
 }
 
 sub unzip {
-	my ($self, $d, $src) = @_;
+	my ($self, $db, $path, $full_path, $distvname) = @_;
 
-	if ($d->prefix !~ m/\.(tar\.bz2|tar\.gz|tgz|zip)$/) {
-		WARN("Does not know how to unzip $src");
-		return 0;
+	if ($full_path !~ m/\.(tar\.bz2|tar\.gz|tgz|zip)$/) {
+		WARN("Does not know how to unzip $full_path");
+		$db->unzip_error($path, 'invalid extension', '');
+		return;
 	}
 	require Archive::Any;
 	#require Archive::Any::Plugin::Tar;
 	#require Archive::Any::Plugin::Zip;
 
-	LOG("Unzipping '$src'");
-	my $archive = eval { Archive::Any->new($src); };
+	LOG("Unzipping '$full_path'");
+	my $archive = eval { Archive::Any->new($full_path); };
 	if ($@) {
 		WARN $@;
+		$db->unzip_error($path, 'exception', $@);
 		return;
 	}
 	
 	if ($archive->is_naughty) {
 		WARN("Archive is naughty");
+		$db->unzip_error($path, 'Archive is naughty', '');
 		return;
 	}
-	my $dir = $d->distvname;
+	my $dir = $distvname;
 	if ($archive->is_impolite) {
 		mkdir $dir;
 		$archive->extract($dir);
@@ -540,6 +528,7 @@ sub unzip {
 	if ($@) {
 		WARN("Could not untaint content of directory: $@");
 		#chdir $cwd;
+		$db->unzip_error('Could not untaint content of directory', $@);
 		return;
 	}
 	
@@ -572,7 +561,7 @@ sub unzip {
 		# return 2;
 	# }
 
-	return 1;
+	return;
 }
 
 sub _chmod {

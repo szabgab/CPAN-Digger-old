@@ -23,18 +23,13 @@ GetOptions(\%opt,
 	'pod',
 	'syn',
 
+	'distro=s',
+
 	'whois',
 	'collect',
-	'authors',
-#	'dropdb',
+#	'authors',
 ) or usage();
 
-#if ($opt{dropdb}) {
-#	require CPAN::Digger::DB;
-#	my $db = CPAN::Digger::DB->db;
-#	$db->drop;
-#	exit;
-#}
 
 usage('--dbfile required') if not $opt{dbfile};
 usage('--cpan or --dir required') if not $opt{cpan} and not $opt{dir};
@@ -49,7 +44,7 @@ usage('--prefix should similar to AUTHOR/Module-Name-1.00')
 $opt{root} = $root;
 
 my %run;
-$run{$_} = delete $opt{$_} for qw(collect whois authors);
+$run{$_} = delete $opt{$_} for qw(collect whois distro);
 my $cpan = CPAN::Digger::Index->new(%opt);
 
 if ($run{collect}) {
@@ -63,6 +58,10 @@ if ($run{whois}) {
 # if ($run{authors}) {
 	# $cpan->generate_author_pages;
 # }
+
+if ($run{distro}) {
+	$cpan->process_distro($run{distro});
+}
 
 exit;
 
@@ -86,9 +85,7 @@ if ($cpan->dir) {
 	}
 }
 
-
-
-
+exit;
 
 sub usage {
 	my $msg = shift;
@@ -96,7 +93,7 @@ sub usage {
 		print "\n*** $msg\n\n";
 	}
 	die <<"END_USAGE";
-Usage: perl -T $0
+Usage: perl $0
    --output PATH_TO_OUTPUT_DIRECTORY    (required)
    --dbfile path/to/database.db
 
@@ -105,6 +102,8 @@ At least one of these is required:
    --dir PATH_TO_SOURCE_DIR or PATH_TO_SOURCE_FILE
    --prefix USERNAME/Module-Name-1.00  (prefix is required if --dir is given)
 
+
+
 Optional:
    --filter REGEX   only packages that match the regex will be indexed
    --pod            generate HTML pages from POD
@@ -112,9 +111,14 @@ Optional:
 
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
-   --authors        generate an html page for each author
+
+   --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
+   
+Examples:
+$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --collect --whois
+$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --distro S/SZ/SZABGAB/CPAN-Digger-0.01.tar.gz
+
 END_USAGE
 }
 
-#Or:
-#   --dropdb         to drop the whole database
+#   --authors        generate an html page for each author

@@ -88,6 +88,16 @@ sub get_distro_latest {
     return $r;
 }
 
+sub get_distro_by_path {
+    my ($self, $path) = @_;
+
+    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE path = ?');
+    $sth->execute($path);
+    my $r = $sth->fetchrow_hashref;
+    $sth->finish;
+
+    return $r;
+}
 
 sub _get_distros {
     my ($self, $str, $sql) = @_;
