@@ -44,6 +44,11 @@ $(document).ready(function() {
      });
 
      $('#dig').click(function() {
+            send_query();
+     });
+});
+
+function send_query() {
             var query = $('#query').val();
             //alert($('#what').val());
             var what = $('#what').val();
@@ -83,6 +88,5 @@ $(document).ready(function() {
                     }
             }, 'json');
             return false;
-    });
-});
+};
 
