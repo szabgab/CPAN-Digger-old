@@ -14,7 +14,7 @@ use Test::More;
 use Test::Deep;
 use Test::NoWarnings;
 
-plan tests => 14 + 10 + 1;
+plan tests => 14 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -259,7 +259,8 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
 {
     my $r = dancer_response(GET => '/id/FAKE1');
     is $r->{status}, 200, 'OK';
-#    diag $r->{content};
+    #diag $r->{content};
+    like Encode::encode('utf8', $r->{content}),  qr{$expected_authors{FAKE1}{name}}, 'name is in the content';
 }
 
 {

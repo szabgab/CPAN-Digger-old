@@ -1,8 +1,8 @@
 #layout: "main"
 #environment: development
 appname: "CPAN::Digger::WWW"
-#logger: "file"
-logger: 'console'
+logger: "file"
+#logger: 'console'
 template: template_toolkit
 #daemon: 0  # setting to 1 does not do anything on Windows?
 charset: utf-8

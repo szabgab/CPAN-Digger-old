@@ -7,6 +7,7 @@ CREATE TABLE distro (
     file_timestamp DATE,
     added_timestamp DATE
 );
+CREATE INDEX distro_author_idx ON distro (author);
 
 CREATE TABLE author (
     pauseid   VARCHAR(50) PRIMARY KEY,

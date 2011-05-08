@@ -18,6 +18,7 @@ sub setup {
 
     my $dbfile = $self->dbfile;
     my $dbdir = dirname $dbfile;
+#    die("Creating '$dbdir'");
     mkpath $dbdir if not -d $dbdir;
     system "sqlite3 $dbfile < schema/digger.sql" if not -e $dbfile;
     $self->dbh( DBI->connect("dbi:SQLite:dbname=$dbfile","","", {RaiseError => 1, PrintError => 0, AutoCommit => 1}) );
