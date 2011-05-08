@@ -159,3 +159,27 @@ and setup the web site with the first version.
    that don't package as zip files.
 
 
+*) Allow searching within a distribution
+   and/or list all the functions in the distribution
+
+
+*) for searching create a table of words
+
+   for each distribution split up the name and each part of the name becomes a word
+   for each module name probably the parts of the name might be words though the last part should
+     be the most significants
+   META.yml might have some keywords stored
+   names of the functions / methods
+   full text indexing of the POD for each module
+      various sections might have different weight.
+   later we will allow users of the site to add keywords to the modules/distributions
+
+   store each keyword in lowercase only and map everything to lowercase
+   for each word include where it could be found
+   word    type_of_source       the source
+   cgi     distro               CGI-Simple
+   cgi     distro               CGI-Application
+   cgi     module               CGI::Simple
+   cgi     module               CGI::Application
+
+
