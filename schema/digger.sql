@@ -5,10 +5,25 @@ CREATE TABLE distro (
     version  VARCHAR(30) NOT NULL,
     path     VARCHAR(255) UNIQUE NOT NULL,
     file_timestamp DATE,
-    added_timestamp DATE
+    added_timestamp DATE,
+
+    unzip_error VARCHAR(20),
+    unzip_error_details TEXT
 );
 CREATE INDEX distro_author_idx ON distro (author);
 CREATE INDEX distro_name_idx   ON distro (name);
+
+CREATE TABLE distro_details (
+    id                INTEGER UNIQUE NOT NULL,
+    has_meta_yml      BOOL,
+    has_meta_json     BOOL,
+    has_t             BOOL,
+    meta_homepage     VARCHAR(100),
+    meta_repository   VARCHAR(100),
+    meta_abstract     VARCHAR(100),
+    FOREIGN KEY(id)   REFERENCES distro (id)
+);
+
 
 CREATE TABLE author (
     pauseid   VARCHAR(50) PRIMARY KEY,

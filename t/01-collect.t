@@ -14,7 +14,9 @@ use Test::More;
 use Test::Deep;
 use Test::NoWarnings;
 
-plan tests => 14 + 11 + 1;
+# number of tests in the following groups:
+# collect,  process,   dancer,    noWarnings 
+plan tests => 14 + 2 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -40,6 +42,7 @@ create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
 copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/"  or die $!;
 copy 't/files/02whois.xml', "$cpan/authors/00whois.xml" or die $!;
 collect();
+
 
 ### check database
 my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
@@ -101,8 +104,8 @@ my %expected_authors = (
   #diag explain @data;
 
   cmp_deeply(\@data, [
-    [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS],
-    [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS],
+    [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS, undef, undef],
+    [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS, undef, undef],
   ], 'data is ok') or diag explain \@data;
 
   my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
@@ -132,7 +135,7 @@ $expected_data2->[1]{id} = $ID;
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
-    my $data = $db->get_distros('Pack');
+    my $data = $db->get_distros_like('Pack');
     my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data, $expected_data, 'get_distros');
     cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
@@ -167,7 +170,7 @@ collect();
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
-    my $data = $db->get_distros('Pack');
+    my $data = $db->get_distros_like('Pack');
     my $data2 = $db->get_distros_latest_version('Pack');
     cmp_deeply($data, $expected_data, 'get_distros');
     cmp_deeply($data2, $expected_data2, 'get_distros_latest_version');
@@ -219,7 +222,7 @@ my %expected_authors2 = (
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
-    my $data = $db->get_distros('Pack');
+    my $data = $db->get_distros_like('Pack');
     cmp_deeply($data, $exp_data, 'get_distros');
 
     my $data2 = $db->get_distros_latest_version('Pack');
@@ -232,6 +235,51 @@ my %expected_authors2 = (
 
     cmp_deeply $db->get_authors('N'), [ map {$expected_authors{$_}} qw(AFOXSON NUFFIN) ], 'authors with N';
 }
+
+
+###################################
+
+mkpath  "$cpan/authors/id/S/SP/SPECTRUM/";
+copy 't/files/Padre-Plugin-CommandLine-0.02.tar.gz', "$cpan/authors/id/S/SP/SPECTRUM/";
+collect();
+
+###################################   process files
+process('F/FA/FAKE1/Package-Name-0.02.tar.gz');
+my $pathx = 'S/SP/SPECTRUM/Padre-Plugin-CommandLine-0.02.tar.gz'; 
+process($pathx);
+{
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+    my $ppc = $db->get_distro_by_path($pathx);
+    #diag explain $ppc;
+    cmp_deeply $ppc, {
+      'added_timestamp'     => $TS,
+      'author'              => 'SPECTRUM',
+      'file_timestamp'      => $TS,
+      'name'                => 'Padre-Plugin-CommandLine',
+      'version'             => '0.02',
+      'id'                  => $ID,
+      'path'                => $pathx,
+      'unzip_error'         => ignore(),
+      'unzip_error_details' => ignore(),
+    }, 'Padre-Plugin-CommandLine';
+
+    my ($cnt) = $dbh->selectrow_array('SELECT COUNT(*) FROM distro_details');
+    #diag "Number of distro_detail lines $cnt";
+    #diag "ID: $ppc->{id}";
+    my $ppc_details = $db->get_distro_details($ppc->{id});
+    #diag explain $ppc_details;
+    cmp_deeply $ppc_details, {
+      has_meta_json   => undef,
+      has_meta_yml    => 1,
+      has_t           => 1,
+      id              => $ID,
+      meta_abstract   => undef,
+      meta_homepage   => undef,
+      meta_repository => undef,
+    }, 'Padre-Plugin-CommandLine details';
+}
+
 
 #################################################### Testing Dancer
 
@@ -284,5 +332,10 @@ sub create_file {
 }
 
 sub collect {
-   system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
+    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
+}
+
+sub process {
+    my ($path) = @_;
+    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --distro $path");
 }

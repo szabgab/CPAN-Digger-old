@@ -119,33 +119,38 @@ Be able to index
 Alternate plan:
 *) run CPAN mirror
 *) Collect distros:
-    go over all the CPAN mirror directory get all the files 
-    - using a filter for our sanity that starts with id/A/AU/AUTHOR/Distro-Name-number.tar.gz and then expands
-     For each file adds it to the database  AUTHOR, distname, version, path  date when we added to the database, date of the file???
-TODO: go over all the files and report what are we missing
+   Go over all the CPAN mirror directory get all the files.
+   For each file adds it to the database AUTHOR, distname, version, path,
+   date when we added to the database, date of the file. (see touch how to imitate old dates)
+TODO: go over the files reported as error, show them on the web site and think how to include them.
 
 *) Add search engine that can find packages based on their name - fetch always the latest
 TODO: show exact hits first
+TODO: show newest earlier
 
-
-*) Remove distros:
+TODO: *) Remove distros:
     Go over all the distros in the database and check if they are still in the CPAN mirror.
-    If not, mark them as "removed" in the database and maybe also remove them from the extracted directory and/or 
-    maybe remove them from the database as well.
+    If not, mark them as "removed" in the database.
+    Maybe also remove them from the extracted directory and
+    maybe remove them from the database.
+    or just mark them as "removed" in the database?
 
 *) Parse the 00whois.xml file and update the 'author' table.
 TODO: collect data from the new author.json files
 
-TODO: Create a static page for each author with data from the database and 
-link the results to these pages. - For not we will go with dynamic pages as
-generating all the static pages takes 75 min on my desktop and I don't know
-how to decide which pages will need to be updated.
+*) Create a dynamic page for each author with data from the database and
+link the results to these pages. -
+Generating all the static pages took 75 min on my desktop so we are creating the pages
+dynamically for now.
 TODO: "Registered modules" on the authors page
+TODO: make the author page nicer, allow the viewer to sort based on distro name or release date
+TODO: add description to each distribution
+
 
 TODO: setup an easy way to generate the database with new code base while the old one is still working
 and setup the web site with the first version.
 
-
+TODO
 *) Extract:
     go over all the distros in the database and check if they have been extracted to the 'src' directory already
     if not yet, then try to extract them
@@ -157,6 +162,10 @@ and setup the web site with the first version.
 *) Script that can process an individual distribution which is give as either a zip file
    so we start with unzipping or an already open directory for projects and companies
    that don't package as zip files.
+   
+   
+   
+   
 
 
 *) Allow searching within a distribution

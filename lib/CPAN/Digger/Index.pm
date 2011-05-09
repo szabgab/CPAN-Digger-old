@@ -153,7 +153,8 @@ sub process_distro {
 	$db->setup;
 
 	my $d = $db->get_distro_by_path($path);
-	
+	die "Could not find distro by path '$path'" if not $d;
+
 	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
 	my $src_dir   = File::Spec->catdir( $self->output, 'src' , lc $d->{author});
 	my $dist_dir  = File::Spec->catdir( $self->output, 'dist', $d->{name});
@@ -184,7 +185,7 @@ sub process_distro {
 	if (not -e $distvname) {
 		WARN("No directory for '" . $distvname . "'");
 		#$counter{no_directory}++;
-		$db->unzip_error($path, 'no directory', $distvname);
+		$db->unzip_error($path, 'no_directory', $distvname);
 		return;
 	}
 	
@@ -203,7 +204,7 @@ sub process_distro {
 	}
 
 	$self->generate_outline($dist_dir, $data{modules});
-return;
+
 	if ($self->syn) {
 		$self->generate_syn($syn_dir, $data{modules});
 	}
@@ -232,12 +233,12 @@ return;
 		}
 	}
 	$data{has_meta_json} = -e 'META.json';
-print 8;
+
 	if (-d 'xt') {
 		$data{xt} = 1;
 	}
 	if (-d 't') {
-		$data{t} = 1;
+		$data{has_t} = 1;
 	}
 	if (-f 'test.pl') {
 		$data{test_file} = 1;
@@ -250,30 +251,23 @@ print 8;
 	}
 	my @changes_files = qw(Changes CHANGES ChangeLog);
 
-	LOG("Update DB");
-	#eval {
-	#	$self->db->distro->update({ name => $d->dist }, \%data , { upsert => 1 });
-	#};
-	#if ($@) {
-	#	WARN("Exception in MongoDB: $@");
-	#}
 
 	my @readme_files = qw('README');
 
 	# additional fields needed for the main page of the distribution
-	my $author = $self->author_info($data{author});
-	if (not $source_dir) {
-		if ($author) {
-			$data{author_name} = $author->name;
-		} else {
-			WARN("Could not find details of '$data{author}'");
-		}
-	}
+	# my $author = $self->author_info($data{author});
+	# if (not $source_dir) {
+		# if ($author) {
+			# $data{author_name} = $author->name;
+		# } else {
+			# WARN("Could not find details of '$data{author}'");
+		# }
+	# }
 
-	$data{author_name} ||= $data{author};
+#	$data{author_name} ||= $data{author};
 
 	my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
-	$data{prefix} = $d->prefix;
+#	$data{prefix} = $d->prefix;
 	
 	if ($data{meta}{resources}{repository}) {
 		my $repo = delete $data{meta}{resources}{repository};
@@ -290,9 +284,15 @@ print 8;
 	foreach my $t (@{$data{modules}}, @{$data{pods}}) {
 		$t->{path} =~ s{\\}{/}g;
 	}
-	print Dumper \%data;
-	#$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 
+	#LOG(Dumper \%data);
+
+	my $dist = $db->get_distro_by_path($path);
+	LOG("Update DB for id $dist->{id}");
+	#LOG(Dumper $id
+	$db->update_distro_details(\%data, $dist->{id});
+
+	#$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
 	return;
 }
 
@@ -474,7 +474,7 @@ sub unzip {
 
 	if ($full_path !~ m/\.(tar\.bz2|tar\.gz|tgz|zip)$/) {
 		WARN("Does not know how to unzip $full_path");
-		$db->unzip_error($path, 'invalid extension', '');
+		$db->unzip_error($path, 'invalid_extension', '');
 		return;
 	}
 	require Archive::Any;
@@ -482,16 +482,21 @@ sub unzip {
 	#require Archive::Any::Plugin::Zip;
 
 	LOG("Unzipping '$full_path'");
-	my $archive = eval { Archive::Any->new($full_path); };
+	my $archive;
+	eval { 
+		local $SIG{__WARN__} = sub { die shift };
+		$archive = Archive::Any->new($full_path);
+		die 'Could not unzip' if not $archive;
+	};
 	if ($@) {
-		WARN $@;
+		WARN "Exception in unzip: $@";
 		$db->unzip_error($path, 'exception', $@);
 		return;
 	}
-	
+
 	if ($archive->is_naughty) {
 		WARN("Archive is naughty");
-		$db->unzip_error($path, 'Archive is naughty', '');
+		$db->unzip_error($path, 'naughty_archive', '');
 		return;
 	}
 	my $dir = $distvname;
@@ -528,10 +533,10 @@ sub unzip {
 	if ($@) {
 		WARN("Could not untaint content of directory: $@");
 		#chdir $cwd;
-		$db->unzip_error('Could not untaint content of directory', $@);
+		$db->unzip_error($path, 'tainted_directory', $@);
 		return;
 	}
-	
+
 	#print "CON: @content\n";
 	# if (@content == 1 and $content[0] eq $d->distvname) {
 		# # using external mv as File::Copy::move cannot move directory...
@@ -561,7 +566,7 @@ sub unzip {
 		# return 2;
 	# }
 
-	return;
+	return 1;
 }
 
 sub _chmod {

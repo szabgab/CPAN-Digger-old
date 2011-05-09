@@ -37,10 +37,10 @@ sub insert_distro {
 }
 
 # search by the name of the distribution
-sub get_distros {
+sub get_distros_like {
     my ($self, $str) = @_;
     return $self->_get_distros($str, q{
-       SELECT author, name, version 
+       SELECT author, name, version
        FROM distro 
        WHERE name LIKE ? 
        ORDER BY name, version
@@ -81,7 +81,12 @@ sub get_distros_of {
 sub get_distro_latest {
     my ($self, $name) = @_;
 
-    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE name = ? ORDER BY file_timestamp DESC LIMIT 1');
+    my $sth = $self->dbh->prepare(q{
+        SELECT id, author, name, version, path, file_timestamp, added_timestamp 
+        FROM distro 
+        WHERE name = ? 
+           ORDER BY file_timestamp DESC 
+           LIMIT 1});
     $sth->execute($name);
     my $r = $sth->fetchrow_hashref;
     $sth->finish;
@@ -165,6 +170,37 @@ sub update_author {
     #$self->dbh->do($sql, {}, @$data->{@fields}, $pauseid);
 
     return;
+}
+
+sub unzip_error {
+    my ($self, $path, $error, $details) = @_;
+    my $cnt = $self->dbh->do('UPDATE distro SET unzip_error=?, unzip_error_details=? WHERE path=?', {},
+        $error, $details, $path);
+    # TODO: report if cannot update?
+}
+
+sub update_distro_details {
+    my ($self, $data, $id) = @_;
+
+    my @all_fields = qw(has_meta_yml has_meta_json has_t meta_homepage meta_repository meta_abstract);
+    my @fields = grep {defined $data->{$_}} @all_fields;
+    my $fields = join ' ', map {", $_"} @fields;
+    my @values = map { $data->{$_} } @fields;
+    my $placeholders = join '', (', ?' x scalar @values);
+    my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
+
+    CPAN::Digger::Index::LOG("SQL: $sql");
+    CPAN::Digger::Index::LOG("$id @values");
+    $self->dbh->do('DELETE FROM distro_details WHERE id=?', {}, $id);
+    $self->dbh->do($sql, {}, $id, @values);
+
+    return;
+}
+
+sub get_distro_details {
+    my ($self, $id) = @_;
+
+    return $self->dbh->selectrow_hashref('SELECT * FROM distro_details WHERE id=?', {}, $id);
 }
 
 1;
