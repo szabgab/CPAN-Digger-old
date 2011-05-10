@@ -5,7 +5,9 @@
 [% INCLUDE incl/header.tt %]
 
 <div id="path">
-<a href="/id/[% pauseid %]">[% author.name %]</a> - [% name %] <a href="/src/[% pauseid %]/[% distvname %]/">Source</a>
+<a href="/id/[% pauseid %]">[% author.name %]</a> - [% name %] 
+<a href="/src/[% pauseid %]/[% distvname %]/">Source</a>
+<a href="/syn/[% name %]/">Syn</a>
 </div>
 
 <div id="release_date">
@@ -86,7 +88,7 @@ License:
   [% END %]
 [% ELSE %]
   [% IF has_meta_yml %]
-    <a href="/faq#meta_license">Not found</a> in <a href="/src/[% pauseid %]/[% distvname %]/META.ym">META.yml</a>
+    <a href="/faq#meta_license">Not found</a> in <a href="/src/[% pauseid %]/[% distvname %]/META.yml">META.yml</a>
   [% ELSE %]
     <a href="/faq#meta_yaml">No META.yml</a>
   [% END %]

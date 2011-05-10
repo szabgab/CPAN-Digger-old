@@ -236,7 +236,7 @@ sub process_distro {
 	$data{has_meta_json} = -e 'META.json';
 
 	if (-d 'xt') {
-		$data{xt} = 1;
+		$data{has_xt} = 1;
 	}
 	if (-d 't') {
 		$data{has_t} = 1;
@@ -665,7 +665,7 @@ sub collect_distributions {
 		LOG("insert_distro @args");
 		$db->insert_distro(@args);
 	     } else {
-		ERROR("could not parse filename '$file'");
+		WARN("could not parse filename '$file'");
 	    }
 	} 
 
@@ -724,7 +724,7 @@ sub LOG {
 }
 sub _log {
 	my ($level, @msg) = @_;
-	return if $level eq 'LOG';
+#	return if $level eq 'LOG';
 	my $time = POSIX::strftime("%Y-%b-%d %H:%M:%S", gmtime);
 	printf STDERR "%5s - $time - @msg\n", $level;
 }

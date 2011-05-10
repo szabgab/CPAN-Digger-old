@@ -118,7 +118,15 @@ get '/dist/:name' => sub {
         ellapsed_time => time-$t0,
     );
     $data{$_} = $d->{$_} for qw(version path);
-    $data{$_} = $details->{$_} for qw(has_t has_meta_yml has_meta_json); # test_file
+    $data{$_} = $details->{$_} for qw(has_t test_file has_meta_yml has_meta_json);
+    if ($details->{special_files}) {
+        $data{special_files}  = [split /,/, $details->{special_files}];
+    }
+    if ($details->{pods}) {
+        use JSON;
+        $data{modules} = JSON::from_json($details->{pods});
+    }
+
     #debug(Dumper \%data);
     return template 'dist.tt', \%data;
 };
@@ -250,7 +258,7 @@ get '/q/:query/:what' => sub {
 # this part is only needed in the stand alone environment
 # if used under Apache, then Apache should be configured
 # to handle these static files
-get qr{/(syn|src|data)(/.*)?} => sub {
+get qr{/(syn|src|dist)(/.*)?} => sub {
     # TODO this gives a warning in Dancer::Router if we ask for dist only as the
     # capture in the () is an undef
     #my ($path) = splat; 

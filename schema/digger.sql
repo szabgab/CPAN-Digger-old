@@ -18,9 +18,13 @@ CREATE TABLE distro_details (
     has_meta_yml      BOOL,
     has_meta_json     BOOL,
     has_t             BOOL,
+    has_xt            BOOL,
+    test_file         BOOL,
     meta_homepage     VARCHAR(100),
     meta_repository   VARCHAR(100),
     meta_abstract     VARCHAR(100),
+    special_files     VARCHAR(1000),
+    pods              VARCHAR(1000),
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 

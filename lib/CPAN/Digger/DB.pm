@@ -192,12 +192,28 @@ sub unzip_error {
 
 sub update_distro_details {
     my ($self, $data, $id) = @_;
+    
+    $data->{meta_homepage}   = $data->{meta}{resources}{homepage};
+    $data->{meta_repository} = $data->{meta}{resources}{repository};
+    $data->{meta_abstract}   = $data->{meta}{abstract};
 
-    my @all_fields = qw(has_meta_yml has_meta_json has_t meta_homepage meta_repository meta_abstract);
+    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file meta_homepage meta_repository meta_abstract);
     my @fields = grep {defined $data->{$_}} @all_fields;
     my $fields = join ' ', map {", $_"} @fields;
     my @values = map { $data->{$_} } @fields;
     my $placeholders = join '', (', ?' x scalar @values);
+
+    if ($data->{special_files}) {
+        $fields .= ',special_files';
+        $placeholders .= ',?';
+        push @values, join ',', @{ $data->{special_files} };
+    }
+    if ($data->{pods}) {
+        $fields .= ',pods';
+        $placeholders .= ',?';
+        push @values, JSON::to_json($data->{modules});
+    }
+
     my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
 
     #CPAN::Digger::Index::LOG("SQL: $sql");
