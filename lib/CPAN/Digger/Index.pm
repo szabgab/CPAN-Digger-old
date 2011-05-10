@@ -22,6 +22,7 @@ use Parse::CPAN::Whois    ();
 use POSIX                 ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
+use PPIx::EditorTools::Outline;
 
 use CPAN::Digger::PPI;
 use CPAN::Digger::Pod;
@@ -152,7 +153,7 @@ sub process_all_distros {
 	#LOG(Dumper $distros);
 	foreach my $d (@$distros) {
 		$self->process_distro($d->[0]);
-        sleep 2;
+        sleep 1;
 	}
 
 	return;
@@ -331,19 +332,26 @@ sub generate_syn {
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, $file->{path});
 		mkpath dirname $outfile;
-		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
-		my $html = $ppi->get_syntax;
+		my $html;
+		eval {
+			my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
+			$html = $ppi->get_syntax;
+		};
+		if ($@) {
+			ERROR("Exception while generating syn in PPI for $file->{path}  $@");
+			next;
+		}
+
 		LOG("Save syn in $outfile");
-		
 		my %data = (
 			#filename => $opt{infile},
 			code => $html,
 		);
 		my $tt = $self->get_tt;
 		$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
-
-		
 	}
+
+	return;
 }
 
 sub generate_outline {
@@ -353,11 +361,17 @@ sub generate_outline {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
 		mkpath dirname $outfile;
 
-		my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
-		require PPIx::EditorTools::Outline;
-		my $x = $ppi->get_ppi;
+		my $outline;
+		eval {
+			my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
+			#my $x = $ppi->get_ppi;
 
-		my $outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
+			$outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
+		};
+		if ($@) {
+			ERROR("Exception in PPI while generating outline for $file->{path} $@");
+			next;
+		}
 
 		LOG("Save outline in $outfile");
 		open my $out, '>', $outfile;
