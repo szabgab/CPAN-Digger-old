@@ -233,7 +233,12 @@ sub get_distro_details_by_id {
 sub get_all_distros {
     my ($self) = @_;
     #return $self->dbh->selectall_arrayref("SELECT path FROM distro WHERE name LIKE 'Pipe%'");
-    return $self->dbh->selectall_arrayref('SELECT path FROM distro');
+    #return $self->dbh->selectall_arrayref('SELECT path FROM distro');
+    return $self->dbh->selectall_arrayref(q{
+        SELECT path
+        FROM distro A, (SELECT max(version) AS v, name
+                        FROM distro GROUP BY name) AS B
+        WHERE A.version=B.v and A.name=B.name ORDER BY A.name});
 }
 
 1;

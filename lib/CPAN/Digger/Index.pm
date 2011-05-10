@@ -504,17 +504,30 @@ sub unzip {
 		return;
 	}
 
-	if ($archive->is_naughty) {
+    my $is_naughty;
+    eval {
+        $is_naughty = $archive->is_naughty;
+    };
+ # TODO!
+
+	if ($is_naughty) {
 		WARN("Archive is naughty");
 		$db->unzip_error($path, 'naughty_archive', '');
 		return;
 	}
 	my $dir = $distvname;
+    eval {
 	if ($archive->is_impolite) {
 		mkdir $dir;
 		$archive->extract($dir);
 	} else {
 		$archive->extract();
+	}
+    };
+	if ($@) {
+		WARN("Exception in unzip extract: $@");
+		$db->unzip_error($path, 'exception', $@);
+		return;
 	}
 
 	# my $cwd = eval { _untaint_path(cwd()) };
