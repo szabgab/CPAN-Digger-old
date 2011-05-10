@@ -143,6 +143,22 @@ has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 	# }
 # }
 
+sub process_all_distros {
+	my ($self) = @_;
+
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	$db->setup;
+	my $distros = $db->get_all_distros;
+	#LOG(Dumper $distros);
+	foreach my $d (@$distros) {
+		$self->process_distro($d->[0]);
+        sleep 2;
+	}
+
+	return;
+}
+
+
 # process a single distribution given the (relative) path to it
 sub process_distro {
 	my ($self, $path, $source_dir) = @_;

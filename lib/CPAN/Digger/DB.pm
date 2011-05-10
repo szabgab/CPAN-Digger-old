@@ -230,4 +230,10 @@ sub get_distro_details_by_id {
     return $self->dbh->selectrow_hashref('SELECT * FROM distro_details WHERE id=?', {}, $id);
 }
 
+sub get_all_distros {
+    my ($self) = @_;
+    #return $self->dbh->selectall_arrayref("SELECT path FROM distro WHERE name LIKE 'Pipe%'");
+    return $self->dbh->selectall_arrayref('SELECT path FROM distro');
+}
+
 1;

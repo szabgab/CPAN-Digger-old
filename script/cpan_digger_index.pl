@@ -22,6 +22,7 @@ GetOptions(\%opt,
 	'prefix=s',
 	'pod',
 	'syn',
+	'process',
 
 	'distro=s',
 
@@ -44,7 +45,7 @@ usage('--prefix should similar to AUTHOR/Module-Name-1.00')
 $opt{root} = $root;
 
 my %run;
-$run{$_} = delete $opt{$_} for qw(collect whois distro);
+$run{$_} = delete $opt{$_} for qw(collect whois distro process);
 my $cpan = CPAN::Digger::Index->new(%opt);
 
 if ($run{collect}) {
@@ -63,6 +64,9 @@ if ($run{distro}) {
 	$cpan->process_distro($run{distro});
 }
 
+if ($run{process}) {
+	$cpan->process_all_distros();
+}
 
 
 # $cpan->generate_central_files;
@@ -113,6 +117,7 @@ Optional:
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
 
    --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
+   --process  process all distros
    
 Examples:
 $0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --collect --whois
