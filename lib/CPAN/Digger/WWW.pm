@@ -258,7 +258,9 @@ get qr{/(syn|src|data)(/.*)?} => sub {
     my $path = request->path;
     # TODO: how can I add a configuration option to config.yml 
     # to point to a directory relative to the appdir ?
+    #return config->{appdir};
     my $full_path = path config->{appdir}, '..', 'digger', $path;
+    return "Cannot handle $path as full_path is undef" if not defined $full_path;
     if (-d $full_path) {
         if ($path !~ m{/$}) {
             return redirect request->path . '/';

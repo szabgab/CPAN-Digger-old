@@ -157,7 +157,7 @@ sub process_distro {
 	die "Could not find distro by path '$path'" if not $d;
 
 	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
-	my $src_dir   = File::Spec->catdir( $self->output, 'src' , lc $d->{author});
+	my $src_dir   = File::Spec->catdir( $self->output, 'src' , uc $d->{author});
 	my $dist_dir  = File::Spec->catdir( $self->output, 'dist', $d->{name});
 	my $syn_dir   = File::Spec->catdir( $self->output, 'syn', $d->{name});
 
