@@ -95,20 +95,20 @@ get '/dist/:name' => sub {
     $db->setup;
 
     my $d = $db->get_distro_latest($name);
-    debug(Dumper $d);
+    my $details = $db->get_distro_details_by_id($d->{id});
+    #debug(Dumper $d);
+    #debug(Dumper $details);
 
     my $author = $db->get_author(uc $d->{author});
 
-debug($d->{file_timestamp});
-debug(_date($d->{file_timestamp}));
+#debug($d->{file_timestamp});
+#debug(_date($d->{file_timestamp}));
 
     my %data = (
         name      => $name,
-        version   => $d->{version},
         pauseid   => $d->{author},
         released  => _date($d->{file_timestamp}),
         distvname => "$name-$d->{version}",
-        path      => $d->{path},
         author    => {
             name => decode('utf8', $author->{name}),
         },
@@ -117,7 +117,9 @@ debug(_date($d->{file_timestamp}));
         },
         ellapsed_time => time-$t0,
     );
-    debug(Dumper \%data);
+    $data{$_} = $d->{$_} for qw(version path);
+    $data{$_} = $details->{$_} for qw(has_t has_meta_yml has_meta_json); # test_file
+    #debug(Dumper \%data);
     return template 'dist.tt', \%data;
 };
 

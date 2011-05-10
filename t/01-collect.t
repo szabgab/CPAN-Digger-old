@@ -267,7 +267,7 @@ process($pathx);
     my ($cnt) = $dbh->selectrow_array('SELECT COUNT(*) FROM distro_details');
     #diag "Number of distro_detail lines $cnt";
     #diag "ID: $ppc->{id}";
-    my $ppc_details = $db->get_distro_details($ppc->{id});
+    my $ppc_details = $db->get_distro_details_by_id($ppc->{id});
     #diag explain $ppc_details;
     cmp_deeply $ppc_details, {
       has_meta_json   => undef,

@@ -85,10 +85,10 @@ License:
      [% meta_data.license %]
   [% END %]
 [% ELSE %]
-  [% IF has_meta %]
-    <a href="/faq.html#meta_license">Not found</a> in <a href="/src/[% pauseid %]/[% distvname %]/META.ym">META.yml</a>
+  [% IF has_meta_yml %]
+    <a href="/faq#meta_license">Not found</a> in <a href="/src/[% pauseid %]/[% distvname %]/META.ym">META.yml</a>
   [% ELSE %]
-    <a href="/faq.html#meta_yaml">No META.yml</a>
+    <a href="/faq#meta_yaml">No META.yml</a>
   [% END %]
 [% END %]
 </div>
@@ -98,13 +98,13 @@ Examples:
 [% IF examples %]
 <a href="/src/[% pauseid %]/[% distvname %]/[% examples %]">[% examples %]</a>
 [% ELSE %]
-<a href="/faq.html#examples">Not found</a>.
+<a href="/faq#examples">Not found</a>.
 [% END %]
 </div>
 
 <div id="tests">
 Tests:
-[% IF t %]
+[% IF has_t %]
   in the <a href="/src/[% pauseid %]/[% distvname %]/t/">t/</a> directory
 [% ELSIF test_file %]
   in the <a href="/src/[% pauseid %]/[% distvname %]/test.pl">test.pl</a> file

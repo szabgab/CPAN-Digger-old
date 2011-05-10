@@ -208,7 +208,7 @@ sub update_distro_details {
     return;
 }
 
-sub get_distro_details {
+sub get_distro_details_by_id {
     my ($self, $id) = @_;
 
     return $self->dbh->selectrow_hashref('SELECT * FROM distro_details WHERE id=?', {}, $id);
