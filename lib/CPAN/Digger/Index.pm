@@ -19,6 +19,7 @@ use File::Find::Rule      ();
 use JSON                  qw(to_json);
 use Parse::CPAN::Whois    ();
 #use Parse::CPAN::Authors  ();
+use POSIX                 ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 
@@ -33,48 +34,48 @@ has 'prefix'   => (is => 'ro', isa => 'Str');
 has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 
 
-sub index_dir {
-	my $self = shift;
-
-	$ENV{PATH} = '/bin:/usr/bin';
-	my $dir = $self->dir;
-	
-	# prefix should be something like  AUTHOR/Module-Name-1.00
-	my $prefix = $self->prefix;
-	my ($author, $distvname)  = split m{/}, $prefix;
-	my ($dist, $version)      = split m{-(?=\d)}, $distvname;
-	my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2); 
-	my $d = Parse::CPAN::Packages::Distribution->new(
-		dist      => $dist,
-		prefix    => "$path/$prefix",
-		cpanid    => $author,
-		distvname => $distvname,
-		version   => $version,
-		# filename =>
-		# maturity =>
-	);
-	$self->process_distro($d, abs_path $dir);
-
-	return;
-}
-
-sub run_index {
-	my $self = shift;
-
-	#$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
-	my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
-
-	$ENV{PATH} = '/bin:/usr/bin';
-
-	my $tt = $self->get_tt;
-
-	my @distributions = $p->distributions;
-	foreach my $d (@distributions) {
-		$self->process_distro($d);
-	}
-
-	return;
-}
+# sub index_dir {
+	# my $self = shift;
+# 
+	# $ENV{PATH} = '/bin:/usr/bin';
+	# my $dir = $self->dir;
+	# 
+	# # prefix should be something like  AUTHOR/Module-Name-1.00
+	# my $prefix = $self->prefix;
+	# my ($author, $distvname)  = split m{/}, $prefix;
+	# my ($dist, $version)      = split m{-(?=\d)}, $distvname;
+	# my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2); 
+	# my $d = Parse::CPAN::Packages::Distribution->new(
+		# dist      => $dist,
+		# prefix    => "$path/$prefix",
+		# cpanid    => $author,
+		# distvname => $distvname,
+		# version   => $version,
+		# # filename =>
+		# # maturity =>
+	# );
+	# $self->process_distro($d, abs_path $dir);
+# 
+	# return;
+# }
+# 
+# sub run_index {
+	# my $self = shift;
+# 
+	# #$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
+	# my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
+# 
+	# $ENV{PATH} = '/bin:/usr/bin';
+# 
+	# my $tt = $self->get_tt;
+# 
+	# my @distributions = $p->distributions;
+	# foreach my $d (@distributions) {
+		# $self->process_distro($d);
+	# }
+# 
+	# return;
+# }
 
 # get all the authors from the database
 # for each author fetch the latest version of distributions
@@ -133,21 +134,21 @@ sub run_index {
 # }
 
 
-sub author_info {
-	my ($self, $author) = @_;
-	if ($self->authors) {
-		return $self->authors->author(uc $author);
-	} else {
-		return;
-	}
-}
+# sub author_info {
+	# my ($self, $author) = @_;
+	# if ($self->authors) {
+		# return $self->authors->author(uc $author);
+	# } else {
+		# return;
+	# }
+# }
 
 # process a single distribution given the (relative) path to it
 sub process_distro {
 	my ($self, $path, $source_dir) = @_;
 
 	#$self->counter_distro($self->counter_distro +1);
-	#LOG("Working on " . $d->prefix);
+	LOG("Working on $path");
 
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
@@ -285,10 +286,10 @@ sub process_distro {
 		$t->{path} =~ s{\\}{/}g;
 	}
 
-	#LOG(Dumper \%data);
+	LOG("update_distro_details for $path by " . Dumper \%data);
 
 	my $dist = $db->get_distro_by_path($path);
-	LOG("Update DB for id $dist->{id}");
+	#LOG("Update DB for id $dist->{id}");
 	#LOG(Dumper $id
 	$db->update_distro_details(\%data, $dist->{id});
 
@@ -461,13 +462,6 @@ sub generate_central_files {
 	return;
 }
 
-sub WARN {
-	LOG("WARN: $_[0]");
-}
-sub LOG {
-	my $msg = shift;
-	print "$msg\n";
-}
 
 sub unzip {
 	my ($self, $db, $path, $full_path, $distvname) = @_;
@@ -489,7 +483,7 @@ sub unzip {
 		die 'Could not unzip' if not $archive;
 	};
 	if ($@) {
-		WARN "Exception in unzip: $@";
+		WARN("Exception in unzip: $@");
 		$db->unzip_error($path, 'exception', $@);
 		return;
 	}
@@ -614,6 +608,8 @@ sub collect_distributions {
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
 
+	$db->dbh->begin_work;
+	
 	my $files = File::Find::Rule
 	   ->file()
 	   ->relative
@@ -631,7 +627,9 @@ sub collect_distributions {
 	    next if $file =~ m{CHECKSUMS$};
 	    next if $file =~ m{/\w+$};
 
-
+# limit processing when profiling
+#$main::count++;
+#last if $main::count > 200;
 
 	    # Sample files:
 	    # F/FA/FAKE1/My-Package-1.02.tar.gz
@@ -652,7 +650,9 @@ sub collect_distributions {
 			   $EXTENSION
 			   $}x ) {
 		#print "$1  - $2 - $3\n";
-		$db->insert_distro($1, $2, $3, $file, (stat $full_path)[9], time);
+		my @args = ($1, $2, $3, $file, (stat $full_path)[9], time);
+		LOG("insert_distro @args");
+		$db->insert_distro(@args);
 
 	    # K/KR/KRAKEN/Net-Telnet-Cisco-IOS-0.4beta.tar.gz
 	    } elsif ($file =~ m{^$PREFIX           # P/PA/PAUSEID
@@ -661,11 +661,17 @@ sub collect_distributions {
 			   -v?($CRAZY_VERSION_NO)      # version
 			   $EXTENSION
 			   $}x ) {
-		$db->insert_distro($1, $2, $3, $file, (stat $full_path)[9], time);
+		my @args = ($1, $2, $3, $file, (stat $full_path)[9], time);
+		LOG("insert_distro @args");
+		$db->insert_distro(@args);
 	     } else {
-		warn "ERROR - could not parse filename $file\n";
+		ERROR("could not parse filename '$file'");
 	    }
-	}
+	} 
+
+	$db->dbh->commit;
+
+	return;
 }
 
 sub update_from_whois {
@@ -675,6 +681,8 @@ sub update_from_whois {
 
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
+	$db->dbh->begin_work;
+
 
 	my $file = $self->cpan . '/authors/00whois.xml';
 	my $whois = Parse::CPAN::Whois->new($file);
@@ -692,12 +700,33 @@ sub update_from_whois {
 		}
 		#print Dumper \%new_data;
 		if (not $have) {
+			LOG('add_author ' . Dumper \%new_data);
 			$db->add_author(\%new_data, $who->pauseid);
 		} elsif ($changed) {
+			LOG('update_author ' . Dumper \%new_data);
 			$db->update_author(\%new_data, $who->pauseid);
 		}
 	}
+
+	$db->dbh->commit;
+
 	return;
+}
+
+sub ERROR {
+	_log('ERROR', @_);
+}
+sub WARN {
+	_log('WARN',  @_);
+}
+sub LOG {
+	_log('LOG',   @_);
+}
+sub _log {
+	my ($level, @msg) = @_;
+	return if $level eq 'LOG';
+	my $time = POSIX::strftime("%Y-%b-%d %H:%M:%S", gmtime);
+	printf STDERR "%5s - $time - @msg\n", $level;
 }
 
 1;

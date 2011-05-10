@@ -21,7 +21,12 @@ sub setup {
 #    die("Creating '$dbdir'");
     mkpath $dbdir if not -d $dbdir;
     system "sqlite3 $dbfile < schema/digger.sql" if not -e $dbfile;
-    $self->dbh( DBI->connect("dbi:SQLite:dbname=$dbfile","","", {RaiseError => 1, PrintError => 0, AutoCommit => 1}) );
+    $self->dbh( DBI->connect("dbi:SQLite:dbname=$dbfile","","", {
+        RaiseError       => 1,
+        PrintError       => 0,
+        AutoCommit       => 1,
+        FetchHashKeyName => 'NAME_lc',
+    }) );
 
     return;
 }
@@ -32,7 +37,12 @@ sub insert_distro {
 
     my $count = $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro WHERE path = ?', {}, $args[3]);
     if (not $count) {
-        $self->dbh->do($sql_insert, {}, @args);
+        eval {
+            $self->dbh->do($sql_insert, {}, @args);
+        };
+        if ($@) {
+            CPAN::Digger::Index::ERROR("Exception in insert_distro @args");
+        }
     }
 }
 
@@ -124,7 +134,7 @@ sub get_author {
 
     my $sth = $self->dbh->prepare('SELECT * FROM author WHERE pauseid = ?');
     $sth->execute($pauseid);
-    my $data = $sth->fetchrow_hashref('NAME_lc');
+    my $data = $sth->fetchrow_hashref;
     $sth->finish;
 
     return $data;
@@ -174,6 +184,7 @@ sub update_author {
 
 sub unzip_error {
     my ($self, $path, $error, $details) = @_;
+    CPAN::Digger::Index::WARN("unzip_error $error - $details in $path");
     my $cnt = $self->dbh->do('UPDATE distro SET unzip_error=?, unzip_error_details=? WHERE path=?', {},
         $error, $details, $path);
     # TODO: report if cannot update?
@@ -189,8 +200,8 @@ sub update_distro_details {
     my $placeholders = join '', (', ?' x scalar @values);
     my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
 
-    CPAN::Digger::Index::LOG("SQL: $sql");
-    CPAN::Digger::Index::LOG("$id @values");
+    #CPAN::Digger::Index::LOG("SQL: $sql");
+    #CPAN::Digger::Index::LOG("$id @values");
     $self->dbh->do('DELETE FROM distro_details WHERE id=?', {}, $id);
     $self->dbh->do($sql, {}, $id, @values);
 

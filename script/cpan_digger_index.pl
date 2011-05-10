@@ -63,27 +63,27 @@ if ($run{distro}) {
 	$cpan->process_distro($run{distro});
 }
 
-exit;
 
-$cpan->generate_central_files;
 
-if ($cpan->cpan) {
-	eval {
-		$cpan->run_index;
-	};
-	if ($@) {
-		warn "Exception in run_index: $@";
-		print $cpan->counter_distro, "\n";
-	}
-}
-if ($cpan->dir) {
-	eval {
-		$cpan->index_dir;
-	};
-	if ($@) {
-		warn "Exception in index_dir: $@";
-	}
-}
+# $cpan->generate_central_files;
+# 
+# if ($cpan->cpan) {
+	# eval {
+		# $cpan->run_index;
+	# };
+	# if ($@) {
+		# warn "Exception in run_index: $@";
+		# print $cpan->counter_distro, "\n";
+	# }
+# }
+# if ($cpan->dir) {
+	# eval {
+		# $cpan->index_dir;
+	# };
+	# if ($@) {
+		# warn "Exception in index_dir: $@";
+	# }
+# }
 
 exit;
 
