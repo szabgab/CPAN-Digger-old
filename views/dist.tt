@@ -146,10 +146,14 @@ Modules:
 <ul>
 [% FOR m IN modules %]
   [% IF m.html %]
-     <li><a href="/dist/[% name %]/[% m.path %]">[% m.name %]</a></li>
+     <li><a href="/dist/[% name %]/[% m.path %]">[% m.name %]</a>
   [% ELSE %]
-     <li>[% m.name %]</li>
+     <li>[% m.name %]
   [% END %]
+  <a href="/src/[% pauseid %]/[% distvname %]/[% m.path %]">src</a>
+  <a href="/syn/[% name %]/[% m.path %]">syn</a>
+  <a href="/dist/[% name %]/[% m.path %].json">out</a>
+  </li>
 [% END %]
 </ul>
 </div>

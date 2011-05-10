@@ -345,7 +345,7 @@ sub generate_outline {
 
 		LOG("Save outline in $outfile");
 		open my $out, '>', $outfile;
-		#print $out to_json($outline, { pretty => 1 });
+		print $out to_json($outline, { pretty => 1 });
 	}
 	return;
 }
