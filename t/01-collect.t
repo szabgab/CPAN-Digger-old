@@ -16,7 +16,7 @@ use Test::NoWarnings;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 14 + 2 + 11 + 1;
+plan tests => 14 + 3 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -291,6 +291,9 @@ process($pathx);
       meta_homepage   => undef,
       meta_repository => undef,
     }, 'Padre-Plugin-CommandLine details';
+    
+    my $modules = $dbh->selectall_arrayref('SELECT * FROM module ORDER BY name');
+    cmp_deeply $modules, [[1, 'Padre::Plugin::CommandLine', undef, 1, 5 ]], 'module table';
 }
 
 
