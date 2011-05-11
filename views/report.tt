@@ -1,0 +1,17 @@
+[%
+   title= "Report"
+   description= ""
+%]
+[% INCLUDE incl/header.tt %]
+
+<p>
+This page will contain various statistics and reports about the collected data.
+</p>
+
+<table>
+<tr><td>Number of distributions with unzip_error</td><td>[% unzip_errors %]</td></tr>
+<tr><td>Total Number of distributions</td><td>[% total_number_of_distributions %]</td></tr>
+</table>
+
+[% INCLUDE incl/footer.tt %]
+

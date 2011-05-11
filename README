@@ -198,20 +198,20 @@ Later we will add Ajax back to provide hints while the user types in the query.
 
 
 BUGs:
-  - FIXED On the pages generated from the (source) link does not include the PAUSEID
+  - FIXED - On the pages generated from the (source) link does not include the PAUSEID
     = need to regenare all the pages
   - On the POD pages we have links to /m/Module::Name and they don't work. Either the backend should support these links
     or we need to make the links point to the actual module. They can be redirections, assuming we know exactly where 
     each module is located. That will eliminate the need for a second pass on the files.
     for that we need to keep a table called module
     Module::Name, distribution where it is located, path in the distribution (lib/Module/Name.pm or Module/Name.pm)
+  - FIXED - if a user has never uploaded a file (and thus backapan does not exist for him) then don't show the link (e.g. id/YSAWANT )
+    nor should we show the "Releases" part of the page
+  - FIXED - if the e-mail is CENSORED then don't make it a link (e.g. id/YSAWANT )
 TODO:
-  - replace the Ajax way of searching by sending the search request in the URL.  At least for now.
+  - DONE - replace the Ajax way of searching by sending the search request in the URL.  At least for now.
   - add word indexing, (see above) to improve speed as we are using exact matches
   - add CSS to make the whole page nicer
   - On the POD and SYN (an SOURCE?) pages include a link to the dist page and to the other pages of the same type
+    Shall we generate the whole page up-front or only the internal part? - the highlighting or POD part?
 
-
-
-
- 

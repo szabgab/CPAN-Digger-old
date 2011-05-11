@@ -312,9 +312,17 @@ sub process_distro {
 	my $dist = $db->get_distro_by_path($path);
 	#LOG("Update DB for id $dist->{id}");
 	#LOG(Dumper $id
-	$db->update_distro_details(\%data, $dist->{id});
 
-	#$tt->process('dist.tt', \%data, $outfile) or die $tt->error;
+	$db->dbh->begin_work;
+	$db->update_distro_details(\%data, $dist->{id});
+	foreach my $t (@{$data{modules}}) {
+		$db->update_module($t, 1, $dist->{id});
+        }
+	foreach my $t (@{$data{pods}}) {
+		$db->update_module($t, 0, $dist->{id});
+	}
+	$db->dbh->commit;
+
 	return;
 }
 
@@ -740,7 +748,8 @@ sub update_from_whois {
 	my $file = $self->cpan . '/authors/00whois.xml';
 	my $whois = Parse::CPAN::Whois->new($file);
 	foreach my $who ($whois->authors) {
-		my $have = $db->get_author($who->pauseid);
+                my $pauseid = $who->pauseid;
+		my $have = $db->get_author($pauseid);
 		#print Dumper $have;
 		my %new_data;
 		my $changed;
@@ -751,13 +760,15 @@ sub update_from_whois {
 				$changed = 1 if $new_data{$field} ne $have->{$field};
 			}
 		}
+		my $homedir = sprintf('%s/authors/id/%s/%s/%s', $self->cpan, substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid);
+		$new_data{homedir} = -d $homedir ? 1 : 0;
 		#print Dumper \%new_data;
 		if (not $have) {
 			LOG('add_author ' . Dumper \%new_data);
-			$db->add_author(\%new_data, $who->pauseid);
+			$db->add_author(\%new_data, $pauseid);
 		} elsif ($changed) {
 			LOG('update_author ' . Dumper \%new_data);
-			$db->update_author(\%new_data, $who->pauseid);
+			$db->update_author(\%new_data, $pauseid);
 		}
 	}
 

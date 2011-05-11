@@ -34,7 +34,8 @@ CREATE TABLE author (
     name      VARCHAR(255),
     email     VARCHAR(255),
     asciiname VARCHAR(255),
-    homepage  VARCHAR(255)
+    homepage  VARCHAR(255),
+    homedir   BOOL
 );
 
 CREATE TABLE word_types (
@@ -57,8 +58,13 @@ CREATE TABLE words (
 );
 CREATE INDEX words_word_idx ON words (word);
 
-CREATE TABLE modules (
+CREATE TABLE module (
     id       INTEGER PRIMARY KEY,
-    name     VARCHAR(255) UNIQUE NOT NULL
+    name     VARCHAR(255) UNIQUE NOT NULL,
+    abstract VARCHAR(255),
+    is_module BOOL,
+    distro   INTEGER NOT NULL,
+    FOREIGN KEY(distro)  REFERENCES distro (id)
 );
+CREATE INDEX module_name_idx ON module (name);
 

@@ -56,42 +56,48 @@ my %expected_authors = (
    name      => '',
    asciiname => undef,
    email     => undef,
-   homepage  => undef
+   homepage  => undef,
+   homedir   => 0,
  },
  'KORSHAK' => {
    pauseid   => 'KORSHAK',
    name      => 'Ярослав Коршак',
    email     => 'CENSORED',
    asciiname => undef,
-   homepage  => undef
+   homepage  => undef,
+   homedir   => 0,
  },
  'SPECTRUM' => {
    pauseid   => 'SPECTRUM',
    name      => 'Черненко Эдуард Павлович',
    email     => 'edwardspec@gmail.com',
    asciiname => 'Edward Chernenko',
-   homepage  => 'http://absurdopedia.net/wiki/User:Edward_Chernenko'
+   homepage  => 'http://absurdopedia.net/wiki/User:Edward_Chernenko',
+   homedir   => 0,
  },
  'FAKE1' => {
    pauseid   => 'FAKE1',
    name      => 'גאבור סבו - Gábor Szabó',
    email     => 'gabor@pti.co.il',
    asciiname => 'Gabor Szabo',
-   homepage  => 'http://szabgab.com/'
+   homepage  => 'http://szabgab.com/',
+   homedir   => 1,
  },
  'YKO' => {
    pauseid   => 'YKO',
    name      => 'Ярослав Коршак',
    email     => 'ykorshak@gmail.com',
    asciiname => 'Yaroslav Korshak',
-   homepage  => 'http://korshak.name/'
+   homepage  => 'http://korshak.name/',
+   homedir   => 0,
  },
  'NUFFIN' => {
    pauseid   => 'NUFFIN',
    name      => 'יובל קוג\'מן (Yuval Kogman)',
    email     => 'nothingmuch@woobling.org',
    asciiname => 'Yuval Kogman',
-   homepage  => 'http://nothingmuch.woobling.org/'
+   homepage  => 'http://nothingmuch.woobling.org/',
+   homedir   => 0,
   },
 );
 
@@ -319,13 +325,14 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
 }
 
 {
-    my $r = dancer_response(GET => '/q/FA/author');
+    my $r = dancer_response(GET => '/query', { params => {query => 'FA', what => 'author'} } );
     is $r->{status}, 200, 'OK';
-    my $data = from_json($r->{content});
-    my $exp = dclone($expected_authors{FAKE1});
-    $exp->{type} = 'a';
-    $data->{data}[0]{name} = Encode::encode('utf8', $data->{data}[0]{name});
-    cmp_deeply($data, {data => [$exp], ellapsed_time => ignore()}, '/q/FA/author');
+    like $r->{content}, qr{FAKE1}, 'content';
+    #my $data = from_json($r->{content});
+    #my $exp = dclone($expected_authors{FAKE1});
+    #$exp->{type} = 'a';
+    #$data->{data}[0]{name} = Encode::encode('utf8', $data->{data}[0]{name});
+    #cmp_deeply($data, {data => [$exp], ellapsed_time => ignore()}, '/q/FA/author');
 }
 
 #################################################### end

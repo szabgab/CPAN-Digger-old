@@ -1,7 +1,7 @@
 package CPAN::Digger::WWW;
 use Dancer ':syntax';
 
-our $VERSION = '0.1';
+our $VERSION = '0.01';
 
 use CPAN::Digger::DB;
 
@@ -67,11 +67,13 @@ get '/id/:pauseid' => sub {
     }
     my %data = (
         name        => decode('utf8', $author->{name} || $author->{asciiname} || ''),
-        last_upload => _date($last_upload),
+        last_upload => ($last_upload ? _date($last_upload) : 'NA'),
 	pauseid     => uc($pauseid),
 	lcpauseid   => lc($pauseid),
 	email       => $author->{email},
+        link_email  => ($author->{email} and $author->{email} ne 'CENSORED' ? 1 : 0),
 	homepage    => $author->{homepage},
+	homedir     => $author->{homedir},
 	backpan     => uc(join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid)),
 	distributions => $distributions,
         ellapsed_time => time - $t0,
@@ -140,6 +142,18 @@ foreach my $page (qw(news faq)) {
     };
 };
 
+get '/report' => sub {
+    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
+    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
+    $db->setup;
+
+    my %data = (
+        unzip_erros => $db->count_unzip_errors,
+	total_number_of_distributions => $db->count_distros,
+    );
+    template 'report.tt', \%data;
+};
+
 # get '/licenses' => sub {
     # my $data_file = path config->{public}, 'data', 'licenses.json';
     # my $json = eval {from_json slurp($data_file)};
@@ -185,7 +199,7 @@ sub run_query {
     my $t0 = time;
 
     if ($what !~ /^(distribution|author)$/) {
-        return { error => 'Invalid search type' };
+        return { error => "Invalid search type: '$what'" };
     }
 
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now

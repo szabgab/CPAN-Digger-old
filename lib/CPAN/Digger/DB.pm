@@ -2,10 +2,13 @@ package CPAN::Digger::DB;
 use 5.008008;
 use Moose;
 
+our $VERSION = '0.01';
+
 has 'dbfile' => (is => 'ro', isa => 'Str');
 has 'dbh'    => (is => 'rw');
 
 use DBI;
+use Data::Dumper   qw(Dumper);
 use File::Basename qw(dirname);
 use File::Path     qw(mkpath);
 
@@ -155,7 +158,7 @@ sub add_author {
     my ($self, $data, $pauseid) = @_;
     
     Carp::croak('pauseid is required') if not $pauseid;
-    my @fields = qw(name email asciiname homepage);
+    my @fields = qw(name email asciiname homepage homedir);
     my $fields = join ', ', grep { defined $data->{$_} } @fields;
     my @values = map { $data->{$_} } grep { defined $data->{$_} } @fields;
     my $placeholders = join ', ', ('?') x scalar @values;
@@ -239,6 +242,27 @@ sub get_all_distros {
         FROM distro A, (SELECT max(version) AS v, name
                         FROM distro GROUP BY name) AS B
         WHERE A.version=B.v and A.name=B.name ORDER BY A.name}, 'name');
+}
+
+sub update_module {
+	my ($self, $data, $is_module, $distro_id) = @_;
+    	CPAN::Digger::Index::LOG("update_module of $distro_id " . Dumper $data);
+	# name is defined as unique though I think what should be unique is the name + distro_id
+	# we then will have to also find out which distro is the one that is really supplying the module!
+	# for now we keep this simple (and probably incorrect)
+        $self->dbh->do('DELETE FROM module WHERE name =?', {}, $data->{name});
+	$self->dbh->do('INSERT INTO module (name, is_module, abstract, distro) VALUES(?, ?, ?, ?)', {}, 
+		$data->{name}, $is_module, $data->{abstract}, $distro_id);
+	return;
+}
+
+sub count_distros {
+	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro');
+}
+sub count_unzip_errors {
+	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro WHERE unzip_error NOT NULL');
 }
 
 1;
