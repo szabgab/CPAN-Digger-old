@@ -142,14 +142,27 @@ foreach my $page (qw(news faq)) {
     };
 };
 
-get '/report' => sub {
+get '/stats' => sub {
     my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
 
     my %data = (
-        unzip_erros => $db->count_unzip_errors,
+        unzip_errors => $db->count_unzip_errors,
 	total_number_of_distributions => $db->count_distros,
+	distinct_distributions => $db->count_distinct_distros,
+	has_meta_json => $db->count_meta_json,
+	has_meta_yaml => $db->count_meta_yaml,
+	has_no_meta   => $db->count_no_meta,
+	has_test_file => $db->count_test_file,
+	has_t_dir     => $db->count_t_dir,
+	has_xt_dir    => $db->count_xt_dir,
+	has_no_tests  => $db->count_no_tests,
+	
+	number_of_authors => $db->count_authors,
+
+	number_of_modules => $db->count_modules,
+
     );
     template 'report.tt', \%data;
 };

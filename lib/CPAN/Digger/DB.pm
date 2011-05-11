@@ -256,13 +256,61 @@ sub update_module {
 	return;
 }
 
+# subs for the stats page
 sub count_distros {
 	my ($self) = @_;
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro');
 }
+sub count_distinct_distros {
+	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(DISTINCT(name)) FROM distro');
+}
 sub count_unzip_errors {
 	my ($self) = @_;
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro WHERE unzip_error NOT NULL');
+}
+sub count_meta_json {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details WHERE has_meta_json=1');
+}
+sub count_meta_yaml {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details WHERE has_meta_yml=1');
+}
+
+sub count_no_meta {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details 
+	       WHERE 
+	         (has_meta_yml IS NULL OR has_meta_yml=0) AND (has_meta_json IS NULL OR has_meta_json=0)');
+}
+sub count_test_file {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details WHERE test_file=1');
+}
+sub count_t_dir {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details WHERE has_t=1');
+}
+sub count_xt_dir {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details WHERE has_xt=1');
+}
+sub count_no_tests {
+    	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro_details
+            WHERE
+              (has_t IS NULL OR has_t=0) AND (test_file IS NULL OR test_file=0)');
+}
+
+sub count_authors {
+       	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM author');
+}
+
+sub count_modules {
+       	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM module');
 }
 
 1;
