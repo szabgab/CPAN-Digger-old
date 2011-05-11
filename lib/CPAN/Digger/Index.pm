@@ -151,8 +151,12 @@ sub process_all_distros {
 	$db->setup;
 	my $distros = $db->get_all_distros;
 	#LOG(Dumper $distros);
-	foreach my $d (@$distros) {
-		$self->process_distro($d->[0]);
+	foreach my $name (sort keys %$distros) {
+		LOG(Dumper $name);
+		my $d = $distros->{$name};
+                my $details = $db->get_distro_details_by_id($d->{id});
+                next if $details;
+		$self->process_distro($d->{path});
         sleep 1;
 	}
 

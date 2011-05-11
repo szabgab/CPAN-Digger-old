@@ -162,10 +162,12 @@ TODO
 *) Script that can process an individual distribution which is give as either a zip file
    so we start with unzipping or an already open directory for projects and companies
    that don't package as zip files.
-   
-   
-   
-   
+
+TODO: add a field to each distributions called "processed" which is a timestamp.
+Later processes can work on packages that were not yet processed or processedbefore time X.
+When displaying a distribution we can know if it was already processed at all and when?
+Maybe the processed does not need to be a timestamp but a version number?
+
 
 
 *) Allow searching within a distribution
