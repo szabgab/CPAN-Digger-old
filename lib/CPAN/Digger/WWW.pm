@@ -164,7 +164,7 @@ get '/stats' => sub {
 	number_of_modules => $db->count_modules,
 
     );
-    template 'report.tt', \%data;
+    template 'stats.tt', \%data;
 };
 
 # get '/licenses' => sub {
