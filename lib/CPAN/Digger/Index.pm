@@ -422,7 +422,13 @@ sub _generate_html {
 			$pod->html_header_after_title( $header_bottom);
 			$pod->html_footer( $footer );
 
-			$info{html} = $pod->process($infile, $outfile);
+			eval {
+				$info{html} = $pod->process($infile, $outfile);
+			};
+			if ($@) {
+				ERROR("Exception when processing pod '$infile' of $path to '$outfile'  $@");
+				next;
+			}
 		}
 		push @data, \%info;
 	}
@@ -767,9 +773,14 @@ sub LOG {
 }
 sub _log {
 	my ($level, @msg) = @_;
-#	return if $level eq 'LOG';
-	my $time = POSIX::strftime("%Y-%b-%d %H:%M:%S", gmtime);
+
+	return if $ENV{DIGGER_SILENT};
+ 	#return if $level eq 'LOG';
+	
+	my $time = POSIX::strftime("%Y-%b-%d %H:%M:%S", localtime);
 	printf STDERR "%5s - $time - @msg\n", $level;
+
+	return;
 }
 
 1;

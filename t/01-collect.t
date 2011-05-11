@@ -20,6 +20,8 @@ plan tests => 14 + 2 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
+$ENV{DIGGER_SILENT} = 1;
+
 my $cpan = tempdir( CLEANUP => $cleanup );
 my $dbdir = tempdir( CLEANUP => $cleanup );
 my $outdir = tempdir( CLEANUP => $cleanup );
@@ -269,12 +271,17 @@ process($pathx);
     #diag "ID: $ppc->{id}";
     my $ppc_details = $db->get_distro_details_by_id($ppc->{id});
     #diag explain $ppc_details;
+
     cmp_deeply $ppc_details, {
       has_meta_json   => undef,
       has_meta_yml    => 1,
       has_t           => 1,
+      has_xt          => undef,
+      test_file       => undef,
+      pods            => '[{"name":"Padre::Plugin::CommandLine","path":"lib/Padre/Plugin/CommandLine.pm"}]',
+      special_files   => 'Build.PL,Changes,MANIFEST,META.yml,Makefile.PL',
       id              => $ID,
-      meta_abstract   => undef,
+      meta_abstract   => 'vi and emacs in Padre ?',
       meta_homepage   => undef,
       meta_repository => undef,
     }, 'Padre-Plugin-CommandLine details';
