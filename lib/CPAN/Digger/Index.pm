@@ -396,7 +396,7 @@ sub _generate_html {
 	}
 	my @data;
 	my $tt = $self->get_tt;
-	my $author = lc $d->{pauseid};
+	my $author = uc $d->{author};
 	
 	my $dist = $d->{name};
 	foreach my $file (@files) {
