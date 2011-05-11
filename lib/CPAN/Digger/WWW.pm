@@ -11,6 +11,7 @@ use File::Basename qw(basename);
 use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
+#use JSON;
 
 # for development:
 # on the real server the index file will be static
@@ -123,8 +124,7 @@ get '/dist/:name' => sub {
         $data{special_files}  = [split /,/, $details->{special_files}];
     }
     if ($details->{pods}) {
-        use JSON;
-        $data{modules} = JSON::from_json($details->{pods});
+        $data{modules} = from_json($details->{pods});
     }
 
     #debug(Dumper \%data);
