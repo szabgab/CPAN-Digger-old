@@ -43,17 +43,17 @@ $(document).ready(function() {
 	return false;
      });
 
-     $('#dig').click(function() {
-            send_query();
-            return false;
-     });
-
-     $('#query').bind('keypress', function(e) {
-        if(e.keyCode==13){
-           send_query();
-           return false;
-        }
-     });
+//     $('#dig').click(function() {
+//            send_query();
+//            return false;
+//     });
+//
+//     $('#query').bind('keypress', function(e) {
+//        if(e.keyCode==13){
+//           send_query();
+//           return false;
+//        }
+//     });
 });
 
 function send_query() {
@@ -72,13 +72,13 @@ function send_query() {
                        var data = resp["data"];
                        for (var i=0; i<data.length; i++) {
                            // distribution
-                           if (data[i]["type"] == 'd') {
+                           if (data[i]["distribution"] == '1') {
                                 html += '<div class="author"><a href="/id/' + data[i]["author"]   + '">' + data[i]["author"] + '</a></div>';
                                 html += '<div class="name"><a href="/dist/' + data[i]["name"] + '">' + data[i]["name"]   + '</a></div>';
                                 html += '<div class="version">' + data[i]["version"] + '</div>';
                            }
                            // author
-                           if (data[i]["type"] == 'a') {
+                           if (data[i]["author"] == '1') {
                                 var name = data[i]["asciiname"];
                                 if (data[i]["name"]) {
                                         name = data[i]["name"];

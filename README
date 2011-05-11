@@ -170,6 +170,9 @@ Maybe the processed does not need to be a timestamp but a version number?
 
 
 
+Later we will add Ajax back to provide hints while the user types in the query.
+
+
 *) Allow searching within a distribution
    and/or list all the functions in the distribution
 
@@ -194,3 +197,21 @@ Maybe the processed does not need to be a timestamp but a version number?
    cgi     module               CGI::Application
 
 
+BUGs:
+  - FIXED On the pages generated from the (source) link does not include the PAUSEID
+    = need to regenare all the pages
+  - On the POD pages we have links to /m/Module::Name and they don't work. Either the backend should support these links
+    or we need to make the links point to the actual module. They can be redirections, assuming we know exactly where 
+    each module is located. That will eliminate the need for a second pass on the files.
+    for that we need to keep a table called module
+    Module::Name, distribution where it is located, path in the distribution (lib/Module/Name.pm or Module/Name.pm)
+TODO:
+  - replace the Ajax way of searching by sending the search request in the URL.  At least for now.
+  - add word indexing, (see above) to improve speed as we are using exact matches
+  - add CSS to make the whole page nicer
+  - On the POD and SYN (an SOURCE?) pages include a link to the dist page and to the other pages of the same type
+
+
+
+
+ 

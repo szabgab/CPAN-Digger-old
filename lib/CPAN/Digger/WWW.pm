@@ -155,20 +155,44 @@ foreach my $page (qw(news faq)) {
     # return _data({ 'meta.license' => $license });
 # };
 
+get '/xx' => sub {
+     return time . (params->{data} || '');
+};
+
 get '/q/:query/:what' => sub {
+    return query();
+};
+get '/query' => sub {
+    return query();
+};
+
+sub query {
+    my $data = run_query();
+
+    if (request->is_ajax()) {  # should check request->content_type instead?
+       content_type 'text/plain';
+       return to_json $data, {utf8 => 0};
+    } else {
+      # return to_json $data, {utf8 => 0};
+      return template 'query.tt', $data;
+    }
+}
+
+
+sub run_query {
     my $term = params->{query} || '';
     my $what = params->{what} || '';
     my $t0 = time;
+
     if ($what !~ /^(distribution|author)$/) {
-        return to_json { error => 'Invalid search type' };
+        return { error => 'Invalid search type' };
     }
 
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
-    content_type 'text/plain';
     #my $data = { 'abc' => $term };
 
     my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-    return to_json { error => 'no db configuration' } if not $dbfile;
+    return { error => 'no db configuration' } if not $dbfile;
 
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
@@ -176,17 +200,17 @@ get '/q/:query/:what' => sub {
     my $data;
     if ($what eq 'distribution') {
         $data = $db->get_distros_latest_version($term);
-        $_->{type} = 'd' for @$data;
+        $_->{distribution} = 1 for @$data;
     }
     if ($what eq 'author') {
         $data = $db->get_authors($term);
-        $_->{type} = 'a' for @$data;
+        $_->{author} = 1 for @$data;
         foreach my $d (@$data) {
             $d->{name} = decode('utf8', $d->{name});
         }
     }
-    return to_json({data => $data, ellapsed_time => time-$t0}, {utf8 => 0});
-};
+    return {data => $data, ellapsed_time => time-$t0};
+}
 
 
 # get '/module/:query' => sub {

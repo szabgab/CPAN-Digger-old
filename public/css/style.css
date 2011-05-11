@@ -21,6 +21,7 @@ body {
 #content {
   float: left;
   width: 700px;
+  margin-left: 20px;
 /*  background-color: yellow; */
 }
 
