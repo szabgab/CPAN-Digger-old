@@ -354,8 +354,12 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
         if (-s $full_path) {
             if ($path =~ m{/src}) { # TODO stop hard coding here!
                 content_type 'text/plain';
+                return slurp($full_path);
+            } else {
+                my $html = slurp($full_path);
+                return template 'file', {html => $html};
             }
-            return slurp($full_path);
+            
         } else {
             return "This file was empty";
         }

@@ -339,12 +339,15 @@ sub generate_syn {
 		}
 
 		LOG("Save syn in $outfile");
-		my %data = (
+		#my %data = (
 			#filename => $opt{infile},
-			code => $html,
-		);
-		my $tt = $self->get_tt;
-		$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
+		#	code => $html,
+		#);
+		#my $tt = $self->get_tt;
+		#$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
+		open my $out, '>', $outfile;
+		print $out qq{<div class="code">$html</div>}
+
 	}
 
 	return;
@@ -412,14 +415,22 @@ sub _generate_html {
 			# description?
 			# keywords?
 			my ($header_top, $header_bottom, $footer);
-			$tt->process('incl/header_top.tt', {}, \$header_top) or die $tt->error;
-			$tt->process('incl/header_bottom.tt', {}, \$header_bottom) or die $tt->error;
-			$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
-			$pod->html_header_before_title( $header_top );
-			$header_bottom .= qq((<a href="/src/$author/$d->{distvname}/$path/$file">source</a>));
-			$header_bottom .= qq((<a href="/syn/$dist/$path/$file">syn</a>));
-			$pod->html_header_after_title( $header_bottom);
-			$pod->html_footer( $footer );
+
+			# We now only generate the "inside" of the pod and put it together
+			# with the header and footer on-the fly.
+
+			#$tt->process('incl/header_top.tt', {}, \$header_top) or die $tt->error;
+			#$tt->process('incl/header_bottom.tt', {}, \$header_bottom) or die $tt->error;
+			#$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
+			#$pod->html_header_before_title( $header_top );
+			#$header_bottom .= qq((<a href="/src/$author/$d->{distvname}/$path/$file">source</a>));
+			#$header_bottom .= qq((<a href="/syn/$dist/$path/$file">syn</a>));
+			#$pod->html_header_after_title( $header_bottom );
+			#$pod->html_footer( $footer );
+
+			$pod->html_header_before_title('');
+			$pod->html_header_after_title('');
+			$pod->html_footer('');
 
 			eval {
 				$info{html} = $pod->process($infile, $outfile);
