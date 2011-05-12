@@ -74,18 +74,8 @@ if ($run{process}) {
 	$cpan->process_all_distros();
 }
 
-
 # $cpan->generate_central_files;
-# 
-# if ($cpan->cpan) {
-	# eval {
-		# $cpan->run_index;
-	# };
-	# if ($@) {
-		# warn "Exception in run_index: $@";
-		# print $cpan->counter_distro, "\n";
-	# }
-# }
+
 # if ($cpan->dir) {
 	# eval {
 		# $cpan->index_dir;

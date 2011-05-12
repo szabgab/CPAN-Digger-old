@@ -60,23 +60,6 @@ has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 	# return;
 # }
 # 
-# sub run_index {
-	# my $self = shift;
-# 
-	# #$self->authors( Parse::CPAN::Authors->new( File::Spec->catfile( $self->cpan, 'authors', '01mailrc.txt.gz' )) );
-	# my $p = Parse::CPAN::Packages->new( File::Spec->catfile( $self->cpan, 'modules', '02packages.details.txt.gz' ));
-# 
-	# $ENV{PATH} = '/bin:/usr/bin';
-# 
-	# my $tt = $self->get_tt;
-# 
-	# my @distributions = $p->distributions;
-	# foreach my $d (@distributions) {
-		# $self->process_distro($d);
-	# }
-# 
-	# return;
-# }
 
 # get all the authors from the database
 # for each author fetch the latest version of distributions
