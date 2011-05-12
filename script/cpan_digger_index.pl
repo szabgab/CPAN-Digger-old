@@ -14,34 +14,37 @@ use CPAN::Digger::Index;
 
 my %opt;
 GetOptions(\%opt,
-	'cpan=s',
 	'output=s',
 	'dbfile=s',
-	'filter=s',
-	'dir=s',
-	'prefix=s',
-	'pod',
-	'syn',
-	'process',
-	'all',
 
-	'distro=s',
+	'cpan=s',
+	'filter=s',
+
+	'dir=s',
+	'name=s',
 
 	'whois',
 	'collect',
-#	'authors',
+
+
+	'prepare',
+	'pod',
+	'syn',
+	'process',
+
+	'all',
+
+	'distro=s',
 ) or usage();
 
 
 usage('--dbfile required') if not $opt{dbfile};
 usage('--cpan or --dir required') if not $opt{cpan} and not $opt{dir};
 usage("Directory '$opt{cpan}' not found") if $opt{cpan} and not -d $opt{cpan};
-usage('if --dir is given then --prefix also need to be supplied')
-	if $opt{dir} and not $opt{prefix};
+usage('if --dir is given then --name also need to be supplied')
+	if $opt{dir} and not $opt{name};
 usage('--output required') if not $opt{output};
 usage('--output must be given an existing directory') if not -d $opt{output};
-usage('--prefix should similar to AUTHOR/Module-Name-1.00')
-	if $opt{prefix} and $opt{prefix} !~ m{^[A-Z]+  /  \w+(-\w+)*  -\d+\.\d+$}x;
 
 $opt{root} = $root;
 
@@ -62,9 +65,6 @@ if ($run{whois}) {
 	$cpan->update_from_whois;
 }
 
-# if ($run{authors}) {
-	# $cpan->generate_author_pages;
-# }
 
 if ($run{distro}) {
 	$cpan->process_distro($run{distro});
@@ -94,27 +94,29 @@ sub usage {
 	}
 	die <<"END_USAGE";
 Usage: perl $0
-   --output PATH_TO_OUTPUT_DIRECTORY    (required)
+Required:
+   --output PATH_TO_OUTPUT_DIRECTORY
    --dbfile path/to/database.db
 
-At least one of these is required:
+One of these is required:
    --cpan PATH_TO_CPAN_MIRROR
    --dir PATH_TO_SOURCE_DIR or PATH_TO_SOURCE_FILE
-   --prefix USERNAME/Module-Name-1.00  (prefix is required if --dir is given)
 
+   --name NAME_OF_PROJECT  (name is required if --dir is given)
 
 
 Optional:
    --filter REGEX   only packages that match the regex will be indexed
+
+One of these is required:
    --pod            generate HTML pages from POD
    --syn            generate syntax highlighted source files
-
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
 
    --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
    --process  process all distros
-   
+
    --all            do all the steps one by one in the processing
 
 Examples:
@@ -123,5 +125,3 @@ $0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger
 
 END_USAGE
 }
-
-#   --authors        generate an html page for each author
