@@ -47,10 +47,13 @@ has 'pod'     => (is => 'ro', isa => 'Str');
 has 'syn'     => (is => 'ro', isa => 'Str');
 has 'outline' => (is => 'ro', isa => 'Str');
 
+my $dbx;
 sub db {
-	my $db = CPAN::Digger::DB->new;
-	$db->setup;
-	return $db;
+	if (not $dbx) {
+		$dbx = CPAN::Digger::DB->new;
+		$dbx->setup;
+	}
+	return $dbx;
 }
 
 # sub index_dir {

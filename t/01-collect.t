@@ -293,6 +293,8 @@ process('Padre-Plugin-CommandLine');
       meta_abstract   => 'vi and emacs in Padre ?',
       meta_homepage   => undef,
       meta_repository => undef,
+      meta_license    => 'perl',
+      meta_version    => '0.02',
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
 

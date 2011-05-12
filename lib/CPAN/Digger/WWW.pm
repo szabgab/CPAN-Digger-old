@@ -117,6 +117,9 @@ get '/dist/:name' => sub {
 #debug($d->{file_timestamp});
 #debug(_date($d->{file_timestamp}));
 
+    my %meta_data;
+    $meta_data{$_} = $details->{"meta_$_"} for qw(abstract version license);
+
     my %data = (
         name      => $name,
         pauseid   => $d->{author},
@@ -125,9 +128,7 @@ get '/dist/:name' => sub {
         author    => {
             name => decode('utf8', $author->{name}),
         },
-        meta_data => {
-            abstract => $details->{meta_abstract},
-        },
+        meta_data => \%meta_data,
         ellapsed_time => time-$t0,
     );
     $data{$_} = $d->{$_} for qw(version path);

@@ -24,6 +24,8 @@ CREATE TABLE distro_details (
     meta_homepage     VARCHAR(100),
     meta_repository   VARCHAR(100),
     meta_abstract     VARCHAR(100),
+    meta_license      VARCHAR(30),
+    meta_version      VARCHAR(20),
     special_files     VARCHAR(1000),
     pods              VARCHAR(1000),
     FOREIGN KEY(id)   REFERENCES distro (id)
