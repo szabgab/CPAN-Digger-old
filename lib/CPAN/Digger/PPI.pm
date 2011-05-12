@@ -5,8 +5,18 @@ use Moose;
 use PPI::Document;
 use PPI::Find;
 
+use Perl::MinimumVersion;
+
+
 has 'infile' => (is => 'rw', isa => 'Str');
 has 'ppi'    => (is => 'rw', isa => 'PPI::Document');
+
+sub min_perl {
+	my ($self) = @_;
+	my $pm = Perl::MinimumVersion->new( $self->ppi );
+	my @vm = $pm->version_markers;
+	return ($pm->minimum_version, \@vm);
+}
 
 sub read_file {
 	my ($self) = @_;

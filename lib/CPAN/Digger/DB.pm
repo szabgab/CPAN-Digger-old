@@ -257,14 +257,14 @@ sub get_all_distros {
 
 ##### module table
 sub update_module {
-	my ($self, $data, $is_module, $distro_id) = @_;
+	my ($self, $data, $min_perl, $is_module, $distro_id) = @_;
     	CPAN::Digger::Index::LOG("update_module of $distro_id " . Dumper $data);
 	# name is defined as unique though I think what should be unique is the name + distro_id
 	# we then will have to also find out which distro is the one that is really supplying the module!
 	# for now we keep this simple (and probably incorrect)
         $self->dbh->do('DELETE FROM module WHERE name =?', {}, $data->{name});
-	$self->dbh->do('INSERT INTO module (name, is_module, abstract, distro) VALUES(?, ?, ?, ?)', {}, 
-		$data->{name}, $is_module, $data->{abstract}, $distro_id);
+	$self->dbh->do('INSERT INTO module (name, is_module, min_perl, abstract, distro) VALUES(?, ?, ?, ?, ?)', {}, 
+		$data->{name}, $is_module, $min_perl, $data->{abstract}, $distro_id);
 	return;
 }
 

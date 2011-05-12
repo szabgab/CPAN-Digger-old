@@ -225,7 +225,6 @@ BUGs:
   - The module CPANDB does not have POD htmlified, why?
 TODO:
   - Collect MinimumVersion of modules
-  - Collect list of functions (put the data from the outline into the database)
   - Run Perl Critic on modules and collect the data
 
   - add word indexing, (see above) to improve speed as we are using exact matches

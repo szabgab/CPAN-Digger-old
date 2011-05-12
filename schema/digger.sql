@@ -28,6 +28,7 @@ CREATE TABLE distro_details (
     meta_version      VARCHAR(20),
     special_files     VARCHAR(1000),
     pods              VARCHAR(1000),
+    min_perl          VARCHAR(20),
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 
@@ -64,6 +65,7 @@ CREATE TABLE module (
     id       INTEGER PRIMARY KEY,
     name     VARCHAR(255) UNIQUE NOT NULL,
     abstract VARCHAR(255),
+    min_perl VARCHAR(20),
     is_module BOOL,
     distro   INTEGER NOT NULL,
     FOREIGN KEY(distro)  REFERENCES distro (id)

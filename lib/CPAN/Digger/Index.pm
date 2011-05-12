@@ -164,7 +164,7 @@ sub process_distro {
 		$data{pods} = $pods->{pods};
 	}
 
-	my $outlines = $self->generate_outline($dist_dir, $data{modules});
+	my ($outlines, $min_versions) = $self->generate_outline($dist_dir, $data{modules});
 	
 	$self->generate_syn($syn_dir, $data{modules});
 
@@ -176,14 +176,15 @@ sub process_distro {
 	my $dist = db->get_distro_by_path($path);
 	#LOG("Update DB for id $dist->{id}");
 	#LOG(Dumper $id
-
+#warn Dumper $min_versions;
 	db->dbh->begin_work;
 	db->update_distro_details(\%data, $dist->{id});
 	foreach my $t (@{$data{modules}}) {
-		db->update_module($t, 1, $dist->{id});
-        }
+#		warn $t->{name};
+		db->update_module($t, $min_versions->{$t->{name}}, 1, $dist->{id});
+       }
 	foreach my $t (@{$data{pods}}) {
-		db->update_module($t, 0, $dist->{id});
+		db->update_module($t, $min_versions->{$t->{name}}, 0, $dist->{id});
 	}
 
 	foreach my $o (@$outlines) {
@@ -361,17 +362,25 @@ sub generate_outline {
 
 	return if not $self->outline;
 
-	my @all;
+	
+
+	my @all_outlines;
+	my %all_versions;
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
+		my $vm_file = File::Spec->catfile($dir, "$file->{path}.vm.txt");
 		mkpath dirname $outfile;
 
+		my $min_perl;
+		my $version_markers;
 		my $outline;
 		eval {
 			my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
 			#my $x = $ppi->get_ppi;
 
 			$outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
+
+			($min_perl, $version_markers) = $ppi->min_perl;
 		};
 		if ($@) {
 			ERROR("Exception in PPI while generating outline for $file->{path} $@");
@@ -379,12 +388,24 @@ sub generate_outline {
 		}
 
 		LOG("Save outline in $outfile " . Dumper $outline);
-		open my $out, '>', $outfile;
-		print $out to_json($outline, { pretty => 1 });
-		push @all, @$outline;
+		{
+			open my $out, '>', $outfile;
+			print $out to_json($outline, { pretty => 1 });
+		}
+		push @all_outlines, @$outline;
+
+		my $module = $file->{path};
+		$module =~ s{^lib/}{};
+		$module =~ s{\.pm$}{};
+		$module =~ s{/}{::}g;
+		$all_versions{$module} = "$min_perl"; # forced stringification
+		{
+			open my $out, '>', $vm_file;
+			print $out Dumper $version_markers;
+		}
 	}
 
-	return \@all;
+	return (\@all_outlines, \%all_versions);
 }
 
 sub _generate_html {

@@ -295,6 +295,7 @@ process('Padre-Plugin-CommandLine');
       meta_repository => undef,
       meta_license    => 'perl',
       meta_version    => '0.02',
+      min_perl        => undef,
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
 
@@ -307,7 +308,7 @@ process('Padre-Plugin-CommandLine');
 
     my $modules = $dbh->selectall_arrayref('SELECT * FROM module ORDER BY name');
     cmp_deeply $modules, 
-      [[1, 'Padre::Plugin::CommandLine', 'Padre::Plugin::CommandLine - vi and emacs in Padre ?', 1, 5 ]],
+      [[1, 'Padre::Plugin::CommandLine', 'Padre::Plugin::CommandLine - vi and emacs in Padre ?', '5.006', 1, 5]],
       'module table';
       
     my $subs = $dbh->selectall_arrayref('SELECT * FROM subs ORDER BY name');
