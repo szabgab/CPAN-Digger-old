@@ -1,7 +1,8 @@
 package CPAN::Digger::WWW;
-use Dancer ':syntax';
 
 our $VERSION = '0.01';
+
+use Dancer ':syntax';
 
 use CPAN::Digger::DB;
 
@@ -22,6 +23,22 @@ use Time::HiRes   qw(time);
         # #template 'index';
     # };
 # }
+
+#before sub {
+    #return { error => 'no db configuration' } if not $dbfile;
+#};
+
+my $dbx;
+sub db {
+    if (not $dbx) {
+        my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
+        $dbx = CPAN::Digger::DB->new(dbfile => $dbfile);
+        $dbx->setup;
+    }
+    return $dbx;
+
+}
+
 
 get '/' => sub {
     template 'index', {
@@ -51,13 +68,10 @@ get '/id/:pauseid' => sub {
 
     debug($pauseid);
     
-    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
 
-    my $author = $db->get_author(uc $pauseid);
+    my $author = db->get_author(uc $pauseid);
     debug(Dumper $author);
-    my $distributions = $db->get_distros_of(uc $pauseid);
+    my $distributions = db->get_distros_of(uc $pauseid);
     my $last_upload = max(map {$_->{file_timestamp}} @$distributions);
 
     foreach my $d (@$distributions) {
@@ -93,16 +107,13 @@ get '/dist/:name' => sub {
     $name =~ s/[^\w-]//g; # sanitise
 
     debug($name);
-    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
 
-    my $d = $db->get_distro_latest($name);
-    my $details = $db->get_distro_details_by_id($d->{id});
+    my $d = db->get_distro_latest($name);
+    my $details = db->get_distro_details_by_id($d->{id});
     #debug(Dumper $d);
     #debug(Dumper $details);
 
-    my $author = $db->get_author(uc $d->{author});
+    my $author = db->get_author(uc $d->{author});
 
 #debug($d->{file_timestamp});
 #debug(_date($d->{file_timestamp}));
@@ -143,25 +154,22 @@ foreach my $page (qw(news faq)) {
 };
 
 get '/stats' => sub {
-    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
 
     my %data = (
-        unzip_errors => $db->count_unzip_errors,
-	total_number_of_distributions => $db->count_distros,
-	distinct_distributions => $db->count_distinct_distros,
-	has_meta_json => $db->count_meta_json,
-	has_meta_yaml => $db->count_meta_yaml,
-	has_no_meta   => $db->count_no_meta,
-	has_test_file => $db->count_test_file,
-	has_t_dir     => $db->count_t_dir,
-	has_xt_dir    => $db->count_xt_dir,
-	has_no_tests  => $db->count_no_tests,
+        unzip_errors => db->count_unzip_errors,
+	total_number_of_distributions => db->count_distros,
+	distinct_distributions => db->count_distinct_distros,
+	has_meta_json => db->count_meta_json,
+	has_meta_yaml => db->count_meta_yaml,
+	has_no_meta   => db->count_no_meta,
+	has_test_file => db->count_test_file,
+	has_t_dir     => db->count_t_dir,
+	has_xt_dir    => db->count_xt_dir,
+	has_no_tests  => db->count_no_tests,
 	
-	number_of_authors => $db->count_authors,
+	number_of_authors => db->count_authors,
 
-	number_of_modules => $db->count_modules,
+	number_of_modules => db->count_modules,
 
     );
     template 'stats.tt', \%data;
@@ -218,19 +226,14 @@ sub run_query {
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
     #my $data = { 'abc' => $term };
 
-    my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-    return { error => 'no db configuration' } if not $dbfile;
-
-    my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
-    $db->setup;
 
     my $data;
     if ($what eq 'distribution') {
-        $data = $db->get_distros_latest_version($term);
+        $data = db->get_distros_latest_version($term);
         $_->{distribution} = 1 for @$data;
     }
     if ($what eq 'author') {
-        $data = $db->get_authors($term);
+        $data = db->get_authors($term);
         $_->{author} = 1 for @$data;
         foreach my $d (@$data) {
             $d->{name} = decode('utf8', $d->{name});
