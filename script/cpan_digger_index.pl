@@ -20,21 +20,23 @@ GetOptions(\%opt,
 	'cpan=s',
 	'filter=s',
 
-	'dir=s',
-	'name=s',
+# temporarily disabled
+#	'dir=s',
+#	'name=s',
+#	'author=s',
+#	'version=s',
 
 	'whois',
 	'collect',
+	'process',
 
 
 	'prepare',
 	'pod',
 	'syn',
-	'process',
+	'outline',
 
-	'all',
-
-	'distro=s',
+	'full',
 ) or usage();
 
 
@@ -46,28 +48,36 @@ usage('if --dir is given then --name also need to be supplied')
 usage('--output required') if not $opt{output};
 usage('--output must be given an existing directory') if not -d $opt{output};
 
+usage('On or more of --collect, --whois  or --process is needed')
+	if  not $opt{collect}
+	and not $opt{whois}
+	and not $opt{process};
+
+if ($opt{process}) {
+	usage('On or more of --full, --syn --pod is needed')
+		if  not $opt{full}
+		and not $opt{syn}
+		and not $opt{pod}
+		and not $opt{prepare}
+		and not $opt{outline};
+}
+
 $opt{root} = $root;
 
+if (delete $opt{full}) {
+	$opt{$_} = 1 for qw(prepare syn pod outline);
+}
+
 my %run;
-$run{$_} = delete $opt{$_} for qw(collect whois distro process all);
+$run{$_} = delete $opt{$_} for qw(collect whois process);
+
 my $cpan = CPAN::Digger::Index->new(%opt);
-
-if ($run{all}) {
-	$run{$_} = 1 for qw(collect whois process);
-}
-
-
-if ($run{collect}) {
-	$cpan->collect_distributions;
-}
-
 if ($run{whois}) {
 	$cpan->update_from_whois;
 }
 
-
-if ($run{distro}) {
-	$cpan->process_distro($run{distro});
+if ($run{collect}) {
+	$cpan->collect_distributions;
 }
 
 if ($run{process}) {
@@ -75,15 +85,6 @@ if ($run{process}) {
 }
 
 # $cpan->generate_central_files;
-
-# if ($cpan->dir) {
-	# eval {
-		# $cpan->index_dir;
-	# };
-	# if ($@) {
-		# warn "Exception in index_dir: $@";
-	# }
-# }
 
 exit;
 
@@ -109,19 +110,22 @@ Optional:
    --filter REGEX   only packages that match the regex will be indexed
 
 One of these is required:
-   --pod            generate HTML pages from POD
-   --syn            generate syntax highlighted source files
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
 
    --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
    --process  process all distros
 
-   --all            do all the steps one by one in the processing
+If --process is give then one or more of the steps:
+   --prepare        
+   --pod            generate HTML pages from POD
+   --syn            generate syntax highlighted source files
+   --outline
+   --full           do all the steps one by one in the process
 
 Examples:
 $0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --collect --whois
-$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --distro S/SZ/SZABGAB/CPAN-Digger-0.01.tar.gz
+$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --filter '^CPAN-Digger$'
 
 END_USAGE
 }

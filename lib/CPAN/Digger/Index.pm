@@ -34,6 +34,14 @@ has 'dir'      => (is => 'ro', isa => 'Str');
 has 'prefix'   => (is => 'ro', isa => 'Str');
 has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 
+has 'cpan'    => (is => 'ro', isa => 'Str');
+has 'output'  => (is => 'ro', isa => 'Str');
+has 'filter'  => (is => 'ro', isa => 'Str');
+
+has 'prepare' => (is => 'ro', isa => 'Str');
+has 'pod'     => (is => 'ro', isa => 'Str');
+has 'syn'     => (is => 'ro', isa => 'Str');
+has 'outline' => (is => 'ro', isa => 'Str');
 
 # sub index_dir {
 	# my $self = shift;
@@ -87,45 +95,6 @@ has 'authors'  => (is => 'rw', isa => 'Parse::CPAN::Authors');
 	# return;
 # }
 
-# sub get_author_page_data {
-	# my ($self, $pauseid) = @_;
-# 
-	# my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	# $db->setup;
-# 
-	# my $author = 1;
-	# #LOG("Author: $pauseid");
-	# my @packages;
-# 
-	# my $distros = $db->get_distros_of($pauseid);
-	# foreach my $d (@$distros) {
-		# if ($d->{name}) {
-			# push @packages, {
-				# name => $d->{name},
-			# };
-		# } else {
-			# WARN("distro name is missing");
-		# }
-	# }
-	# my %data = (
-		# pauseid   => $pauseid,
-		# lcpauseid => lc($pauseid),
-		# name      => $author->{name},
-		# backpan   => join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid),
-		# packages  => \@packages,
-	# );
-	# return \%data;
-# }
-
-
-# sub author_info {
-	# my ($self, $author) = @_;
-	# if ($self->authors) {
-		# return $self->authors->author(uc $author);
-	# } else {
-		# return;
-	# }
-# }
 
 sub process_all_distros {
 	my ($self) = @_;
@@ -134,7 +103,11 @@ sub process_all_distros {
 	$db->setup;
 	my $distros = $db->get_all_distros;
 	#LOG(Dumper $distros);
+	my $filter = $self->filter;
 	foreach my $name (sort keys %$distros) {
+
+		next if $filter and $name !~ qr{$filter};
+
 		LOG(Dumper $name);
 		my $d = $distros->{$name};
                 my $details = $db->get_distro_details_by_id($d->{id});
@@ -159,15 +132,16 @@ sub process_distro {
 
 	my $d = $db->get_distro_by_path($path);
 	die "Could not find distro by path '$path'" if not $d;
-
-	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
+	
 	my $src_dir   = File::Spec->catdir( $self->output, 'src' , uc $d->{author});
 	my $dist_dir  = File::Spec->catdir( $self->output, 'dist', $d->{name});
 	my $syn_dir   = File::Spec->catdir( $self->output, 'syn', $d->{name});
 
 	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
 
-	$self->prepare_src($d, $src_dir, $source_dir, $path, $full_path) or return;
+	if ($self->prepare) {
+		$self->prepare_src($d, $src_dir, $source_dir, $path) or return;
+	}
 
 	if ($source_dir) {
 		chdir $source_dir;
@@ -176,6 +150,7 @@ sub process_distro {
 	}
 
 	my $pods = $self->generate_html_from_pod($dist_dir, $d);
+
 	my %data;
 
 	$data{modules} = $pods->{modules};
@@ -184,10 +159,8 @@ sub process_distro {
 	}
 
 	$self->generate_outline($dist_dir, $data{modules});
-
-	if ($self->syn) {
-		$self->generate_syn($syn_dir, $data{modules});
-	}
+	
+	$self->generate_syn($syn_dir, $data{modules});
 
 	$self->collect_meta_data(\%data);
 	$data{distvname} = $d->{distvname};
@@ -293,10 +266,12 @@ sub collect_meta_data {
 
 # unzip if needed or copy files if we were supplied with a directory structure (e.g. an svn checkout)
 sub prepare_src {
-	my ($self, $d, $src_dir, $source_dir, $path, $full_path) = @_;
+	my ($self, $d, $src_dir, $source_dir, $path) = @_;
 
 	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
 	$db->setup;
+
+	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
 
 	chdir $src_dir;
 	my $distv_dir = File::Spec->catdir($src_dir, $d->{distvname});
@@ -341,6 +316,8 @@ sub generate_html_from_pod {
 sub generate_syn {
 	my ($self, $dir, $files) = @_;
 
+	return if not $self->syn;
+
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, $file->{path});
 		mkpath dirname $outfile;
@@ -369,6 +346,8 @@ sub generate_syn {
 sub generate_outline {
 	my ($self, $dir, $files) = @_;
 
+	return if not $self->outline;
+
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
 		mkpath dirname $outfile;
@@ -389,6 +368,7 @@ sub generate_outline {
 		open my $out, '>', $outfile;
 		print $out to_json($outline, { pretty => 1 });
 	}
+
 	return;
 }
 

@@ -11,13 +11,8 @@ use Template              ();
 
 #use CPAN::Digger::DB;
 
-has 'root'   => (is => 'ro', isa => 'Str');
-has 'cpan'   => (is => 'ro', isa => 'Str');
-has 'output' => (is => 'ro', isa => 'Str');
-has 'filter' => (is => 'ro', isa => 'Str');
-has 'pod'    => (is => 'ro', isa => 'Str');
-has 'syn'    => (is => 'ro', isa => 'Str');
-has 'dbfile' => (is => 'ro', isa => 'Str');
+has 'root'    => (is => 'ro', isa => 'Str');
+has 'dbfile'  => (is => 'ro', isa => 'Str');
 
 #has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
 

@@ -252,9 +252,11 @@ copy 't/files/Padre-Plugin-CommandLine-0.02.tar.gz', "$cpan/authors/id/S/SP/SPEC
 collect();
 
 ###################################   process files
-process('F/FA/FAKE1/Package-Name-0.02.tar.gz');
+#process('F/FA/FAKE1/Package-Name-0.02.tar.gz');
+process('Package-Name');
 my $pathx = 'S/SP/SPECTRUM/Padre-Plugin-CommandLine-0.02.tar.gz'; 
-process($pathx);
+#process($pathx);
+process('Padre-Plugin-CommandLine');
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
@@ -285,7 +287,7 @@ process($pathx);
       has_t           => 1,
       has_xt          => undef,
       test_file       => undef,
-      pods            => '[{"name":"Padre::Plugin::CommandLine","path":"lib/Padre/Plugin/CommandLine.pm"}]',
+      pods            => '[{"html":1,"name":"Padre::Plugin::CommandLine","path":"lib/Padre/Plugin/CommandLine.pm"}]',
       special_files   => 'Build.PL,Changes,MANIFEST,META.yml,Makefile.PL',
       id              => $ID,
       meta_abstract   => 'vi and emacs in Padre ?',
@@ -355,5 +357,5 @@ sub collect {
 
 sub process {
     my ($path) = @_;
-    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --distro $path");
+    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --process --full --filter $path");
 }

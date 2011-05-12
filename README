@@ -169,6 +169,19 @@ When displaying a distribution we can know if it was already processed at all an
 Maybe the processed does not need to be a timestamp but a version number?
 
 
+1) Run modes:
+   - on all CPAN
+     fill the author table
+     fill the distro table
+     unzip distributions
+   - on a specific project (not related to CPAN) (or on several projects)
+     unzip if needed or copy files
+2) In either cases
+   - collect data from META files and layout
+   - run POD2HTML
+   - generate SYN files (PPI)
+   - run Perl::Critic   (PPI)
+   - Generate Outline   (PPI)
 
 Later we will add Ajax back to provide hints while the user types in the query.
 
