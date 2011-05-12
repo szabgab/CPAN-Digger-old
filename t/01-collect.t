@@ -16,7 +16,7 @@ use Test::NoWarnings;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 14 + 4 + 11 + 1;
+plan tests => 14 + 5 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -309,6 +309,14 @@ process('Padre-Plugin-CommandLine');
     cmp_deeply $modules, 
       [[1, 'Padre::Plugin::CommandLine', 'Padre::Plugin::CommandLine - vi and emacs in Padre ?', 1, 5 ]],
       'module table';
+      
+    my $subs = $dbh->selectall_arrayref('SELECT * FROM subs ORDER BY name');
+    cmp_deeply $subs, [
+          ['about', 1, 196 ],
+          ['menu',  1,  63 ],
+          ['on_key_pressed', 1, 112 ],
+          ['show_prompt', 1, 80 ]
+        ], 'subs';
 }
 
 

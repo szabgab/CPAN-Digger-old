@@ -273,6 +273,21 @@ sub get_module_by_name {
     return $self->dbh->selectrow_hashref('SELECT * FROM module WHERE name=?', {}, $name);
 }
 
+##### subs
+sub add_subs {
+    my ($self, $module, $subs) = @_;
+
+    CPAN::Digger::Index::LOG("add subs $module " . Dumper $subs);
+    my $m = $self->get_module_by_name($module);
+    CPAN::Digger::Index::LOG("m: " . Dumper $m);
+    return if not $m;
+    
+    foreach my $s (@$subs) {
+        $self->dbh->do('DELETE FROM subs WHERE name=? AND module_id=?', {}, $s->{name}, $m->{id});
+        $self->dbh->do('INSERT INTO subs (name, module_id, line) VALUES(?, ?, ?)', {}, $s->{name}, $m->{id}, $s->{line});
+    }
+}
+
 ################################## subs for the stats page
 sub count_distros {
 	my ($self) = @_;

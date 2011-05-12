@@ -164,7 +164,7 @@ sub process_distro {
 		$data{pods} = $pods->{pods};
 	}
 
-	$self->generate_outline($dist_dir, $data{modules});
+	my $outlines = $self->generate_outline($dist_dir, $data{modules});
 	
 	$self->generate_syn($syn_dir, $data{modules});
 
@@ -185,6 +185,12 @@ sub process_distro {
 	foreach my $t (@{$data{pods}}) {
 		db->update_module($t, 0, $dist->{id});
 	}
+
+	foreach my $o (@$outlines) {
+		#CPAN::Digger::Index::LOG("add subs $o->{name} " . Dumper $o);
+		db->add_subs($o->{name}, $o->{methods});
+	}
+
 	db->dbh->commit;
 
 	return;
@@ -355,6 +361,7 @@ sub generate_outline {
 
 	return if not $self->outline;
 
+	my @all;
 	foreach my $file (@$files) {
 		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
 		mkpath dirname $outfile;
@@ -371,12 +378,13 @@ sub generate_outline {
 			next;
 		}
 
-		LOG("Save outline in $outfile");
+		LOG("Save outline in $outfile " . Dumper $outline);
 		open my $out, '>', $outfile;
 		print $out to_json($outline, { pretty => 1 });
+		push @all, @$outline;
 	}
 
-	return;
+	return \@all;
 }
 
 sub _generate_html {
@@ -784,7 +792,9 @@ sub _log {
  	#return if $level eq 'LOG';
 	
 	my $time = POSIX::strftime("%Y-%b-%d %H:%M:%S", localtime);
-	printf STDERR "%5s - $time - @msg\n", $level;
+	
+	# need to interpolate outside the printf format as there might be % signs in @msg somewhere
+	printf STDERR "%5s - %s - %s\n", $level, $time, "@msg";
 
 	return;
 }

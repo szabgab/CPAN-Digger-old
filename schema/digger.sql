@@ -50,7 +50,6 @@ INSERT INTO word_types VALUES(1, 'distro_name');
 INSERT INTO word_types VALUES(2, 'abstract');
 INSERT INTO word_types VALUES(3, 'meta_keyword');
 
-
 CREATE TABLE words (
     word    VARCHAR(30) NOT NULL,
     type    INTEGER NOT NULL,
@@ -70,4 +69,11 @@ CREATE TABLE module (
     FOREIGN KEY(distro)  REFERENCES distro (id)
 );
 CREATE INDEX module_name_idx ON module (name);
+
+CREATE TABLE subs (
+    name      VARCHAR(255) NOT NULL,
+    module_id INTEGER NOT NULL,
+    line      INTEGER NOT NULL,
+    FOREIGN KEY(module_id)  REFERENCES module (id)
+);
 
