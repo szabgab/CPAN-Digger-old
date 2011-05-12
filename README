@@ -226,7 +226,7 @@ BUGs:
 TODO:
   - On the POD and SYN (an SOURCE?) pages include a link to the dist page and to the other pages of the same type
     Shall we generate the whole page up-front or only the internal part? - the highlighting or POD part?
-  - First unzip everything nut skip already unzipped files and/or those already marked as unzip failed
+  - First unzip everything but skip already unzipped files and/or those already marked as unzip failed
   - Collect MinimumVersion of modules
   - Collect list of functions (put the data from the outline into the database)
   - Run Perl Critic on modules and collect the data

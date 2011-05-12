@@ -31,8 +31,7 @@ use Time::HiRes   qw(time);
 my $dbx;
 sub db {
     if (not $dbx) {
-        my $dbfile = $ENV{CPAN_DIGGER_DBFILE};
-        $dbx = CPAN::Digger::DB->new(dbfile => $dbfile);
+        $dbx = CPAN::Digger::DB->new;
         $dbx->setup;
     }
     return $dbx;
@@ -359,8 +358,34 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
                 content_type 'text/plain';
                 return slurp($full_path);
             } else {
-                my $html = slurp($full_path);
-                return template 'file', {html => $html};
+                # get the name of the distro
+                # using that get the author, the latest version
+                my %data = (
+                    html => scalar slurp($full_path),
+                );
+
+                my $dist_name;
+                my $sub_path;
+                if ($path =~ m{^/dist/([^/]+)/(.*)}) {
+                    $dist_name = $1;
+                    $sub_path  = $2;
+                    ($data{syn} = $path) =~ s{^/dist}{/syn};
+                }
+                if ($path =~ m{^/syn/([^/]+)/(.*)}) {
+                    $dist_name = $1;
+                    $sub_path  = $2;
+                    ($data{pod} = $path) =~ s{^/syn}{/dist};
+                }
+                #if ($path =~ m{^/src
+                if ($dist_name) {
+                    my $d = db->get_distro_latest($dist_name);
+                    #my $details = db->get_distro_details_by_id($d->{id});
+                    $data{src} = "/src/$d->{author}/$dist_name-$d->{version}/$sub_path";
+                    $data{dist} = $dist_name;
+                    $data{title} = $dist_name;
+                }
+
+                return template 'file', \%data;
             }
             
         } else {
