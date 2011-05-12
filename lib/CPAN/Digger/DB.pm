@@ -19,7 +19,7 @@ my $sql_insert = q{
 sub setup {
     my ($self) = @_;
 
-    my $dbfile = $self->dbfile;
+    my $dbfile = $self->dbfile || $ENV{CPAN_DIGGER_DBFILE};
     my $dbdir = dirname $dbfile;
 #    die("Creating '$dbdir'");
     mkpath $dbdir if not -d $dbdir;
