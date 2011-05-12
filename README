@@ -182,6 +182,7 @@ Maybe the processed does not need to be a timestamp but a version number?
    - generate SYN files (PPI)
    - run Perl::Critic   (PPI)
    - Generate Outline   (PPI)
+   - MinimumVersion     (PPI)
 
 Later we will add Ajax back to provide hints while the user types in the query.
 

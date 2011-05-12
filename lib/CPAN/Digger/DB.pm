@@ -202,7 +202,7 @@ sub update_distro_details {
     $data->{meta_repository} = $data->{meta}{resources}{repository};
     $data->{meta_abstract}   = $data->{meta}{abstract};
 
-    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file meta_homepage meta_repository meta_abstract);
+    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file meta_homepage meta_repository meta_abstract examples);
     my @fields = grep {defined $data->{$_}} @all_fields;
     my $fields = join ' ', map {", $_"} @fields;
     my @values = map { $data->{$_} } @fields;

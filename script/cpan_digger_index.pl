@@ -54,7 +54,7 @@ usage('On or more of --collect, --whois  or --process is needed')
 	and not $opt{process};
 
 if ($opt{process}) {
-	usage('On or more of --full, --syn --pod is needed')
+	usage('On or more of --syn, --pod, --prepare, --outline or --full is needed')
 		if  not $opt{full}
 		and not $opt{syn}
 		and not $opt{pod}

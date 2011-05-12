@@ -20,6 +20,7 @@ CREATE TABLE distro_details (
     has_t             BOOL,
     has_xt            BOOL,
     test_file         BOOL,
+    examples          VARCHAR(100),
     meta_homepage     VARCHAR(100),
     meta_repository   VARCHAR(100),
     meta_abstract     VARCHAR(100),
