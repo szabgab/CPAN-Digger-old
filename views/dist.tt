@@ -127,7 +127,13 @@ Special files:
 [% END %]
 </ul>
 </div>
-Minimal perl version: [% min_perl %]
+<div>
+Minimal perl version: [% min_perl %] <a href="/dist/[% name %]/version.txt">version markers</a>
+</div>
+
+<div>
+<a href="/dist/[% name %]/critic.txt">Perl::Critic results</a>
+</div>
 
 <div id="dependencies">
 Depends on (requires):

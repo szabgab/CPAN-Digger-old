@@ -29,6 +29,7 @@ CREATE TABLE distro_details (
     special_files     VARCHAR(1000),
     pods              VARCHAR(1000),
     min_perl          VARCHAR(20),
+    critic            TEXT,
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 

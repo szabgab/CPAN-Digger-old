@@ -296,6 +296,7 @@ process('Padre-Plugin-CommandLine');
       meta_license    => 'perl',
       meta_version    => '0.02',
       min_perl        => '5.006',
+      critic          => undef, #re('in list functions at line'), #ignore(), Don't modify $_ in list functions at line 161, column 8. See page 114 of PBP.
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
 

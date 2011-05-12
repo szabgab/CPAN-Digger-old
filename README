@@ -186,11 +186,14 @@ Maybe the processed does not need to be a timestamp but a version number?
 
 Later we will add Ajax back to provide hints while the user types in the query.
 
-Collecting MinimumVersion of modules and setting minimum version of package
+Collecting MinimumVersion of modules and setting minimum version of package. 
+Collect the version markers in the version.txt file of each distribution.
+
+Running Perl Critic using level 4 on modules and collect the data in 
+the critic.txt file of each distribution.
 
 *) Allow searching within a distribution
    and/or list all the functions in the distribution
-
 
 *) for searching create a table of words
 
@@ -225,8 +228,6 @@ BUGs:
   - FIXED - if the e-mail is CENSORED then don't make it a link (e.g. id/YSAWANT )
   - The module CPANDB does not have POD htmlified, why?
 TODO:
-  - Run Perl Critic on modules and collect the data
-
   - add word indexing, (see above) to improve speed as we are using exact matches
   - add CSS to make the whole page nicer
   - use CPANDB from here http://svn.ali.as/db/cpandb.gz  2011-03-08 ? 14 Mb  (49M after unzip)

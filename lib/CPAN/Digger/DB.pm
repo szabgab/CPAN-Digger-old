@@ -209,7 +209,10 @@ sub update_distro_details {
     my @meta_fields = qw(abstract license version);
     $data->{"meta_$_"} = $data->{meta}{$_} for @meta_fields;
 
-    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file meta_homepage meta_repository examples min_perl);
+    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file  
+                examples min_perl critic
+                meta_homepage meta_repository
+                );
     push @all_fields, map {"meta_$_"} @meta_fields;
     my @fields = grep {defined $data->{$_}} @all_fields;
     my $fields = join ' ', map {", $_"} @fields;

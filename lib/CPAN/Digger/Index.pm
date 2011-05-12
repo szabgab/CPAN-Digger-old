@@ -165,7 +165,7 @@ sub process_distro {
 		$data{pods} = $pods->{pods};
 	}
 
-	my ($outlines, $min_versions) = $self->generate_outline($dist_dir, $data{modules});
+	my ($outlines, $min_versions, $pc_violations, $version_markers) = $self->generate_outline($dist_dir, $data{modules});
 	
 	$self->generate_syn($syn_dir, $data{modules});
 
@@ -194,7 +194,25 @@ sub process_distro {
 		db->add_subs($o->{name}, $o->{methods});
 	}
 	$data{min_perl} = $min_perl_version;
+	#$data{critic}   = $pc_violations;
 	db->update_distro_details(\%data, $dist->{id});
+	{
+		open my $out, '>', "$dist_dir/critic.txt";
+		if ($pc_violations) {
+			print $out "<pre>\n";
+			print $out $pc_violations;
+			print $out "\n</pre>\n";
+		}
+		close $out;
+	}
+	{
+		open my $out, '>', "$dist_dir/version.txt";
+		print $out "<pre>\n";
+		print $out "Overall min perl version: $min_perl_version\n\n";
+		print $out "Markers:\n\n";
+		print $out $version_markers;
+		print $out "\n</pre>\n";
+	}
 
 	db->dbh->commit;
 
@@ -366,18 +384,19 @@ sub generate_outline {
 
 	return if not $self->outline;
 
-	
+	use Perl::Critic;
 
+	my $pc = Perl::Critic->new( -severity => 5 );
 	my @all_outlines;
 	my %all_versions;
+	my $all_version_markers = '';
+	my $all_violations = '';
 	foreach my $file (@$files) {
-		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
-		my $vm_file = File::Spec->catfile($dir, "$file->{path}.vm.txt");
-		mkpath dirname $outfile;
 
 		my $min_perl;
 		my $version_markers;
 		my $outline;
+		my @violations;
 		eval {
 			my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
 			#my $x = $ppi->get_ppi;
@@ -385,11 +404,18 @@ sub generate_outline {
 			$outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
 
 			($min_perl, $version_markers) = $ppi->min_perl;
+			
+			@violations = $pc->critique( $ppi->get_ppi );
 		};
 		if ($@) {
 			ERROR("Exception in PPI while generating outline for $file->{path} $@");
 			next;
 		}
+
+		my $outfile = File::Spec->catfile($dir, "$file->{path}.json");
+		#my $vm_file = File::Spec->catfile($dir, "$file->{path}.vm.txt");
+		#my $pc_file = File::Spec->catfile($dir, "$file->{path}.pc.txt");
+		mkpath dirname $outfile;
 
 		LOG("Save outline in $outfile " . Dumper $outline);
 		{
@@ -403,13 +429,20 @@ sub generate_outline {
 		$module =~ s{\.pm$}{};
 		$module =~ s{/}{::}g;
 		$all_versions{$module} = "$min_perl"; # forced stringification
-		{
-			open my $out, '>', $vm_file;
-			print $out Dumper $version_markers;
+		$all_version_markers .= "$module\n" . Dumper($version_markers) . "\n";
+		#{
+		#	open my $out, '>', $vm_file;
+		#	print $out Dumper $version_markers;
+		#}
+
+		if (@violations) {
+			$all_violations .= "$module\n" . join('', @violations) . "\n";
+		#	open my $out, '>', $pc_file;
+		#	print $out @violations;
 		}
 	}
 
-	return (\@all_outlines, \%all_versions);
+	return (\@all_outlines, \%all_versions, $all_violations, $all_version_markers);
 }
 
 sub _generate_html {
