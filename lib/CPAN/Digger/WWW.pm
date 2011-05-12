@@ -244,7 +244,17 @@ get '/m/:module' => sub {
     return "Wow, could not find corresponding distribution" if not $distro;
 
     $name =~ s{::}{/}g;
-    return redirect "/dist/$distro->{name}/lib/$name.pm";
+    foreach my $ext (qw(pm pod)) {
+        my $path = "/dist/$distro->{name}/lib/$name.$ext";
+        my $full_path = path config->{appdir}, '..', 'digger', $path;
+        return redirect $path if -e $full_path;
+    }
+
+    return template 'error', {
+         no_pod_found => 1, 
+         module => $name,
+    };
+    
     
     #my $distro_details = db->get_distro_details_by_id($distro->{id});
     #return to_json {module => $module, distro => $distro, details => $distro_details};
@@ -273,7 +283,13 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
     # to point to a directory relative to the appdir ?
     #return config->{appdir};
     my $full_path = path config->{appdir}, '..', 'digger', $path;
-    return "Cannot handle $path as full_path is undef" if not defined $full_path;
+    if (not defined $full_path) {
+        return template 'error', {
+            cannot_handle => 1, 
+        };
+    }
+
+
     if (-d $full_path) {
         if ($path !~ m{/$}) {
             return redirect request->path . '/';
@@ -342,7 +358,10 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
             return "This file was empty";
         }
     }
-    return "Cannot handle $path  $full_path";
+
+    return template 'error', {
+         cannot_handle => 1, 
+    };
 };
 
 sub _date {

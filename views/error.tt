@@ -13,4 +13,12 @@ We have to try harder.
 </p>
 [% END %]
 
+[% IF no_pod_found %]
+Sorry, no POD found for [% module %]
+[% END %]
+
+[% IF cannot_handle %]
+Hmm, sorry but we could not handle this request
+[% END %]
+
 [% INCLUDE incl/footer.tt %]
