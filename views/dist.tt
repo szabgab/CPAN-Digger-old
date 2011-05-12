@@ -127,6 +127,7 @@ Special files:
 [% END %]
 </ul>
 </div>
+Minimal perl version: [% min_perl %]
 
 <div id="dependencies">
 Depends on (requires):

@@ -132,7 +132,7 @@ get '/dist/:name' => sub {
         ellapsed_time => time-$t0,
     );
     $data{$_} = $d->{$_} for qw(version path);
-    $data{$_} = $details->{$_} for qw(has_t test_file has_meta_yml has_meta_json examples);
+    $data{$_} = $details->{$_} for qw(has_t test_file has_meta_yml has_meta_json examples min_perl);
     if ($details->{special_files}) {
         $data{special_files}  = [split /,/, $details->{special_files}];
     }

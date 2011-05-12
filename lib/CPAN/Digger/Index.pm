@@ -17,6 +17,7 @@ use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
 use JSON                  qw(to_json);
+use List::Util            qw(max);
 use Parse::CPAN::Whois    ();
 #use Parse::CPAN::Authors  ();
 use POSIX                 ();
@@ -176,21 +177,24 @@ sub process_distro {
 	my $dist = db->get_distro_by_path($path);
 	#LOG("Update DB for id $dist->{id}");
 	#LOG(Dumper $id
-#warn Dumper $min_versions;
+
+	my $min_perl_version = 1;
 	db->dbh->begin_work;
-	db->update_distro_details(\%data, $dist->{id});
 	foreach my $t (@{$data{modules}}) {
-#		warn $t->{name};
 		db->update_module($t, $min_versions->{$t->{name}}, 1, $dist->{id});
-       }
+		$min_perl_version = max($min_versions->{$t->{name}}, $min_perl_version);
+        }
 	foreach my $t (@{$data{pods}}) {
 		db->update_module($t, $min_versions->{$t->{name}}, 0, $dist->{id});
+		$min_perl_version = max($min_versions->{$t->{name}}, $min_perl_version);
 	}
 
 	foreach my $o (@$outlines) {
 		#CPAN::Digger::Index::LOG("add subs $o->{name} " . Dumper $o);
 		db->add_subs($o->{name}, $o->{methods});
 	}
+	$data{min_perl} = $min_perl_version;
+	db->update_distro_details(\%data, $dist->{id});
 
 	db->dbh->commit;
 

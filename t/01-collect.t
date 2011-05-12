@@ -295,7 +295,7 @@ process('Padre-Plugin-CommandLine');
       meta_repository => undef,
       meta_license    => 'perl',
       meta_version    => '0.02',
-      min_perl        => undef,
+      min_perl        => '5.006',
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
 
