@@ -293,6 +293,7 @@ process('Padre-Plugin-CommandLine');
       meta_abstract   => 'vi and emacs in Padre ?',
       meta_homepage   => undef,
       meta_repository => undef,
+      examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
     
     my $modules = $dbh->selectall_arrayref('SELECT * FROM module ORDER BY name');
