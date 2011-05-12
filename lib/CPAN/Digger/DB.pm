@@ -115,6 +115,8 @@ sub get_distro_by_path {
     my $r = $sth->fetchrow_hashref;
     $sth->finish;
 
+    $r->{distvname} = "$r->{name}-$r->{version}";
+
     return $r;
 }
 

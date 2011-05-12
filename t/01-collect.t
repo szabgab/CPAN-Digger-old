@@ -268,6 +268,7 @@ process($pathx);
       'version'             => '0.02',
       'id'                  => $ID,
       'path'                => $pathx,
+      'distvname'           => 'Padre-Plugin-CommandLine-0.02',
       'unzip_error'         => ignore(),
       'unzip_error_details' => ignore(),
     }, 'Padre-Plugin-CommandLine';

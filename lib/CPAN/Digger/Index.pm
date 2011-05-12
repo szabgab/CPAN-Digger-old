@@ -182,42 +182,17 @@ sub process_distro {
 	my $dist_dir  = File::Spec->catdir( $self->output, 'dist', $d->{name});
 	my $syn_dir   = File::Spec->catdir( $self->output, 'syn', $d->{name});
 
-	my $distvname = "$d->{name}-$d->{version}";
 	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
-	chdir $src_dir;
-	my $distv_dir = File::Spec->catdir($src_dir, $distvname);
-	if (not -e $distv_dir) {
-		if ($source_dir) {
-			LOG("Source directory $source_dir");
-			# just copy the files
-			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
-				next if $file =~ /\.svn|\.git|CVS|blib/;
-				my $from = File::Spec->catfile($source_dir, $file);
-				my $to   = File::Spec->catfile($distvname, $file);
-				#LOG("Copy $from to $to");
-				mkpath dirname $to;
-				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
-			}
-		} else {
-			my $unzip = $self->unzip($db, $path, $full_path, $distvname);
-			return if not $unzip;
-		}
-	}
 
-	if (not -e $distvname) {
-		WARN("No directory for '" . $distvname . "'");
-		#$counter{no_directory}++;
-		$db->unzip_error($path, 'no_directory', $distvname);
-		return;
-	}
-	
+	$self->prepare_src($d, $src_dir, $source_dir, $path, $full_path) or return;
+
 	if ($source_dir) {
 		chdir $source_dir;
 	} else {
-		chdir $distvname;
+		chdir $d->{distvname};
 	}
 
-	my $pods = $self->generate_html_from_pod($dist_dir, $d, $distvname);
+	my $pods = $self->generate_html_from_pod($dist_dir, $d);
 	my %data;
 
 	$data{modules} = $pods->{modules};
@@ -299,7 +274,7 @@ sub process_distro {
 	}
 
 	$data{special_files} = \@special_files;
-	$data{distvname} = $distvname;
+	$data{distvname} = $d->{distvname};
 	my $outfile = File::Spec->catfile($dist_dir, 'index.html');
 	my $tt = $self->get_tt;
 	
@@ -326,14 +301,49 @@ sub process_distro {
 	return;
 }
 
+# unzip if needed or copy files if we were supplied with a directory structure (e.g. an svn checkout)
+sub prepare_src {
+	my ($self, $d, $src_dir, $source_dir, $path, $full_path) = @_;
+
+	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
+	$db->setup;
+
+	chdir $src_dir;
+	my $distv_dir = File::Spec->catdir($src_dir, $d->{distvname});
+	if (not -e $distv_dir) {
+		if ($source_dir) {
+			LOG("Source directory $source_dir");
+			# just copy the files
+			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
+				next if $file =~ /\.svn|\.git|CVS|blib/;
+				my $from = File::Spec->catfile($source_dir, $file);
+				my $to   = File::Spec->catfile($d->{distvname}, $file);
+				#LOG("Copy $from to $to");
+				mkpath dirname $to;
+				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
+			}
+		} else {
+			my $unzip = $self->unzip($db, $path, $full_path, $d->{distvname});
+			return if not $unzip;
+		}
+	}
+
+	if (not -e $d->{distvname}) {
+		WARN("No directory for '$d->{distvname}'");
+		#$counter{no_directory}++;
+		$db->unzip_error($path, 'no_directory', $d->{distvname});
+		return;
+	}
+	return 1;
+}
 
 # starting from current directory
 sub generate_html_from_pod {
-	my ($self, $dir, $d, $distvname) = @_;
+	my ($self, $dir, $d) = @_;
 
 	my %ret;
-	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib', $d, $distvname);
-	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib', $d, $distvname);
+	$ret{modules} = $self->_generate_html($dir, '.pm', 'lib', $d);
+	$ret{pods}    = $self->_generate_html($dir, '.pod', 'lib', $d);
 
 	return \%ret;
 }
@@ -393,7 +403,7 @@ sub generate_outline {
 }
 
 sub _generate_html {
-	my ($self, $dir, $ext, $path, $d, $distvname) = @_;
+	my ($self, $dir, $ext, $path, $d) = @_;
 
 	my @files = eval { sort map {_untaint_path($_)} File::Find::Rule->file->name("*$ext")->extras({ untaint => 1})->relative->in($path) };
 	# id/K/KA/KAWASAKI/WSST-0.1.1.tar.gz
@@ -429,7 +439,7 @@ sub _generate_html {
 			$tt->process('incl/header_bottom.tt', {}, \$header_bottom) or die $tt->error;
 			$tt->process('incl/footer.tt', {}, \$footer) or die $tt->error;
 			$pod->html_header_before_title( $header_top );
-			$header_bottom .= qq((<a href="/src/$author/$distvname/$path/$file">source</a>));
+			$header_bottom .= qq((<a href="/src/$author/$d->{distvname}/$path/$file">source</a>));
 			$header_bottom .= qq((<a href="/syn/$dist/$path/$file">syn</a>));
 			$pod->html_header_after_title( $header_bottom);
 			$pod->html_footer( $footer );
