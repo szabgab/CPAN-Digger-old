@@ -25,10 +25,6 @@ use Parse::CPAN::Packages ();
 use YAML::Any             ();
 use PPIx::EditorTools::Outline;
 
-use Pod::Find qw/ pod_where /;
-use Pod::XML;
-use XML::LibXML;
-
 use CPAN::Digger::PPI;
 use CPAN::Digger::Pod;
 use CPAN::Digger::DB;
