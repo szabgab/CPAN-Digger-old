@@ -228,42 +228,34 @@ sub run_query {
     return {data => $data, ellapsed_time => time-$t0};
 }
 
-# get '/m/:module' => sub {
-    # my $module = params->{query} || '';
-    # $module =~ s/[^\w:.*+?-]//g; # sanitize for now
-    # my $results = _fetch_from_db({ 'modules.name' => $module });
-# 
+get '/m/:module' => sub {
+    my $name = params->{module} || '';
+    $name =~ s/[^\w:.*+?-]//g; # sanitize for now
+    
+    my $module = db->get_module_by_name($name);
+    if (not $module ){
+        return template 'error', {
+            no_such_module => 1, 
+            module => $name,
+        };
+    }
+
+    my $distro = db->get_distro_by_id($module->{distro});
+    return "Wow, could not find corresponding distribution" if not $distro;
+
+    $name =~ s{::}{/}g;
+    return redirect "/dist/$distro->{name}/lib/$name.pm";
+    
+    #my $distro_details = db->get_distro_details_by_id($distro->{id});
+    #return to_json {module => $module, distro => $distro, details => $distro_details};
+    #return $distro_details->{pods};
+    
     # # TODO: maybe in case of no hit, run the query with regex and find
     # # all the modules (or packages?) that have this string in their name
-    # if (not @$results) {
-        # template 'error', {
-            # no_such_module => 1, 
-            # module => $module,
-        # };
-    # } elsif (@$results == 1) {
-        # $module =~ s{::}{/}g;
-        # return redirect "/dist/$results->[0]{name}/lib/$module.pm";
-    # } else {
-        # my $path = $module;
-        # $path =~ s{::}{/}g;
-        # my @links;
-        # foreach my $r (@$results) {
-            # push @links, {
-                # distro => $r->{name},
-                # module => $module,
-                # path   => $path,
-            # };
-        # }
-        # template => 'modules', {
-            # module => $module,
-            # links  => \@links,
-        # }
-    # }
-# 
-# 
-    # # TODO what if we received several results? 
-    # # Should we show a list of links?
-# };
+    
+    # TODO what if we received several results? 
+    # Should we show a list of links?
+};
 
 
 # this part is only needed in the stand alone environment

@@ -110,11 +110,16 @@ sub get_distro_latest {
 sub get_distro_by_path {
     my ($self, $path) = @_;
 
-    my $sth = $self->dbh->prepare('SELECT * FROM distro WHERE path = ?');
-    $sth->execute($path);
-    my $r = $sth->fetchrow_hashref;
-    $sth->finish;
+    my $r = $self->dbh->selectrow_hashref('SELECT * FROM distro WHERE path=?', {}, $path);
+    $r->{distvname} = "$r->{name}-$r->{version}";
 
+    return $r;
+}
+    
+sub get_distro_by_id {
+    my ($self, $id) = @_;
+
+    my $r = $self->dbh->selectrow_hashref('SELECT * FROM distro WHERE id=?', {}, $id);
     $r->{distvname} = "$r->{name}-$r->{version}";
 
     return $r;
@@ -249,6 +254,8 @@ sub get_all_distros {
         WHERE A.version=B.v and A.name=B.name ORDER BY A.name}, 'name');
 }
 
+
+##### module table
 sub update_module {
 	my ($self, $data, $is_module, $distro_id) = @_;
     	CPAN::Digger::Index::LOG("update_module of $distro_id " . Dumper $data);
@@ -261,7 +268,12 @@ sub update_module {
 	return;
 }
 
-# subs for the stats page
+sub get_module_by_name {
+    my ($self, $name) = @_;
+    return $self->dbh->selectrow_hashref('SELECT * FROM module WHERE name=?', {}, $name);
+}
+
+################################## subs for the stats page
 sub count_distros {
 	my ($self) = @_;
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro');
@@ -317,5 +329,6 @@ sub count_modules {
        	my ($self) = @_;
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM module');
 }
+#########################################################
 
 1;
