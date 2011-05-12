@@ -47,6 +47,12 @@ has 'pod'     => (is => 'ro', isa => 'Str');
 has 'syn'     => (is => 'ro', isa => 'Str');
 has 'outline' => (is => 'ro', isa => 'Str');
 
+sub db {
+	my $db = CPAN::Digger::DB->new;
+	$db->setup;
+	return $db;
+}
+
 # sub index_dir {
 	# my $self = shift;
 # 
@@ -81,12 +87,9 @@ has 'outline' => (is => 'ro', isa => 'Str');
 # 
 	# my $tt = $self->get_tt;
 # 
-	# my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	# $db->setup;
-# 
-	# my $authors = $db->get_all_authors;
+	# my $authors = db->get_all_authors;
 	# foreach my $author (@$authors) {
-		# my $data = $db->get_author_page_data($pauseid);
+		# my $data = db->get_author_page_data($pauseid);
 # 
 		# my $pauseid = $author->{pauseid};
 		# my $outdir = File::Spec->catdir( $self->output, 'id', lc $pauseid);
@@ -103,9 +106,7 @@ has 'outline' => (is => 'ro', isa => 'Str');
 sub process_all_distros {
 	my ($self) = @_;
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
-	my $distros = $db->get_all_distros;
+	my $distros = db->get_all_distros;
 	#LOG(Dumper $distros);
 	my $filter = $self->filter;
 	foreach my $name (sort keys %$distros) {
@@ -114,7 +115,7 @@ sub process_all_distros {
 
 		LOG(Dumper $name);
 		my $d = $distros->{$name};
-                my $details = $db->get_distro_details_by_id($d->{id});
+                my $details = db->get_distro_details_by_id($d->{id});
                 next if $details;
 		$self->process_distro($d->{path});
         sleep 1;
@@ -131,10 +132,7 @@ sub process_distro {
 	#$self->counter_distro($self->counter_distro +1);
 	LOG("Working on $path");
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
-
-	my $d = $db->get_distro_by_path($path);
+	my $d = db->get_distro_by_path($path);
 	die "Could not find distro by path '$path'" if not $d;
 	
 	my $src_dir   = File::Spec->catdir( $self->output, 'src' , uc $d->{author});
@@ -174,19 +172,19 @@ sub process_distro {
 
 	LOG("update_distro_details for $path by " . Dumper \%data);
 
-	my $dist = $db->get_distro_by_path($path);
+	my $dist = db->get_distro_by_path($path);
 	#LOG("Update DB for id $dist->{id}");
 	#LOG(Dumper $id
 
-	$db->dbh->begin_work;
-	$db->update_distro_details(\%data, $dist->{id});
+	db->dbh->begin_work;
+	db->update_distro_details(\%data, $dist->{id});
 	foreach my $t (@{$data{modules}}) {
-		$db->update_module($t, 1, $dist->{id});
+		db->update_module($t, 1, $dist->{id});
         }
 	foreach my $t (@{$data{pods}}) {
-		$db->update_module($t, 0, $dist->{id});
+		db->update_module($t, 0, $dist->{id});
 	}
-	$db->dbh->commit;
+	db->dbh->commit;
 
 	return;
 }
@@ -275,8 +273,6 @@ sub collect_meta_data {
 sub prepare_src {
 	my ($self, $d, $src_dir, $source_dir, $path) = @_;
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
 
 	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
 
@@ -295,7 +291,7 @@ sub prepare_src {
 				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
 			}
 		} else {
-			my $unzip = $self->unzip($db, $path, $full_path, $d->{distvname});
+			my $unzip = $self->unzip($path, $full_path, $d->{distvname});
 			return if not $unzip;
 		}
 	}
@@ -303,7 +299,7 @@ sub prepare_src {
 	if (not -e $d->{distvname}) {
 		WARN("No directory for '$d->{distvname}'");
 		#$counter{no_directory}++;
-		$db->unzip_error($path, 'no_directory', $d->{distvname});
+		db->unzip_error($path, 'no_directory', $d->{distvname});
 		return;
 	}
 	return 1;
@@ -511,11 +507,11 @@ sub generate_central_files {
 
 
 sub unzip {
-	my ($self, $db, $path, $full_path, $distvname) = @_;
+	my ($self, $path, $full_path, $distvname) = @_;
 
 	if ($full_path !~ m/\.(tar\.bz2|tar\.gz|tgz|zip)$/) {
 		WARN("Does not know how to unzip $full_path");
-		$db->unzip_error($path, 'invalid_extension', '');
+		db->unzip_error($path, 'invalid_extension', '');
 		return;
 	}
 	require Archive::Any;
@@ -531,7 +527,7 @@ sub unzip {
 	};
 	if ($@) {
 		WARN("Exception in unzip: $@");
-		$db->unzip_error($path, 'exception', $@);
+		db->unzip_error($path, 'exception', $@);
 		return;
 	}
 
@@ -543,7 +539,7 @@ sub unzip {
 
 	if ($is_naughty) {
 		WARN("Archive is naughty");
-		$db->unzip_error($path, 'naughty_archive', '');
+		db->unzip_error($path, 'naughty_archive', '');
 		return;
 	}
 	my $dir = $distvname;
@@ -557,7 +553,7 @@ sub unzip {
     };
 	if ($@) {
 		WARN("Exception in unzip extract: $@");
-		$db->unzip_error($path, 'exception', $@);
+		db->unzip_error($path, 'exception', $@);
 		return;
 	}
 
@@ -587,7 +583,7 @@ sub unzip {
 	if ($@) {
 		WARN("Could not untaint content of directory: $@");
 		#chdir $cwd;
-		$db->unzip_error($path, 'tainted_directory', $@);
+		db->unzip_error($path, 'tainted_directory', $@);
 		return;
 	}
 
@@ -665,10 +661,7 @@ sub collect_distributions {
 
 	return if not $self->cpan;
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
-
-	$db->dbh->begin_work;
+	db->dbh->begin_work;
 	
 	my $files = File::Find::Rule
 	   ->file()
@@ -712,7 +705,7 @@ sub collect_distributions {
 		#print "$1  - $2 - $3\n";
 		my @args = ($1, $2, $3, $file, (stat $full_path)[9], time);
 		LOG("insert_distro @args");
-		$db->insert_distro(@args);
+		db->insert_distro(@args);
 
 	    # K/KR/KRAKEN/Net-Telnet-Cisco-IOS-0.4beta.tar.gz
 	    } elsif ($file =~ m{^$PREFIX           # P/PA/PAUSEID
@@ -723,13 +716,13 @@ sub collect_distributions {
 			   $}x ) {
 		my @args = ($1, $2, $3, $file, (stat $full_path)[9], time);
 		LOG("insert_distro @args");
-		$db->insert_distro(@args);
+		db->insert_distro(@args);
 	     } else {
 		WARN("could not parse filename '$file'");
 	    }
 	} 
 
-	$db->dbh->commit;
+	db->dbh->commit;
 
 	return;
 }
@@ -739,16 +732,14 @@ sub update_from_whois {
 
 	LOG('start whois');
 
-	my $db = CPAN::Digger::DB->new(dbfile => $self->dbfile);
-	$db->setup;
-	$db->dbh->begin_work;
+	db->dbh->begin_work;
 
 
 	my $file = $self->cpan . '/authors/00whois.xml';
 	my $whois = Parse::CPAN::Whois->new($file);
 	foreach my $who ($whois->authors) {
                 my $pauseid = $who->pauseid;
-		my $have = $db->get_author($pauseid);
+		my $have = db->get_author($pauseid);
 		#print Dumper $have;
 		my %new_data;
 		my $changed;
@@ -764,14 +755,14 @@ sub update_from_whois {
 		#print Dumper \%new_data;
 		if (not $have) {
 			LOG('add_author ' . Dumper \%new_data);
-			$db->add_author(\%new_data, $pauseid);
+			db->add_author(\%new_data, $pauseid);
 		} elsif ($changed) {
 			LOG('update_author ' . Dumper \%new_data);
-			$db->update_author(\%new_data, $pauseid);
+			db->update_author(\%new_data, $pauseid);
 		}
 	}
 
-	$db->dbh->commit;
+	db->dbh->commit;
 
 	return;
 }
@@ -796,5 +787,6 @@ sub _log {
 
 	return;
 }
+
 
 1;

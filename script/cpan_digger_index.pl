@@ -71,6 +71,8 @@ if (delete $opt{full}) {
 my %run;
 $run{$_} = delete $opt{$_} for qw(collect whois process);
 
+$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
+
 my $cpan = CPAN::Digger::Index->new(%opt);
 if ($run{whois}) {
 	$cpan->update_from_whois;
