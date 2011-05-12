@@ -54,6 +54,18 @@ sub process {
 	return 1;
 }
 
+sub _handle_text {
+	my ($parser, $text) = @_;
+	if ($parser->{__in_name}) {
+		$parser->{__abstract} = $text;
+		delete $parser->{__in_name};
+	}
+	if ($text eq 'NAME') {
+		$parser->{__in_name} = 1;
+	}
+
+	$parser->SUPER::_handle_text($text);
+}
 
 
 

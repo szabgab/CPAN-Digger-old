@@ -116,7 +116,7 @@ get '/dist/:name' => sub {
             name => decode('utf8', $author->{name}),
         },
         meta_data => {
-            abstract => '',
+            abstract => $details->{meta_abstract},
         },
         ellapsed_time => time-$t0,
     );

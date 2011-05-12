@@ -224,15 +224,14 @@ BUGs:
   - FIXED - if the e-mail is CENSORED then don't make it a link (e.g. id/YSAWANT )
   - The module CPANDB does not have POD htmlified, why?
 TODO:
-  - DONE - replace the Ajax way of searching by sending the search request in the URL.  At least for now.
-  - add word indexing, (see above) to improve speed as we are using exact matches
-  - add CSS to make the whole page nicer
   - On the POD and SYN (an SOURCE?) pages include a link to the dist page and to the other pages of the same type
     Shall we generate the whole page up-front or only the internal part? - the highlighting or POD part?
-  - add run_all to the indexer
   - First unzip everything nut skip already unzipped files and/or those already marked as unzip failed
   - Collect MinimumVersion of modules
+  - Collect list of functions (put the data from the outline into the database)
   - Run Perl Critic on modules and collect the data
-  - Collect list of functions
+
+  - add word indexing, (see above) to improve speed as we are using exact matches
+  - add CSS to make the whole page nicer
   - use CPANDB from here http://svn.ali.as/db/cpandb.gz  2011-03-08 ? 14 Mb  (49M after unzip)
   - shorten the ellapsed time to 4 digits after the .

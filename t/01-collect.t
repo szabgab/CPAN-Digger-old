@@ -16,7 +16,7 @@ use Test::NoWarnings;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 14 + 3 + 11 + 1;
+plan tests => 14 + 4 + 11 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -287,7 +287,7 @@ process('Padre-Plugin-CommandLine');
       has_t           => 1,
       has_xt          => undef,
       test_file       => undef,
-      pods            => '[{"html":1,"name":"Padre::Plugin::CommandLine","path":"lib/Padre/Plugin/CommandLine.pm"}]',
+      pods            => ignore(),
       special_files   => 'Build.PL,Changes,MANIFEST,META.yml,Makefile.PL',
       id              => $ID,
       meta_abstract   => 'vi and emacs in Padre ?',
@@ -295,9 +295,18 @@ process('Padre-Plugin-CommandLine');
       meta_repository => undef,
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
-    
+
+    cmp_deeply from_json($ppc_details->{pods}), [{
+      html     => 1,
+      name     => 'Padre::Plugin::CommandLine',
+      path     => 'lib/Padre/Plugin/CommandLine.pm',
+      abstract => 'Padre::Plugin::CommandLine - vi and emacs in Padre ?',
+    }], 'pods';
+
     my $modules = $dbh->selectall_arrayref('SELECT * FROM module ORDER BY name');
-    cmp_deeply $modules, [[1, 'Padre::Plugin::CommandLine', undef, 1, 5 ]], 'module table';
+    cmp_deeply $modules, 
+      [[1, 'Padre::Plugin::CommandLine', 'Padre::Plugin::CommandLine - vi and emacs in Padre ?', 1, 5 ]],
+      'module table';
 }
 
 

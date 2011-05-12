@@ -24,6 +24,10 @@ use Parse::CPAN::Packages ();
 use YAML::Any             ();
 use PPIx::EditorTools::Outline;
 
+use Pod::Find qw/ pod_where /;
+use Pod::XML;
+use XML::LibXML;
+
 use CPAN::Digger::PPI;
 use CPAN::Digger::Pod;
 use CPAN::Digger::DB;
@@ -148,6 +152,9 @@ sub process_distro {
 	} else {
 		chdir $d->{distvname};
 	}
+
+	
+
 
 	my $pods = $self->generate_html_from_pod($dist_dir, $d);
 
@@ -421,6 +428,7 @@ sub _generate_html {
 				ERROR("Exception when processing pod '$infile' of $path to '$outfile'  $@");
 				next;
 			}
+			$info{abstract} = delete $pod->{__abstract};
 		}
 		push @data, \%info;
 	}
