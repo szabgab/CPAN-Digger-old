@@ -189,81 +189,8 @@ sub process_distro {
 		$self->generate_syn($syn_dir, $data{modules});
 	}
 
-	$data{has_meta_yml} = -e 'META.yml';
-	# TODO we need to make sure the data we read from META.yml is correct and
-	# someone does not try to fill it with garbage or too much data.
-	if ($data{has_meta_yml}) {
-		eval {
-			my $meta = YAML::Any::LoadFile('META.yml');
-			#print Dumper $meta;
-			my @fields = qw(license abstract author name requires version);
-			foreach my $field (@fields) {
-				$data{meta}{$field} = $meta->{$field};
-			}
-			if ($meta->{resources}) {
-				foreach my $field (qw(repository homepage bugtracker license)) {
-					$data{meta}{resources}{$field} = $meta->{resources}{$field};
-				}
-			}
-		};
-		if ($@) {
-			WARN("Exception while reading YAML file: $@");
-			#$counter{exception_in_yaml}++;
-			$data{exception_in_yaml} = $@;
-		}
-	}
-	$data{has_meta_json} = -e 'META.json';
-
-	if (-d 'xt') {
-		$data{has_xt} = 1;
-	}
-	if (-d 't') {
-		$data{has_t} = 1;
-	}
-	if (-f 'test.pl') {
-		$data{test_file} = 1;
-	}
-	my @example_dirs = qw(eg examples);
-	foreach my $dir (@example_dirs) {
-		if (-d $dir) {
-			$data{examples} = $dir;
-		}
-	}
-	my @changes_files = qw(Changes CHANGES ChangeLog);
-
-
-	my @readme_files = qw('README');
-
-	# additional fields needed for the main page of the distribution
-	# my $author = $self->author_info($data{author});
-	# if (not $source_dir) {
-		# if ($author) {
-			# $data{author_name} = $author->name;
-		# } else {
-			# WARN("Could not find details of '$data{author}'");
-		# }
-	# }
-
-#	$data{author_name} ||= $data{author};
-
-	my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
-#	$data{prefix} = $d->prefix;
-	
-	if ($data{meta}{resources}{repository}) {
-		my $repo = delete $data{meta}{resources}{repository};
-		$data{meta}{resources}{repository}{display} = $repo;
-		$repo =~ s{git://(github.com/.*)\.git}{http://$1};
-		$data{meta}{resources}{repository}{link} = $repo;
-	}
-
-	$data{special_files} = \@special_files;
+	$self->collect_meta_data(\%data);
 	$data{distvname} = $d->{distvname};
-	my $outfile = File::Spec->catfile($dist_dir, 'index.html');
-	my $tt = $self->get_tt;
-	
-	foreach my $t (@{$data{modules}}, @{$data{pods}}) {
-		$t->{path} =~ s{\\}{/}g;
-	}
 
 	LOG("update_distro_details for $path by " . Dumper \%data);
 
@@ -281,6 +208,86 @@ sub process_distro {
 	}
 	$db->dbh->commit;
 
+	return;
+}
+
+# assume we are in the project directory
+sub collect_meta_data {
+	my ($self, $data) = @_;
+
+	$data->{has_meta_yml} = -e 'META.yml';
+	# TODO we need to make sure the data we read from META.yml is correct and
+	# someone does not try to fill it with garbage or too much data.
+	if ($data->{has_meta_yml}) {
+		eval {
+			my $meta = YAML::Any::LoadFile('META.yml');
+			#print Dumper $meta;
+			my @fields = qw(license abstract author name requires version);
+			foreach my $field (@fields) {
+				$data->{meta}{$field} = $meta->{$field};
+			}
+			if ($meta->{resources}) {
+				foreach my $field (qw(repository homepage bugtracker license)) {
+					$data->{meta}{resources}{$field} = $meta->{resources}{$field};
+				}
+			}
+		};
+		if ($@) {
+			WARN("Exception while reading YAML file: $@");
+			#$counter{exception_in_yaml}++;
+			$data->{exception_in_yaml} = $@;
+		}
+	}
+	$data->{has_meta_json} = -e 'META.json';
+
+	if (-d 'xt') {
+		$data->{has_xt} = 1;
+	}
+	if (-d 't') {
+		$data->{has_t} = 1;
+	}
+	if (-f 'test.pl') {
+		$data->{test_file} = 1;
+	}
+	my @example_dirs = qw(eg examples);
+	foreach my $dir (@example_dirs) {
+		if (-d $dir) {
+			$data->{examples} = $dir;
+		}
+	}
+	my @changes_files = qw(Changes CHANGES ChangeLog);
+
+
+	my @readme_files = qw('README');
+
+	# additional fields needed for the main page of the distribution
+	# my $author = $self->author_info($data->{author});
+	# if (not $source_dir) {
+		# if ($author) {
+			# $data->{author_name} = $author->name;
+		# } else {
+			# WARN("Could not find details of '$data->{author}'");
+		# }
+	# }
+
+#	$data->{author_name} ||= $data->{author};
+
+	my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
+#	$data->{prefix} = $d->prefix;
+	
+	if ($data->{meta}{resources}{repository}) {
+		my $repo = delete $data->{meta}{resources}{repository};
+		$data->{meta}{resources}{repository}{display} = $repo;
+		$repo =~ s{git://(github.com/.*)\.git}{http://$1};
+		$data->{meta}{resources}{repository}{link} = $repo;
+	}
+
+	$data->{special_files} = \@special_files;
+	
+	foreach my $t (@{$data->{modules}}, @{$data->{pods}}) {
+		$t->{path} =~ s{\\}{/}g;
+	}
+	
 	return;
 }
 
