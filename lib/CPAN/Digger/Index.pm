@@ -142,6 +142,7 @@ sub process_distro {
 	mkpath $_ for ($dist_dir, $src_dir, $syn_dir);
 
 	if ($self->prepare) {
+		return if $d->{unzip_error};
 		$self->prepare_src($d, $src_dir, $source_dir, $path) or return;
 	}
 
@@ -150,9 +151,6 @@ sub process_distro {
 	} else {
 		chdir $d->{distvname};
 	}
-
-	
-
 
 	my $pods = $self->generate_html_from_pod($dist_dir, $d);
 

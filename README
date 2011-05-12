@@ -224,9 +224,6 @@ BUGs:
   - FIXED - if the e-mail is CENSORED then don't make it a link (e.g. id/YSAWANT )
   - The module CPANDB does not have POD htmlified, why?
 TODO:
-  - On the POD and SYN (an SOURCE?) pages include a link to the dist page and to the other pages of the same type
-    Shall we generate the whole page up-front or only the internal part? - the highlighting or POD part?
-  - First unzip everything but skip already unzipped files and/or those already marked as unzip failed
   - Collect MinimumVersion of modules
   - Collect list of functions (put the data from the outline into the database)
   - Run Perl Critic on modules and collect the data
