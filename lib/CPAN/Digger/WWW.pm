@@ -186,7 +186,7 @@ get '/query' => sub {
     my $term = params->{query} || '';
     my $what = params->{what} || '';
 
-    if ($what !~ /^(distribution|author)$/) {
+    if ($what !~ /^(distribution|author|all)$/) {
         return render_response 'error', { 
             invalid_search => 1,
             what => $what,
@@ -198,6 +198,30 @@ get '/query' => sub {
 
 
     my $data;
+
+    if ($what eq 'all') {
+        my $found;
+
+        # check if there is an exact match in the modules
+        my $module = db->get_module_by_name($term);
+        if ($module) {
+            my $distro = db->get_distro_by_id($module->{distro});
+            if ($distro) {
+                $term =~ s{::}{/}g;
+                foreach my $ext (qw(pm pod)) {
+                    my $path = "/dist/$distro->{name}/lib/$term.$ext";
+                    my $full_path = path config->{appdir}, '..', 'digger', $path;
+                    return redirect $path if -e $full_path;
+                }
+            }
+        }
+        # fall back to
+        $what = 'distribution';
+        # later check if there is an exact match in the distros
+        # and add other improvements
+    }
+
+
     if ($what eq 'distribution') {
         $data = db->get_distros_latest_version($term);
         $_->{show_distribution} = 1 for @$data;

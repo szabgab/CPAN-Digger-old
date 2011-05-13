@@ -8,6 +8,7 @@ It is hard to write a FAQ before the web site is launched.
 <div id="faq_index">
 <ul>
 <li><a href="#what_is_cpan_digger">What is CPAN Digger?</a></li>
+<li><a href="#search_types">What search types are available?</a></li>
 <li><a href="#the_source_code_of_cpan_digger">Where is the source code of CPAN Digger?</a></li>
 <li><a href="#meta_yaml">What is META.yml and why is it missing?</a></li>
 <li><a href="#meta_license">Why is the license missing?</a></li>
@@ -20,6 +21,16 @@ It is hard to write a FAQ before the web site is launched.
 <ul>
 <li><a name="what_is_cpan_digger"></a><b>What is CPAN Digger?</b><br>
 CPAN Digger is a place to find and analyze information about CPAN modules, distributions and authors.
+</li>
+
+<li><a name="search_types"></a><b>What search types are available?</b><br>
+The Digger is primarily NOT a search engine. It provides 3 search types: 
+<ul>
+  <li>All: a generic search that is not particularily strong. Yet<br />
+      It currently tries to match a Module::Name. If it does not match then it falls back to the Distribution mode:
+      </li>
+  <li>Distribution: expects strings like some-distro and tries to find a CPAN distribution that contains some-distro in its name</li>
+  <li>Author: tries to match the PAUSEID of an author</li>
 </li>
 
 <li><a name="the_source_code_of_cpan_digger"></a><b>Where is the source code of CPAN Digger?</b><br>

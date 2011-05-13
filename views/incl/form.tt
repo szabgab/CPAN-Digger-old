@@ -1,6 +1,7 @@
 <div id="search">
 <form action='/query'>
 <select id="what" name="what">
+<option value="all">All</option>
 <option value="distribution">Distribution</option>
 <option value="author">Author</option>
 </select>
