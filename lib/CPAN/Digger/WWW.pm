@@ -135,7 +135,7 @@ get '/dist/:name' => sub {
     # Temporary solution ??? (or maybe not?) reading the META.yml file
     # on the fly
     my $full_path = path config->{appdir}, '..', 'digger', "/src/$d->{author}/$distvname/META.yml";
-    if (-e $full_path) {
+    if (defined $full_path and -e $full_path) {
         my $yaml;
         eval { $yaml = YAML::LoadFile($full_path) };
         if ($yaml) {
