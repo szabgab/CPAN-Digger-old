@@ -16,6 +16,7 @@
   <li><a href="/news">News</a></li>
   <li><a href="/faq">FAQ</a></li>
   <li><a href="/stats">Stats</a></li>
+  <li>alpha v[% digger_version %]</li>
 <!--
   <li><a href="/licenses.html">Licenses</a></li>
 -->

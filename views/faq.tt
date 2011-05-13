@@ -31,6 +31,7 @@ The Digger is primarily NOT a search engine. It provides 3 search types:
       </li>
   <li>Distribution: expects strings like some-distro and tries to find a CPAN distribution that contains some-distro in its name</li>
   <li>Author: tries to match the PAUSEID of an author</li>
+</ul>
 </li>
 
 <li><a name="the_source_code_of_cpan_digger"></a><b>Where is the source code of CPAN Digger?</b><br>

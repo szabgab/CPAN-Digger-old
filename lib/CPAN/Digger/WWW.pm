@@ -20,6 +20,7 @@ sub render_response {
 
     $data ||= {};
     $data->{ellapsed_time} = time - vars->{start};
+    $data->{digger_version} = $VERSION;
     my $content_type = request->content_type || params->{content_type} || '';
     if ($content_type =~ /json/) {
        content_type 'text/plain';
