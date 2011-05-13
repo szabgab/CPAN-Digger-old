@@ -203,11 +203,11 @@ sub run_query {
     my $data;
     if ($what eq 'distribution') {
         $data = db->get_distros_latest_version($term);
-        $_->{distribution} = 1 for @$data;
+        $_->{show_distribution} = 1 for @$data;
     }
     if ($what eq 'author') {
         $data = db->get_authors($term);
-        $_->{author} = 1 for @$data;
+        $_->{show_author} = 1 for @$data;
         foreach my $d (@$data) {
             $d->{name} = decode('utf8', $d->{name});
         }
