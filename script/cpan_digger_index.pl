@@ -9,86 +9,92 @@ use File::Basename qw(dirname);
 use File::Spec;
 use Getopt::Long qw(GetOptions);
 
-my $root = dirname dirname abs_path $0;
 use CPAN::Digger::Index;
 
-my %opt;
-GetOptions(\%opt,
-	'output=s',
-	'dbfile=s',
-
-	'cpan=s',
-	'filter=s',
-
-# temporarily disabled
-#	'dir=s',
-#	'name=s',
-#	'author=s',
-#	'version=s',
-
-	'whois',
-	'collect',
-	'process',
+run();
+exit;
 
 
-	'prepare',
-	'pod',
-	'syn',
-	'outline',
+sub run {
+	
+	my $root = dirname dirname abs_path $0;
 
-	'full',
-) or usage();
+	my %opt;
+	GetOptions(\%opt,
+		'output=s',
+		'dbfile=s',
+
+		'cpan=s',
+		'filter=s',
+
+	# temporarily disabled
+	#	'dir=s',
+	#	'name=s',
+	#	'author=s',
+	#	'version=s',
+
+		'whois',
+		'collect',
+		'process',
 
 
-usage('--dbfile required') if not $opt{dbfile};
-usage('--cpan or --dir required') if not $opt{cpan} and not $opt{dir};
-usage("Directory '$opt{cpan}' not found") if $opt{cpan} and not -d $opt{cpan};
-usage('if --dir is given then --name also need to be supplied')
-	if $opt{dir} and not $opt{name};
-usage('--output required') if not $opt{output};
-usage('--output must be given an existing directory') if not -d $opt{output};
+		'prepare',
+		'pod',
+		'syn',
+		'outline',
 
-usage('On or more of --collect, --whois  or --process is needed')
-	if  not $opt{collect}
-	and not $opt{whois}
-	and not $opt{process};
+		'full',
+	) or usage();
 
-if ($opt{process}) {
-	usage('On or more of --syn, --pod, --prepare, --outline or --full is needed')
-		if  not $opt{full}
-		and not $opt{syn}
-		and not $opt{pod}
-		and not $opt{prepare}
-		and not $opt{outline};
+
+	usage('--dbfile required') if not $opt{dbfile};
+	usage('--cpan or --dir required') if not $opt{cpan} and not $opt{dir};
+	usage("Directory '$opt{cpan}' not found") if $opt{cpan} and not -d $opt{cpan};
+	usage('if --dir is given then --name also need to be supplied')
+		if $opt{dir} and not $opt{name};
+	usage('--output required') if not $opt{output};
+	usage('--output must be given an existing directory') if not -d $opt{output};
+
+	usage('On or more of --collect, --whois  or --process is needed')
+		if  not $opt{collect}
+		and not $opt{whois}
+		and not $opt{process};
+
+	if ($opt{process}) {
+		usage('On or more of --syn, --pod, --prepare, --outline or --full is needed')
+			if  not $opt{full}
+			and not $opt{syn}
+			and not $opt{pod}
+			and not $opt{prepare}
+			and not $opt{outline};
+	}
+
+	$opt{root} = $root;
+
+	if (delete $opt{full}) {
+		$opt{$_} = 1 for qw(prepare syn pod outline);
+	}
+
+	my %run;
+	$run{$_} = delete $opt{$_} for qw(collect whois process);
+
+	$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
+
+	my $cpan = CPAN::Digger::Index->new(%opt);
+	if ($run{whois}) {
+		$cpan->update_from_whois;
+	}
+
+	if ($run{collect}) {
+		$cpan->collect_distributions;
+	}
+
+	if ($run{process}) {
+		$cpan->process_all_distros();
+	}
 }
-
-$opt{root} = $root;
-
-if (delete $opt{full}) {
-	$opt{$_} = 1 for qw(prepare syn pod outline);
-}
-
-my %run;
-$run{$_} = delete $opt{$_} for qw(collect whois process);
-
-$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
-
-my $cpan = CPAN::Digger::Index->new(%opt);
-if ($run{whois}) {
-	$cpan->update_from_whois;
-}
-
-if ($run{collect}) {
-	$cpan->collect_distributions;
-}
-
-if ($run{process}) {
-	$cpan->process_all_distros();
-}
-
 # $cpan->generate_central_files;
 
-exit;
 
 sub usage {
 	my $msg = shift;
