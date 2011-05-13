@@ -36,13 +36,7 @@ There is no need to run "make install"
 
 Scripts in the scripts/  directory
 =====================================
-cpan_digger.pl            - temporary script to load the web application, probably needs refactoring
 cpan_digger_index.pl      - indexing CPAN tree or directory tree
-
-cpan_digger_pod2html.pl   - process a single perl (or .pod) file to generate HTML
-                            this is mostly used for development
-cpan_digger_ppi.pl        - process a single perl file with ppi
-                            this is mostly used for development
 
 
 ========================================
