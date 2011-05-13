@@ -25,4 +25,8 @@ Hmm, sorry but we could not handle this request
 Cannot provide directory listing
 [% END %]
 
+[% IF invalid_search %]
+Invalid search type: '[% what %]'
+[% END %]
+ 
 [% INCLUDE incl/footer.tt %]

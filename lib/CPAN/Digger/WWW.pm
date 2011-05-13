@@ -183,17 +183,14 @@ get '/stats' => sub {
 # };
 
 get '/query' => sub {
-    return render_response 'query.tt', run_query();
-};
-
-
-
-sub run_query {
     my $term = params->{query} || '';
     my $what = params->{what} || '';
 
     if ($what !~ /^(distribution|author)$/) {
-        return { error => "Invalid search type: '$what'" };
+        return render_response 'error', { 
+            invalid_search => 1,
+            what => $what,
+        };
     }
 
     $term =~ s/[^\w:.*+?-]//g; # sanitize for now
@@ -212,8 +209,9 @@ sub run_query {
             $d->{name} = decode('utf8', $d->{name});
         }
     }
-    return {data => $data};
-}
+
+    return render_response 'query', {data => $data};
+};
 
 get '/m/:module' => sub {
     my $name = params->{module} || '';
