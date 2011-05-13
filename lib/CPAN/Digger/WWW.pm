@@ -12,6 +12,7 @@ use File::Basename qw(basename);
 use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
+use YAML          ();
 
 #set serializer => 'Mutable';
 
@@ -119,14 +120,30 @@ get '/dist/:name' => sub {
 #debug($d->{file_timestamp});
 #debug(_date($d->{file_timestamp}));
 
+    my $distvname = "$name-$d->{version}";
+
     my %meta_data;
     $meta_data{$_} = $details->{"meta_$_"} for qw(abstract version license);
+    
+    # Temporary solution ??? (or maybe not?) reading the META.yml file
+    # on the fly
+    my $full_path = path config->{appdir}, '..', 'digger', "/src/$d->{author}/$distvname/META.yml";
+    if (-e $full_path) {
+        my $yaml;
+        eval { $yaml = YAML::LoadFile($full_path) };
+        if ($yaml) {
+            if ($yaml->{requires}) {
+                $meta_data{requires} = $yaml->{requires};
+            }
+        }
+    }
+    # TODO: also process META.json where available
 
     my %data = (
         name      => $name,
         pauseid   => $d->{author},
         released  => _date($d->{file_timestamp}),
-        distvname => "$name-$d->{version}",
+        distvname => $distvname,,
         author    => {
             name => decode('utf8', $author->{name}),
         },
