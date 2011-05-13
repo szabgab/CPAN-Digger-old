@@ -68,6 +68,46 @@ using the module given in the directory given with the --dir option.
 
 Running CPAN-Digger-WWW.pl will launch a stand-alone web server.
 
+=head1 Indexing
+
+=head2 Perl Critic
+
+We are running L<Perl::Critic> using level 4 on modules and collect the data in 
+the critic.txt file of each distribution.
+
+=head2 Minumum Required perl version
+
+For each module we check the mimimum required version using L<Perl::MinimumVersion> of 
+modules and setting minimum version of package.
+We also collect the version markers in the version.txt file of each distribution.
+
+=head2 Word indexing (planned)
+
+For each distribution split up the name and each part of the name becomes a word
+
+For each module name probably the parts of the name might be words though the last part should
+be the most significants
+
+META.yml might have some keywords stored
+
+Names of the functions / methods
+
+Gull text indexing of the POD for each module
+
+Various sections might have different weight.
+
+Later we will allow users of the site to add keywords to the modules/distributions
+
+Store each keyword in lowercase only and map everything to lowercase
+for each word include where it could be found
+
+   word    type_of_source       the source
+   cgi     distro               CGI-Simple
+   cgi     distro               CGI-Application
+   cgi     module               CGI::Simple
+   cgi     module               CGI::Application
+
+
 =head1 AUTHOR
 
 Gabor Szabo L<http://szabgab.com/>

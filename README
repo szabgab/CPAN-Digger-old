@@ -180,49 +180,7 @@ Maybe the processed does not need to be a timestamp but a version number?
 
 Later we will add Ajax back to provide hints while the user types in the query.
 
-Collecting MinimumVersion of modules and setting minimum version of package. 
-Collect the version markers in the version.txt file of each distribution.
-
-Running Perl Critic using level 4 on modules and collect the data in 
-the critic.txt file of each distribution.
-
-*) Allow searching within a distribution
-   and/or list all the functions in the distribution
-
-*) for searching create a table of words
-
-   for each distribution split up the name and each part of the name becomes a word
-   for each module name probably the parts of the name might be words though the last part should
-     be the most significants
-   META.yml might have some keywords stored
-   names of the functions / methods
-   full text indexing of the POD for each module
-      various sections might have different weight.
-   later we will allow users of the site to add keywords to the modules/distributions
-
-   store each keyword in lowercase only and map everything to lowercase
-   for each word include where it could be found
-   word    type_of_source       the source
-   cgi     distro               CGI-Simple
-   cgi     distro               CGI-Application
-   cgi     module               CGI::Simple
-   cgi     module               CGI::Application
-
-
-BUGs:
-  - FIXED - On the pages generated from the (source) link does not include the PAUSEID
-    = need to regenare all the pages
-  - On the POD pages we have links to /m/Module::Name and they don't work. Either the backend should support these links
-    or we need to make the links point to the actual module. They can be redirections, assuming we know exactly where 
-    each module is located. That will eliminate the need for a second pass on the files.
-    for that we need to keep a table called module
-    Module::Name, distribution where it is located, path in the distribution (lib/Module/Name.pm or Module/Name.pm)
-  - FIXED - if a user has never uploaded a file (and thus backapan does not exist for him) then don't show the link (e.g. id/YSAWANT )
-    nor should we show the "Releases" part of the page
-  - FIXED - if the e-mail is CENSORED then don't make it a link (e.g. id/YSAWANT )
-  - The module CPANDB does not have POD htmlified, why?
 TODO:
-  - add word indexing, (see above) to improve speed as we are using exact matches
   - add CSS to make the whole page nicer
   - use CPANDB from here http://svn.ali.as/db/cpandb.gz  2011-03-08 ? 14 Mb  (49M after unzip)
   - shorten the ellapsed time to 4 digits after the .
