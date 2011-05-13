@@ -90,7 +90,6 @@ TODO
 - List all the licenses that were used in META files and list all the packages with the given license. List all packages without license
 - check if a module is pure_perl or not
 
-
 - dist page:
   - download link should be based on a configurable cpan server
   - date of release
@@ -129,20 +128,12 @@ TODO: *) Remove distros:
     maybe remove them from the database.
     or just mark them as "removed" in the database?
 
-*) Parse the 00whois.xml file and update the 'author' table.
-TODO: collect data from the new author.json files
-
 *) Create a dynamic page for each author with data from the database and
 link the results to these pages. -
 Generating all the static pages took 75 min on my desktop so we are creating the pages
 dynamically for now.
-TODO: "Registered modules" on the authors page
+
 TODO: make the author page nicer, allow the viewer to sort based on distro name or release date
-TODO: add description to each distribution
-
-
-TODO: setup an easy way to generate the database with new code base while the old one is still working
-and setup the web site with the first version.
 
 TODO
 *) Extract:
@@ -162,7 +153,6 @@ Later processes can work on packages that were not yet processed or processedbef
 When displaying a distribution we can know if it was already processed at all and when?
 Maybe the processed does not need to be a timestamp but a version number?
 
-
 1) Run modes:
    - on all CPAN
      fill the author table
@@ -180,7 +170,3 @@ Maybe the processed does not need to be a timestamp but a version number?
 
 Later we will add Ajax back to provide hints while the user types in the query.
 
-TODO:
-  - add CSS to make the whole page nicer
-  - use CPANDB from here http://svn.ali.as/db/cpandb.gz  2011-03-08 ? 14 Mb  (49M after unzip)
-  - shorten the ellapsed time to 4 digits after the .

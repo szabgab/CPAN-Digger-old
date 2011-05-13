@@ -75,7 +75,7 @@ Running CPAN-Digger-WWW.pl will launch a stand-alone web server.
 We are running L<Perl::Critic> using level 4 on modules and collect the data in 
 the critic.txt file of each distribution.
 
-=head2 Minumum Required perl version
+=head2 Minimum Required perl version
 
 For each module we check the mimimum required version using L<Perl::MinimumVersion> of 
 modules and setting minimum version of package.
@@ -106,6 +106,14 @@ for each word include where it could be found
    cgi     distro               CGI-Application
    cgi     module               CGI::Simple
    cgi     module               CGI::Application
+
+=head2 Authors
+
+Parse the 00whois.xml file and update the 'author' table.
+
+Reuse the content of the author.json files.
+
+Fetch the avatars and display them.
 
 
 =head1 AUTHOR
