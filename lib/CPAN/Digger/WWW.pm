@@ -28,6 +28,8 @@ use Time::HiRes   qw(time);
     #return { error => 'no db configuration' } if not $dbfile;
 #};
 
+#set serializer => 'Mutable';
+
 my $dbx;
 sub db {
     if (not $dbx) {
@@ -189,16 +191,21 @@ get '/query' => sub {
 
 sub query {
     my $data = run_query();
+ 
+    return render_response('query.tt', $data);
+}
 
-    if (request->is_ajax()) {  # should check request->content_type instead?
+sub render_response {
+    my ($template, $data) = @_;
+
+    my $content_type = request->content_type || params->{content_type} || '';
+    if ($content_type =~ /json/) {
        content_type 'text/plain';
        return to_json $data, {utf8 => 0};
     } else {
-      # return to_json $data, {utf8 => 0};
-      return template 'query.tt', $data;
+      return template $template, $data;
     }
 }
-
 
 sub run_query {
     my $term = params->{query} || '';
