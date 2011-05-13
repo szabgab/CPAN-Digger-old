@@ -10,3 +10,6 @@ engines:
   template_toolkit:
     start_tag: '[%'
     stop_tag: '%]'
+#plack_middlewares:
+#  -
+#    - Runtime
