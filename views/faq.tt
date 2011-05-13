@@ -14,6 +14,7 @@ It is hard to write a FAQ before the web site is launched.
 <li><a href="#meta_license">Why is the license missing?</a></li>
 <li><a href="#examples">Examples not found?</a></li>
 <li><a href="#other_search_engines">Other search engines for CPAN?</a></li>
+<li><a href="#author_json">What is author.json </a></li>
 </ul>
 </div>
 
@@ -74,8 +75,11 @@ Various other sites serve the Perl and CPAN community:
 <!--
 <a href="http://cpants.perl.org/">CPANTS</a> 
 -->
+</li>
 
 
+<li><a name="author_json"></a><b>What is author.json?</b><br>
+See <a href="http://blogs.perl.org/users/olaf_alders/2010/12/expanding-your-author-info-in-the-metacpan.html">Expanding Your Author Info in the MetaCPAN</a>
 </li>
 
 

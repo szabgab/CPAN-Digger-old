@@ -95,6 +95,13 @@ get '/id/:pauseid' => sub {
 	backpan     => uc(join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid)),
 	distributions => $distributions,
     );
+    my $homedir = config->{digger}{cpan} . "/authors/id/$data{backpan}";
+    my ($author_file) = reverse sort glob "$homedir/author-*.json";
+    if ($author_file) {
+        $data{author_json}{file} = basename $author_file;
+        eval { $data{author_json}{data} = from_json slurp($author_file) };
+    }
+
     return render_response 'author', \%data;
 };
 

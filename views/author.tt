@@ -20,6 +20,23 @@
   [% END %]
 </div>
 
+<div id="author_json">
+[% IF author_json.file %]
+<a href="http://search.cpan.org/CPAN/authors/id/[% backpan %]/[% author_json.file %]">[% author_json.file %]</a><br>
+[% FOR p IN author_json.data.profile %]
+   [% IF p.name == "github" %]
+      <a href="http://github.com/[% p.id %]">on Github</a><br />
+   [% END %]
+   [% IF p.name == "perlmonks" %]
+      <a href="http://perlmonks.org/?node=[% p.id %]">on PerlMonks</a><br />
+   [% END %]
+[% END %]
+[% ELSE %]
+<a href="/faq/#author_json">author.json file missing</a>
+[% END %]
+
+
+</div>
 
  [% IF homedir %]
   <div>

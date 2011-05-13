@@ -13,3 +13,5 @@ engines:
 #plack_middlewares:
 #  -
 #    - Runtime
+digger:
+   cpan: /var/www/cpan/cpan
