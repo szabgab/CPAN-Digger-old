@@ -13,10 +13,13 @@ use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
 
+#set serializer => 'Mutable';
 
 sub render_response {
     my ($template, $data) = @_;
 
+    $data ||= {};
+    $data->{ellapsed_time} = time - vars->{start};
     my $content_type = request->content_type || params->{content_type} || '';
     if ($content_type =~ /json/) {
        content_type 'text/plain';
@@ -25,13 +28,6 @@ sub render_response {
       return template $template, $data;
     }
 }
-
-
-#before sub {
-    #return { error => 'no db configuration' } if not $dbfile;
-#};
-
-#set serializer => 'Mutable';
 
 my $dbx;
 sub db {
@@ -43,6 +39,11 @@ sub db {
 
 }
 
+before sub {
+    var start => time;
+    #return { error => 'no db configuration' } if not $dbfile;
+    return;
+};
 
 get '/' => sub {
     return render_response 'index', {};
@@ -63,7 +64,6 @@ get '/id/:pauseid/' => sub {
 
 get '/id/:pauseid' => sub {
     my $pauseid = lc(params->{pauseid} || '');
-    my $t0 = time;
     
     # TODO show error if no pauseid received
     $pauseid =~ s/\W//g; # sanitise
@@ -92,7 +92,6 @@ get '/id/:pauseid' => sub {
 	homedir     => $author->{homedir},
 	backpan     => uc(join("/", substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid)),
 	distributions => $distributions,
-        ellapsed_time => time - $t0,
     );
     return render_response 'author', \%data;
 };
@@ -103,7 +102,6 @@ get '/dist/:name/' => sub {
 
 get '/dist/:name' => sub {
     my $name = params->{name} || '';
-    my $t0 = time;
     
     # TODO show error if no name received
     $name =~ s/[^\w-]//g; # sanitise
@@ -132,7 +130,6 @@ get '/dist/:name' => sub {
             name => decode('utf8', $author->{name}),
         },
         meta_data => \%meta_data,
-        ellapsed_time => time-$t0,
     );
     $data{$_} = $d->{$_} for qw(version path);
     $data{$_} = $details->{$_} for qw(has_t test_file has_meta_yml has_meta_json examples min_perl);
@@ -194,7 +191,6 @@ get '/query' => sub {
 sub run_query {
     my $term = params->{query} || '';
     my $what = params->{what} || '';
-    my $t0 = time;
 
     if ($what !~ /^(distribution|author)$/) {
         return { error => "Invalid search type: '$what'" };
@@ -216,7 +212,7 @@ sub run_query {
             $d->{name} = decode('utf8', $d->{name});
         }
     }
-    return {data => $data, ellapsed_time => time-$t0};
+    return {data => $data};
 }
 
 get '/m/:module' => sub {
