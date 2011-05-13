@@ -80,15 +80,9 @@ set noindex on /pod/perl_5_10_01/ and similar
 
 
 TODO
-- list the full dependency hierarchy
-- 'license analyzis' list the licenses of all the dependencies
-- replace plain CGI code with Dancer
-- allow the user to see the common dependencies of two packages
 - allow the user to create all the dependencies of a list of packages and then see "what if I add this extra package?" 
-- --ppi run the ppi processor on the files
 - check why are several versions of the same package processed (eg. Padre)
 - List all the licenses that were used in META files and list all the packages with the given license. List all packages without license
-- check if a module is pure_perl or not
 
 - dist page:
   - download link should be based on a configurable cpan server
@@ -132,8 +126,6 @@ TODO: *) Remove distros:
 link the results to these pages. -
 Generating all the static pages took 75 min on my desktop so we are creating the pages
 dynamically for now.
-
-TODO: make the author page nicer, allow the viewer to sort based on distro name or release date
 
 TODO
 *) Extract:

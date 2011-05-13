@@ -21,4 +21,8 @@ Sorry, no POD found for [% module %]
 Hmm, sorry but we could not handle this request
 [% END %]
 
+[% IF no_directory_listing  %]
+Cannot provide directory listing
+[% END %]
+
 [% INCLUDE incl/footer.tt %]

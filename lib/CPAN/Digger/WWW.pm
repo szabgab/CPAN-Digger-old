@@ -12,17 +12,20 @@ use File::Basename qw(basename);
 use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
-#use JSON;
 
-# for development:
-# on the real server the index file will be static
-# if ($^O =~ m/win32/i) {
-    # get '/' => sub {
-        # #send_file(path config->{public}, 'index.html');
-        # send_file 'index.html';
-        # #template 'index';
-    # };
-# }
+
+sub render_response {
+    my ($template, $data) = @_;
+
+    my $content_type = request->content_type || params->{content_type} || '';
+    if ($content_type =~ /json/) {
+       content_type 'text/plain';
+       return to_json $data, {utf8 => 0};
+    } else {
+      return template $template, $data;
+    }
+}
+
 
 #before sub {
     #return { error => 'no db configuration' } if not $dbfile;
@@ -42,9 +45,7 @@ sub db {
 
 
 get '/' => sub {
-    template 'index', {
-        keywords => 'x,y',
-    };
+    return render_response 'index', {};
 };
 
 # search.cpan.org keeps the users in ~pauseid 
@@ -93,7 +94,7 @@ get '/id/:pauseid' => sub {
 	distributions => $distributions,
         ellapsed_time => time - $t0,
     );
-    return template 'author.tt', \%data;
+    return render_response 'author', \%data;
 };
 
 get '/dist/:name/' => sub {
@@ -142,13 +143,12 @@ get '/dist/:name' => sub {
         $data{modules} = from_json($details->{pods});
     }
 
-    #debug(Dumper \%data);
-    return template 'dist.tt', \%data;
+    return render_response 'dist', \%data;
 };
 
 foreach my $page (qw(news faq)) {
     get "/$page" => sub {
-        template $page;
+        return render_response $page, {};
     };
     get "/$page/" => sub {
         redirect "/$page";
@@ -174,7 +174,7 @@ get '/stats' => sub {
 	number_of_modules => db->count_modules,
 
     );
-    template 'stats.tt', \%data;
+    return render_response 'stats', \%data;
 };
 
 # get '/licenses' => sub {
@@ -186,26 +186,10 @@ get '/stats' => sub {
 # };
 
 get '/query' => sub {
-    return query();
+    return render_response 'query.tt', run_query();
 };
 
-sub query {
-    my $data = run_query();
- 
-    return render_response('query.tt', $data);
-}
 
-sub render_response {
-    my ($template, $data) = @_;
-
-    my $content_type = request->content_type || params->{content_type} || '';
-    if ($content_type =~ /json/) {
-       content_type 'text/plain';
-       return to_json $data, {utf8 => 0};
-    } else {
-      return template $template, $data;
-    }
-}
 
 sub run_query {
     my $term = params->{query} || '';
@@ -240,8 +224,8 @@ get '/m/:module' => sub {
     $name =~ s/[^\w:.*+?-]//g; # sanitize for now
     
     my $module = db->get_module_by_name($name);
-    if (not $module ){
-        return template 'error', {
+    if (not $module) {
+        return render_response 'error', {
             no_such_module => 1, 
             module => $name,
         };
@@ -257,7 +241,7 @@ get '/m/:module' => sub {
         return redirect $path if -e $full_path;
     }
 
-    return template 'error', {
+    return render_response 'error', {
          no_pod_found => 1, 
          module => $name,
     };
@@ -291,7 +275,7 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
     #return config->{appdir};
     my $full_path = path config->{appdir}, '..', 'digger', $path;
     if (not defined $full_path) {
-        return template 'error', {
+        return render_response 'error', {
             cannot_handle => 1, 
         };
     }
@@ -314,12 +298,15 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
                         push @files, $thing;
                     }
                 }
-                return template 'directory', {
+                return render_response 'directory', {
                     dirs  => \@dirs,
                     files => \@files,
                 };
             } else {
-                return "Cannot provide directory listing";
+                return render_response 'error', {
+                    no_directory_listing => 1,
+                };
+                
             }
             #return "directory listing $full_path";
         }
@@ -358,7 +345,7 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
                     $data{title} = $dist_name;
                 }
 
-                return template 'file', \%data;
+                return render_response 'file', \%data;
             }
             
         } else {
@@ -366,7 +353,7 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
         }
     }
 
-    return template 'error', {
+    return render_response 'error', {
          cannot_handle => 1, 
     };
 };

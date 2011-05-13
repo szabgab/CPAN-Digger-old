@@ -9,17 +9,20 @@
 [% END %]
 
 [% FOR row IN data %]
+
    [% IF row.distribution %]
      <div class="author"><a href="/id/[% row.author %]">[% row.author %]</a></div>
      <div class="name"><a href="/dist/[% row.name %]">[% row.name %]</a></div>
      <div class="version">[% row.version %]</div>
    [% END %]
+
    [% IF row.author %]
-     <div class="name"><a href="/id/[% row.pauseid %]">[% row.pauseid %] ([% IF row.name %][% row.name %][% ELSE %][% row.asciiname %][% END %])</a></div>
+     <div class="name"><a href="/id/[% row.pauseid %]">[% row.pauseid %] (y[% IF row.name %][% row.name %][% ELSE %][% row.asciiname %][% END %])</a></div>
      [% IF row.homepage %]
            <div class="name"><a href="[% row.homepage %]">[% row.homepage %]</a></div>
      [% END %]
   [% END %]
+
 [% END %]
 
 [% INCLUDE incl/footer.tt %]
