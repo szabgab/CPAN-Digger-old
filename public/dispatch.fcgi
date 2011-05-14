@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 
 BEGIN {
-$ENV{CPAN_DIGGER_DBFILE} = '/home/gabor/work/digger/digger.db';
 # in the production environment
     use lib '/home/gabor/perl5/local/lib/perl5';
     use lib '/home/gabor/perl5/local/lib/perl5/x86_64-linux-gnu-thread-multi';

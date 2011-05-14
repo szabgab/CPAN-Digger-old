@@ -13,6 +13,3 @@ engines:
 #plack_middlewares:
 #  -
 #    - Runtime
-digger:
-   cpan: /var/www/cpan/cpan
-   dbfile: /home/gabor/work/digger/digger.db

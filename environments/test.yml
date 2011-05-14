@@ -6,3 +6,6 @@ show_errors: 1
 # you should enable it by yourself if you want it
 # Module::Refresh is needed
 auto_reload: 0
+digger:
+  cpan: /var/www/cpan/cpan
+  dbfile: /home/gabor/work/digger/digger.db
