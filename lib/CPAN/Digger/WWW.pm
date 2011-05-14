@@ -9,6 +9,7 @@ use CPAN::Digger::DB;
 use Data::Dumper  qw(Dumper);
 use Encode        qw(decode);
 use File::Basename qw(basename);
+use File::Find::Rule;
 use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
@@ -104,6 +105,51 @@ get '/id/:pauseid' => sub {
 
     return render_response 'author', \%data;
 };
+
+
+get '/grep' => sub {
+    my $name = params->{dist};
+    my $str  = params->{str};
+    
+    $name =~ s/[^\w-]//g; # sanitise
+    $str  =~ s/[^\w-]//g; # sanitise
+
+    my $regex = qr/$str/;
+    # TODO replace this with ack integration???
+    
+
+    my $d =  db->get_distro_latest($name);
+    my $distvname = "$name-$d->{version}";
+    my $full_path = path config->{appdir}, '..', 'digger', "/src/$d->{author}/$distvname/";
+    # TODO for now we only search the lib/   subdir
+    # process all the files
+    my @files = File::Find::Rule->file->name('*.pm')->relative->in( "$full_path/lib" );
+
+    my %data;
+    foreach my $f (@files) {
+        open my $fh, '<', "$full_path/lib/$f" or next;
+        my $cnt = 0;
+        while (my $line = <$fh>) {
+            $cnt++;
+            if ($line =~ $regex) {
+                push @{$data{"lib/$f"}{match}}, {
+                     line => _escape($line),
+                     cnt  => $cnt,
+                 }
+            }
+        }
+        if ($data{"lib/$f"}) {
+            $data{"lib/$f"}{link} = substr($f, 0, -3);
+            $data{"lib/$f"}{link} =~ s{/}{::}g;
+        }
+    }
+
+    return render_response 'grep', {
+            matches => \%data,
+            dist    => $name,
+            };
+};
+
 
 get '/dist/:name/' => sub {
     redirect '/dist/' . params->{name};
@@ -419,6 +465,13 @@ sub slurp {
     open my $fh, '<', $file or die;
     local $/ = undef;
     <$fh>;
+}
+
+sub _escape {
+    my $str = shift;
+    $str =~ s{<}{&lt;}g;
+    $str =~ s{>}{&gt;}g;
+    return $str;
 }
 
 true;

@@ -38,7 +38,7 @@ Links:
 </div>
 
 <!--
-Other tools (grep, diff)
+Other tools (diff)
 -->
 
 <div id="repository">
@@ -147,6 +147,12 @@ Depends on (requires):
   No prereqs were found in META.yml
 [% END %]
 </div>
+
+<form action="/grep"> 
+<input type="hidden" name="dist" value="[% name %]">
+<input name="str">
+<input type="submit" value="grep">
+</form>
 
 <div id="modules">
 Modules:
