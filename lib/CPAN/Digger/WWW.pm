@@ -433,6 +433,7 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
                     $dist_name = $1;
                     $sub_path  = $2;
                     ($data{pod} = $path) =~ s{^/syn}{/dist};
+                    $data{outline} = _get_outline( path config->{appdir}, '..', 'digger', "$data{pod}.json" );
                 }
                 #if ($path =~ m{^/src
                 if ($dist_name) {
@@ -455,6 +456,16 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
          cannot_handle => 1, 
     };
 };
+
+sub _get_outline {
+    my ($path) = @_;
+    if (-e $path) {
+        my $data;
+        eval { $data = from_json slurp($path) };
+        return $data if $data and not $@;
+    }
+    return;
+}
 
 sub _date {
     return POSIX::strftime("%Y %b %d", gmtime shift);
