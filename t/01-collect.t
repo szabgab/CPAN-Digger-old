@@ -16,7 +16,7 @@ use Test::NoWarnings;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 14 + 5 + 14 + 1;
+plan tests => 15 + 5 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -43,6 +43,8 @@ create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
 
 copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/"  or die $!;
 copy 't/files/02whois.xml', "$cpan/authors/00whois.xml" or die $!;
+mkpath "$cpan/authors/id/A/AF/AFOXSON";
+copy 't/files/author-1.0.json', "$cpan/authors/id/A/AF/AFOXSON/" or die $!;
 collect();
 
 
@@ -57,7 +59,8 @@ my %expected_authors = (
    asciiname => undef,
    email     => undef,
    homepage  => undef,
-   homedir   => 0,
+   homedir   => 1,
+   author_json => undef,
  },
  'KORSHAK' => {
    pauseid   => 'KORSHAK',
@@ -66,6 +69,7 @@ my %expected_authors = (
    asciiname => undef,
    homepage  => undef,
    homedir   => 0,
+   author_json => undef,
  },
  'SPECTRUM' => {
    pauseid   => 'SPECTRUM',
@@ -74,6 +78,7 @@ my %expected_authors = (
    asciiname => 'Edward Chernenko',
    homepage  => 'http://absurdopedia.net/wiki/User:Edward_Chernenko',
    homedir   => 0,
+   author_json => undef,
  },
  'FAKE1' => {
    pauseid   => 'FAKE1',
@@ -82,6 +87,7 @@ my %expected_authors = (
    asciiname => 'Gabor Szabo',
    homepage  => 'http://szabgab.com/',
    homedir   => 1,
+   author_json => undef,
  },
  'YKO' => {
    pauseid   => 'YKO',
@@ -90,6 +96,7 @@ my %expected_authors = (
    asciiname => 'Yaroslav Korshak',
    homepage  => 'http://korshak.name/',
    homedir   => 0,
+   author_json => undef,
  },
  'NUFFIN' => {
    pauseid   => 'NUFFIN',
@@ -98,9 +105,58 @@ my %expected_authors = (
    asciiname => 'Yuval Kogman',
    homepage  => 'http://nothingmuch.woobling.org/',
    homedir   => 0,
+   author_json => undef,
   },
 );
 
+{
+    my $author_json = $dbh->selectall_arrayref('SELECT * FROM author_json ORDER BY pauseid, field, name');
+    #diag explain $author_json;
+    cmp_deeply $author_json, [
+         [
+           'AFOXSON',
+           'profile',
+           'act',
+           '123'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'github',
+           'afoxon_git'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'irc',
+           'afoxon_irc'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'linkedin',
+           'afoxon_link'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'perlmonks',
+           'afoxon_monk'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'stackoverflow',
+           'afoxon_stack'
+         ],
+         [
+           'AFOXSON',
+           'profile',
+           'twitter',
+           'afoxon_tweet'
+         ]
+       ], 'author_json';
+}
 
 {
   $sth->execute;

@@ -35,13 +35,24 @@ CREATE TABLE distro_details (
 
 
 CREATE TABLE author (
-    pauseid   VARCHAR(50) PRIMARY KEY,
-    name      VARCHAR(255),
-    email     VARCHAR(255),
-    asciiname VARCHAR(255),
-    homepage  VARCHAR(255),
+    pauseid      VARCHAR(50) PRIMARY KEY,
+    name         VARCHAR(255),
+    email        VARCHAR(255),
+    asciiname    VARCHAR(255),
+    homepage     VARCHAR(255),
+    author_json  VARCHAR(50),
     homedir   BOOL
 );
+
+CREATE TABLE author_json (
+    pauseid   VARCHAR(50) NOT NULL,
+    field     VARCHAR(50) NOT NULL,
+    name      VARCHAR(50) NOT NULL,
+    id        VARCHAR(50) NOT NULL
+);
+CREATE INDEX author_profile_pauseid_idx ON author_json (pauseid);
+CREATE INDEX author_profile_name_idx ON author_json (name);
+CREATE INDEX author_profile_field_idx ON author_json (field);
 
 CREATE TABLE word_types (
     id       INTEGER PRIMARY KEY,

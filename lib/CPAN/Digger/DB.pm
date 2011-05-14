@@ -35,6 +35,7 @@ sub setup {
     return;
 }
 
+####### TABLE distro
 
 sub insert_distro {
     my ($self, @args) = @_;
@@ -138,6 +139,76 @@ sub _get_distros {
     return \@results;
 }
 
+sub unzip_error {
+    my ($self, $path, $error, $details) = @_;
+    CPAN::Digger::Index::WARN("unzip_error $error - $details in $path");
+    my $cnt = $self->dbh->do('UPDATE distro SET unzip_error=?, unzip_error_details=? WHERE path=?', {},
+        $error, $details, $path);
+    # TODO: report if cannot update?
+}
+
+sub get_all_distros {
+    my ($self) = @_;
+    #return $self->dbh->selectall_arrayref("SELECT path FROM distro WHERE name LIKE 'Pipe%'");
+    #return $self->dbh->selectall_arrayref('SELECT path FROM distro');
+    return $self->dbh->selectall_hashref(q{
+        SELECT path, id, A.name
+        FROM distro A, (SELECT max(version) AS v, name
+                        FROM distro GROUP BY name) AS B
+        WHERE A.version=B.v and A.name=B.name ORDER BY A.name}, 'name');
+}
+
+######### TABLE distro_details
+
+sub update_distro_details {
+    my ($self, $data, $id) = @_;
+    
+    $data->{meta_homepage}   = $data->{meta}{resources}{homepage};
+    $data->{meta_repository} = $data->{meta}{resources}{repository};
+    
+    my @meta_fields = qw(abstract license version);
+    $data->{"meta_$_"} = $data->{meta}{$_} for @meta_fields;
+
+    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file  
+                examples min_perl critic
+                meta_homepage meta_repository
+                );
+    push @all_fields, map {"meta_$_"} @meta_fields;
+    my @fields = grep {defined $data->{$_}} @all_fields;
+    my $fields = join ' ', map {", $_"} @fields;
+    my @values = map { $data->{$_} } @fields;
+    my $placeholders = join '', (', ?' x scalar @values);
+
+    if ($data->{special_files}) {
+        $fields .= ',special_files';
+        $placeholders .= ',?';
+        push @values, join ',', @{ $data->{special_files} };
+    }
+    if ($data->{pods}) {
+        $fields .= ',pods';
+        $placeholders .= ',?';
+        push @values, JSON::to_json($data->{modules});
+    }
+
+    my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
+
+    #CPAN::Digger::Index::LOG("SQL: $sql");
+    #CPAN::Digger::Index::LOG("$id @values");
+    $self->dbh->do('DELETE FROM distro_details WHERE id=?', {}, $id);
+    $self->dbh->do($sql, {}, $id, @values);
+
+    return;
+}
+
+sub get_distro_details_by_id {
+    my ($self, $id) = @_;
+
+    return $self->dbh->selectrow_hashref('SELECT * FROM distro_details WHERE id=?', {}, $id);
+}
+
+
+####### TABLE author
+
 # get all the data from the 'author' table for a single pauseid
 # returns a HASH ref.
 sub get_author {
@@ -193,71 +264,37 @@ sub update_author {
     return;
 }
 
-sub unzip_error {
-    my ($self, $path, $error, $details) = @_;
-    CPAN::Digger::Index::WARN("unzip_error $error - $details in $path");
-    my $cnt = $self->dbh->do('UPDATE distro SET unzip_error=?, unzip_error_details=? WHERE path=?', {},
-        $error, $details, $path);
-    # TODO: report if cannot update?
-}
+##### TABLE author_profile
+sub update_author_json {
+    my ($self, $data, $pauseid) = @_;
 
-sub update_distro_details {
-    my ($self, $data, $id) = @_;
-    
-    $data->{meta_homepage}   = $data->{meta}{resources}{homepage};
-    $data->{meta_repository} = $data->{meta}{resources}{repository};
-    
-    my @meta_fields = qw(abstract license version);
-    $data->{"meta_$_"} = $data->{meta}{$_} for @meta_fields;
+    $self->dbh->do('DELETE FROM author_json WHERE pauseid=?', {}, $pauseid);
 
-    my @all_fields = qw(has_meta_yml has_meta_json has_t has_xt test_file  
-                examples min_perl critic
-                meta_homepage meta_repository
-                );
-    push @all_fields, map {"meta_$_"} @meta_fields;
-    my @fields = grep {defined $data->{$_}} @all_fields;
-    my $fields = join ' ', map {", $_"} @fields;
-    my @values = map { $data->{$_} } @fields;
-    my $placeholders = join '', (', ?' x scalar @values);
+    my $sql = 'INSERT INTO author_json (pauseid, field, name, id) VALUES(?, ?, ?, ?)';
+    #die "xyz" if not $data or not ref $data eq 'HASH';
+    #die Dumper $data;
 
-    if ($data->{special_files}) {
-        $fields .= ',special_files';
-        $placeholders .= ',?';
-        push @values, join ',', @{ $data->{special_files} };
-    }
-    if ($data->{pods}) {
-        $fields .= ',pods';
-        $placeholders .= ',?';
-        push @values, JSON::to_json($data->{modules});
+    # foreach my $field (keys %$data) {
+        # $data->{$field} ||= '';
+        # if ($data->{$field} and ref $data->{$field} eq 'ARRAY') {
+            # foreach my $entry (@{$data->{$field}}) {
+                # if ($entry and ref $entry eq 'HASH') {
+                       # 
+                # }
+            # }
+        # }
+    # }
+    my $field = 'profile';
+    if ($data->{$field} and ref $data->{$field} eq 'ARRAY') {
+        foreach my $entry ( @{$data->{$field}} ) {
+            $self->dbh->do($sql, {}, $pauseid, $field, $entry->{name}, $entry->{id});
+        }
     }
 
-    my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
-
-    #CPAN::Digger::Index::LOG("SQL: $sql");
-    #CPAN::Digger::Index::LOG("$id @values");
-    $self->dbh->do('DELETE FROM distro_details WHERE id=?', {}, $id);
-    $self->dbh->do($sql, {}, $id, @values);
+    # TODO add more parts of the json file?
 
     return;
 }
-
-sub get_distro_details_by_id {
-    my ($self, $id) = @_;
-
-    return $self->dbh->selectrow_hashref('SELECT * FROM distro_details WHERE id=?', {}, $id);
-}
-
-sub get_all_distros {
-    my ($self) = @_;
-    #return $self->dbh->selectall_arrayref("SELECT path FROM distro WHERE name LIKE 'Pipe%'");
-    #return $self->dbh->selectall_arrayref('SELECT path FROM distro');
-    return $self->dbh->selectall_hashref(q{
-        SELECT path, id, A.name
-        FROM distro A, (SELECT max(version) AS v, name
-                        FROM distro GROUP BY name) AS B
-        WHERE A.version=B.v and A.name=B.name ORDER BY A.name}, 'name');
-}
-
 
 ##### module table
 sub update_module {

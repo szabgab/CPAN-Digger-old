@@ -16,7 +16,7 @@ use File::Path            qw(mkpath);
 use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
-use JSON                  qw(to_json);
+use JSON                  qw(to_json from_json);
 use List::Util            qw(max);
 use Parse::CPAN::Whois    ();
 #use Parse::CPAN::Authors  ();
@@ -79,28 +79,6 @@ sub db {
 # }
 # 
 
-# get all the authors from the database
-# for each author fetch the latest version of distributions
-# This took 75 minutes on my desktop
-# sub generate_author_pages {
-	# my ($self) = @_;
-# 
-	# my $tt = $self->get_tt;
-# 
-	# my $authors = db->get_all_authors;
-	# foreach my $author (@$authors) {
-		# my $data = db->get_author_page_data($pauseid);
-# 
-		# my $pauseid = $author->{pauseid};
-		# my $outdir = File::Spec->catdir( $self->output, 'id', lc $pauseid);
-		# #LOG($outdir);
-		# mkpath $outdir;
-		# my $outfile = File::Spec->catfile($outdir, 'index.html');
-		# $tt->process('author.tt', $data, $outfile) or die $tt->error;
-	# }
-# 
-	# return;
-# }
 
 
 sub process_all_distros {
@@ -815,7 +793,20 @@ sub update_from_whois {
 		}
 		my $homedir = sprintf('%s/authors/id/%s/%s/%s', $self->cpan, substr($pauseid, 0, 1), substr($pauseid, 0, 2), $pauseid);
 		$new_data{homedir} = -d $homedir ? 1 : 0;
-		#print Dumper \%new_data;
+		
+		# has author.json ?
+		my %author_profile;
+		my ($author_file) = reverse sort glob "$homedir/author-*.json";
+		my $author_json;
+		if ($author_file) {
+			eval { $author_json = from_json slurp($author_file) };
+			if ($@) {
+				ERROR("Failed to load '$author_file': $@");
+			} else {
+				$new_data{author_json}= basename $author_file;
+			}
+		}
+
 		if (not $have) {
 			LOG('add_author ' . Dumper \%new_data);
 			db->add_author(\%new_data, $pauseid);
@@ -823,12 +814,19 @@ sub update_from_whois {
 			LOG('update_author ' . Dumper \%new_data);
 			db->update_author(\%new_data, $pauseid);
 		}
+		if ($author_json) {
+			LOG("updating author_json for $pauseid from $author_file by " . Dumper $author_json);
+			db->update_author_json($author_json, $pauseid);
+		}
 	}
 
 	db->dbh->commit;
-
+	
 	return;
 }
+	
+
+
 
 sub ERROR {
 	_log('ERROR', @_);
@@ -851,6 +849,13 @@ sub _log {
 	printf STDERR "%5s - %s - %s\n", $level, $time, "@msg";
 
 	return;
+}
+
+sub slurp {
+    my $file = shift;
+    open my $fh, '<', $file or die;
+    local $/ = undef;
+    <$fh>;
 }
 
 
