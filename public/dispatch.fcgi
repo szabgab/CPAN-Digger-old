@@ -1,15 +1,5 @@
 #!/usr/bin/env perl
 
-BEGIN {
-# in the production environment
-    use lib '/home/gabor/perl5/local/lib/perl5';
-    use lib '/home/gabor/perl5/local/lib/perl5/x86_64-linux-gnu-thread-multi';
-
-# in the development environment
-    use lib '/home/gabor/perl5/lib/perl5';
-    use lib '/home/gabor/perl5/lib/perl5/x86_64-linux-gnu-thread-multi';
-}
-
 use Dancer ':syntax';
 use FindBin '$RealBin';
 use Plack::Handler::FCGI;
@@ -19,7 +9,7 @@ use Plack::Handler::FCGI;
 # is safer.
 set apphandler => 'PSGI';
 #set environment => 'production';
-set environment => 'test';
+set environment => $ENV{CPAN_DIGGER_ENV};
 
 my $psgi = path($RealBin, '..', 'bin', 'app.pl');
 my $app = Plack::Util::load_psgi($psgi);

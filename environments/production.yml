@@ -4,4 +4,7 @@ show_errors: 0
 route_cache: 1
 # never enable auto_reload in production
 auto_reload: 0
+digger:
+  cpan: /var/www/cpan/cpan
+  dbfile: /home/gabor/work/digger/digger2.db
 
