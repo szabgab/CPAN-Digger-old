@@ -381,10 +381,16 @@ sub count_authors {
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM author');
 }
 
+sub count_author_json {
+       	my ($self) = @_;
+#	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM author WHERE author_json NOT NULL');
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(DISTINCT(pauseid)) FROM author_json');
+}
 sub count_modules {
        	my ($self) = @_;
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM module');
 }
+
 #########################################################
 
 1;

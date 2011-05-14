@@ -247,6 +247,7 @@ get '/stats' => sub {
 	has_no_tests  => db->count_no_tests,
 	
 	number_of_authors => db->count_authors,
+	number_of_author_json => db->count_author_json,
 
 	number_of_modules => db->count_modules,
 

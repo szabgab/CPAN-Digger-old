@@ -11,6 +11,7 @@ This page will contain various statistics and reports about the collected data.
 <h2>Authors</h2>
 <table>
 <tr><td>Number of authors</td><td>[% number_of_authors %]</td></tr>
+<tr><td>Number of authors with authors.json file</td><td>[% number_of_author_json %]</td></tr>
 </table>
 
 <h2>Distributions</h2>
