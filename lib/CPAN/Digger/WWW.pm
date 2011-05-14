@@ -34,7 +34,7 @@ sub render_response {
 my $dbx;
 sub db {
     if (not $dbx) {
-        $dbx = CPAN::Digger::DB->new;
+        $dbx = CPAN::Digger::DB->new(dbfile => config->{digger}{dbfile});
         $dbx->setup;
     }
     return $dbx;
@@ -43,7 +43,7 @@ sub db {
 
 before sub {
     var start => time;
-    #return { error => 'no db configuration' } if not $dbfile;
+
     return;
 };
 
