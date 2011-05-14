@@ -107,11 +107,10 @@ There is also a separate web site to look up the core Perl documentation at
 <a href="http://perldoc.perl.org/">perldoc.perl.org</a> by Jon Allen.
 </li>
 
-
 <li><a name="author_json"></a><b>What is author.json?</b><br>
 See <a href="http://blogs.perl.org/users/olaf_alders/2010/12/expanding-your-author-info-in-the-metacpan.html">Expanding Your Author Info in the MetaCPAN</a>
+and see instructions <a href="https://github.com/CPAN-API/cpan-api/wiki/How-to-upload-author-meta-data">how to upload</a> your author meta data.
 </li>
-
 
 </ul>
 </div>
