@@ -6,5 +6,5 @@ route_cache: 1
 auto_reload: 0
 digger:
   cpan: /var/www/cpan/cpan
-  dbfile: /home/gabor/work/digger/digger2.db
+  dbfile: /home/gabor/work/digger/digger.db
 
