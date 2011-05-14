@@ -22,15 +22,23 @@ sub setup {
     my $dbfile = $ENV{CPAN_DIGGER_DBFILE} || $self->dbfile;
     #print STDERR "$dbfile\n";
     my $dbdir = dirname $dbfile;
-#    die("Creating '$dbdir'");
     mkpath $dbdir if not -d $dbdir;
-    system "sqlite3 $dbfile < schema/digger.sql" if not -e $dbfile;
+
+    my $need_creation = not -e $dbfile;
+        
     $self->dbh( DBI->connect("dbi:SQLite:dbname=$dbfile","","", {
         RaiseError       => 1,
         PrintError       => 0,
         AutoCommit       => 1,
         FetchHashKeyName => 'NAME_lc',
     }) );
+    if ($need_creation) {
+        my $schema = slurp('schema/digger.sql');
+        foreach my $sql (split /;/, $schema) {
+            next if $sql !~ /\S/;
+            $self->dbh->do($sql);
+        }
+    }
 
     return;
 }
@@ -392,5 +400,12 @@ sub count_modules {
 }
 
 #########################################################
+
+sub slurp {
+    my $file = shift;
+    open my $fh, '<', $file or die;
+    local $/ = undef;
+    <$fh>;
+}
 
 1;
