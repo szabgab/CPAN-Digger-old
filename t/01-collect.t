@@ -16,7 +16,7 @@ use Test::NoWarnings;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 14 + 5 + 11 + 1;
+plan tests => 14 + 5 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -340,11 +340,20 @@ response_content_like [GET => '/faq'], qr{Frequently asked questions}, "GET /faq
 
 $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
 {
+    my $r = dancer_response(GET => '/dist/Nosuch-Distro');
+    is $r->{status}, 200, 'OK';
+    like $r->{content}, qr{We could not find a distribution called Nosuch-Distro}, '/dist/Nosuch-Distro';
+}
+
+{
     my $r = dancer_response(GET => '/dist/Package-Name');
     is $r->{status}, 200, 'OK';
+    unlike $r->{content}, qr{Error}, 'no Error';
     like $r->{content}, qr{Package-Name}, 'Package-Name in /dist/Package-Name';
     like $r->{content}, qr{FAKE1}, 'FAKE1 in /dist/Package-Name';
 }
+
+
 {
     my $r = dancer_response(GET => '/id/FAKE1');
     is $r->{status}, 200, 'OK';
@@ -362,6 +371,7 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
     #$data->{data}[0]{name} = Encode::encode('utf8', $data->{data}[0]{name});
     #cmp_deeply($data, {data => [$exp], ellapsed_time => ignore()}, '/q/FA/author');
 }
+
 
 #################################################### end
 

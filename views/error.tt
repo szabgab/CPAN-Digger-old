@@ -28,5 +28,9 @@ Cannot provide directory listing
 [% IF invalid_search %]
 Invalid search type: '[% what %]'
 [% END %]
- 
+
+[% IF no_such_distribution %]
+We could not find a distribution called [% name %]
+[% END %]
+
 [% INCLUDE incl/footer.tt %]

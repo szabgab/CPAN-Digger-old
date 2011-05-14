@@ -118,14 +118,23 @@ get '/dist/:name' => sub {
     debug($name);
 
     my $d = db->get_distro_latest($name);
+    if (not $d) {
+        return render_response 'error', { 
+            no_such_distribution => 1,
+            name => $name,
+        };
+    }
+
     my $details = db->get_distro_details_by_id($d->{id});
+    $details ||= {}; #TODO shall we report if not found?
     #debug(Dumper $d);
     #debug(Dumper $details);
 
     my $author = db->get_author(uc $d->{author});
+    $author ||= {name => ''}; #TODO shall we report if not found?
 
-#debug($d->{file_timestamp});
-#debug(_date($d->{file_timestamp}));
+    #debug($d->{file_timestamp});
+    #debug(_date($d->{file_timestamp}));
 
     my $distvname = "$name-$d->{version}";
 
