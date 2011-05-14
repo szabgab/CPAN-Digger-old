@@ -1,11 +1,17 @@
-</div> <!-- content -->
+    </div> <!-- content -->
+
+    <div id="right_column">
+    [% INCLUDE incl/right_column.tt %]
+    </div>
+
+  </div> <!-- page -->
+
+  <div id="ellapsed_time">
+    [% IF ellapsed_time %]
+    Ellapsed time [% ellapsed_time %]
+    [% END %]
+  </div>
+
 </div> <!-- body -->
-
-<div id="ellapsed_time">
-[% IF ellapsed_time %]
-Ellapsed time [% ellapsed_time %]
-[% END %]
-</div>
-
 </body>
 </html>
