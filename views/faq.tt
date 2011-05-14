@@ -29,7 +29,7 @@ CPAN Digger is a place to find and analyze information about CPAN modules, distr
   <li>We parse the 00whois.xml file.</li>
   <li>The author.json file is (partially) inculded in the author page at /id/PAUSEID</li>
   <li>Plan: Fetch the avatars and display them.</li>
-  <li>Syntax highlighted source code. Each module is sent through a PPI based syntax highlighter.
+  <li><b>Syntax highlighted source code</b>. Each module is sent through a PPI based syntax highlighter.
       See the "syn" links on the module pages. The syntax highlighted code sould provide 
       easy navigation in the source code. Just as an <a href="http://padre.perlide.org/">IDE</a> would...
       </li>
@@ -38,7 +38,7 @@ CPAN Digger is a place to find and analyze information about CPAN modules, distr
       <a href="/dist/Perl-MinimumVersion">Perl::MinimumVersion</a> of modules and setting 
       minimum version of package. We also collect the version markers in the version.txt file 
       of each distribution. See them linked from the /dist pages.</li>
-  <li>Each module is processed by <a href="/dist/Perl-Critic">Perl::Critic</a> at level 4. The results are currently 
+  <li><b>Perl::Critic</b><br> Each module is processed by <a href="/dist/Perl-Critic">Perl::Critic</a> at level 4. The results are currently 
       collected and saved in the critic.txt file of each distribution. See the /dist/Distro-Name page for a link.
       <br>
       It is done mostly to promote the use of Perl::Critic.
@@ -46,6 +46,12 @@ CPAN Digger is a place to find and analyze information about CPAN modules, distr
       In the future the processing will be fine tuned and the results will be linked the 
       syntax highlighted source code.
       </li>
+  <li>Planned: <b>Needs compiler?</b> The parser will try to guess if the distribution only contains Perl code
+      or if there is a need for a compiler. <a href="https://github.com/szabgab/CPAN-Digger/issues/17">issue 17</a>
+  </li>
+  <li>Planned dependency analysis:<br>
+     Licenses of all the dependencies: <a href="https://github.com/szabgab/CPAN-Digger/issues/15">issue 15</a>
+  <li>
 </ul>
 </li>
 
