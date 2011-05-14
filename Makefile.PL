@@ -46,6 +46,7 @@ requires 'MooseX::StrictConstructor'   => '0.16';
 requires 'Parse::CPAN::Packages'       => '2.33';
 #requires 'Parse::CPAN::Authors';
 requires 'Parse::CPAN::Whois'          => '0.02';
+requires 'Perl::MinimumVersion'        => '1.28';
 requires 'Pod::Simple'                 => '3.16';
 requires 'PPI::Document';
 requires 'PPI::Find'                   => '1.215';
