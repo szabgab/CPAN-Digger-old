@@ -412,7 +412,7 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
     if (-f $full_path) {
 #        print STDERR "Serving '$full_path'\n";
         if (-s $full_path) {
-            if ($path =~ m{/src}) { # TODO stop hard coding here!
+            if ($path =~ m{/src} or $path =~ m{\.pm\.json$}) { # TODO stop hard coding here!
                 content_type 'text/plain';
                 return slurp($full_path);
             } else {
