@@ -440,10 +440,10 @@ sub create_file {
 }
 
 sub collect {
-    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
+    system("$^X -Ilib script/cpan_digger.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
 }
 
 sub process {
     my ($path) = @_;
-    system("$^X -Ilib script/cpan_digger_index.pl --cpan $cpan --dbfile $dbfile --output $outdir --process --full --filter $path");
+    system("$^X -Ilib script/cpan_digger.pl --cpan $cpan --dbfile $dbfile --output $outdir --process --full --filter $path");
 }

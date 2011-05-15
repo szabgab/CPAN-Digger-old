@@ -36,7 +36,7 @@ There is no need to run "make install"
 
 Scripts in the scripts/  directory
 =====================================
-cpan_digger_index.pl      - indexing CPAN tree or directory tree
+cpan_digger.pl      - indexing CPAN tree or directory tree
 
 
 ========================================

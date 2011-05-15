@@ -74,7 +74,7 @@ test_requires 'Test::NoWarnings'       => '1.02';
 
 no_index 'directory' => qw{ t xt eg share inc privinc };
 
-#install_script 'script/cpan_digger_index.pl';
+#install_script 'script/cpan_digger.pl';
 
 #install_share;
 

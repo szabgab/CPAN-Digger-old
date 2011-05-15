@@ -63,7 +63,7 @@ For internal usage follow the SETUP section.
 
 Download the tar.gz file. Open it and install all its dependencies.
 
-Running perl script\cpan_digger_index.pl will create a local database
+Running perl script\cpan_digger.pl will create a local database
 using the module given in the directory given with the --dir option.
 
 Running CPAN-Digger-WWW.pl will launch a stand-alone web server.
