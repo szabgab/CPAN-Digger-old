@@ -12,11 +12,12 @@ use Capture::Tiny         qw(capture);
 use Data::Dumper          qw(Dumper);
 use File::Basename        qw(basename dirname);
 use File::Copy            qw(copy move);
-use File::Copy::Recursive qw(fcopy);
+use File::Copy::Recursive qw(fcopy rcopy);
 use File::Path            qw(mkpath);
 use File::Spec            ();
 use File::Temp            qw(tempdir);
 use File::Find::Rule      ();
+use File::ShareDir        ();
 use JSON                  qw(to_json from_json);
 use List::Util            qw(max);
 use Parse::CPAN::Whois    ();
@@ -492,59 +493,10 @@ sub generate_central_files {
 
 	# copy static files from public/ to --outdir
 	my $outdir = _untaint_path($self->output);
-	mkpath $outdir;
+#	mkpath $outdir;
 
-	foreach my $file ( 'public/robots.txt', 'public/favicon.ico', glob('public/css/*'), glob('public/js/*'),
-		glob('public/css/ui-lightness/*'),
-		glob('public/css/ui-lightness/images/*'),
-		) {
-		my $src = substr($file, 7);
-		print "Copy $src\n";
-		if (-f $file) {
-			fcopy($file, "$outdir/$src") or die $!;
-		}
-	}
+	rcopy(File::ShareDir::dist_dir('CPAN-Digger'), $outdir);
 
-	my $tt = $self->get_tt;
-	my %map = (
-		'licenses.tt' => 'licenses.html',
-		'news.tt'     => 'news.html',
-		'faq.tt'      => 'faq.html',
-	);
-
-	# my $result = $self->db->run_command([
-		# "distinct" => "distro",
-		# "key"      => "meta.license",
-		# "query"    => {}
-	# ]);
-
-	my @licenses;
-	# foreach my $license ( @{ $result->{values} } ) {
-# #		print "D: $license\n";
-		# next if not defined $license or $license =~ /^\s*$/;
-		# push @licenses, $license;
-	# }
-
-	foreach my $infile (keys %map) {
-		my $outfile = File::Spec->catfile($outdir, $map{$infile});
-		my %data;
-		#$data{licenses} = \@licenses;
-		LOG("Processing $infile to $outfile");
-		$tt->process($infile, \%data, $outfile) or die $tt->error;
-	}
-
-	return;
-
-	mkpath(File::Spec->catfile($outdir, 'data'));
-	open my $out, '>', File::Spec->catfile($outdir, 'data', 'licenses.json');
-	print $out to_json(\@licenses);
-	close $out;
-
-	mkpath(File::Spec->catfile($outdir, 'dist'));
-	# just an empty file for now so it won't try to create a list of all the distributions
-	open my $fh, '>', File::Spec->catfile($outdir, 'dist', 'index.html');
-	close $fh;
-	
 	return;
 }
 

@@ -39,6 +39,7 @@
 \B\._
 # Avoid archives of this distribution
 \bCPAN-Digger-[\d\.\_]+
+.swp$
 
 \b\logs
 

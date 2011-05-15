@@ -35,6 +35,7 @@ sub run {
 
 		'whois',
 		'collect',
+		'static',
 		'process',
 
 
@@ -58,6 +59,7 @@ sub run {
 	usage('On or more of --collect, --whois  or --process is needed')
 		if  not $opt{collect}
 		and not $opt{whois}
+		and not $opt{static}
 		and not $opt{process};
 
 	if ($opt{process}) {
@@ -76,7 +78,7 @@ sub run {
 	}
 
 	my %run;
-	$run{$_} = delete $opt{$_} for qw(collect whois process);
+	$run{$_} = delete $opt{$_} for qw(collect whois process static);
 
 	$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
 
@@ -92,8 +94,11 @@ sub run {
 	if ($run{process}) {
 		$cpan->process_all_distros();
 	}
+
+	if ($run{static}) {
+		$cpan->generate_central_files;
+	}
 }
-# $cpan->generate_central_files;
 
 
 sub usage {
@@ -120,6 +125,7 @@ Optional:
 One of these is required:
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
+   --static         copy the static files
 
    --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
    --process  process all distros
@@ -133,7 +139,7 @@ If --process is give then one or more of the steps:
 
 Examples:
 $0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --collect --whois
-$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --filter '^CPAN-Digger$'
+$0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --filter CPAN-Digger
 
 END_USAGE
 }

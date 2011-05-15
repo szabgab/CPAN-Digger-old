@@ -38,6 +38,7 @@ requires 'File::Copy';
 requires 'File::Copy::Recursive'       => '0.38';
 requires 'File::Find::Rule'            => '0.32';
 requires 'File::Path';
+requires 'File::ShareDir'              => '1.03';
 requires 'File::Spec';
 requires 'File::Temp';
 requires 'Getopt::Long';
@@ -76,6 +77,17 @@ no_index 'directory' => qw{ t xt eg share inc privinc };
 
 install_script 'script/cpan_digger.pl';
 
-#install_share;
+eval {
+	require File::Copy::Recursive;
+	mkdir 'share';
+	# config.yml
+	# environmaents
+	foreach my $dir (qw(public schema bin view)) {
+		File::Copy::Recursive::rcopy($dir, "share/$dir");
+	}
+
+	install_share();
+};
 
 WriteAll;
+
