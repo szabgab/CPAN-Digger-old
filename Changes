@@ -1,0 +1,9 @@
+
+
+0.02 2011.05.15
+  - Add missing prerequisites.
+  - use modules instead of require-ing them.
+
+0.01 2011.05.14
+  - Initial version that can already index CPAN and display it
+    in an ugly but slightly usable way.

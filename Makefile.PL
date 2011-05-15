@@ -26,10 +26,13 @@ requires 'autodie'                     => '2.10';
 requires 'Archive::Any'                => '0.0932';
 requires 'Archive::Zip'                => '1.30';
 requires 'Archive::Tar'                => '1.76';
+requires 'Capture::Tiny'               => '0.10';
 requires 'Carp';
 requires 'Cwd';
-requires 'Capture::Tiny'               => '0.10';
+requires 'Dancer'                      => '1.3040';
 requires 'Data::Dumper';
+requires 'DBI'                         => '1.611';
+requires 'Encode'                      => '2.38';
 requires 'File::Basename';
 requires 'File::Copy';
 requires 'File::Copy::Recursive'       => '0.38';
@@ -40,25 +43,30 @@ requires 'File::Temp';
 requires 'Getopt::Long';
 requires 'JSON::XS'                    => '2.3';
 requires 'JSON'                        => '2.51';
-requires 'MongoDB'                     => '0.39';
+requires 'List::Util';
 requires 'Moose'                       => '2.0006';
 requires 'MooseX::StrictConstructor'   => '0.16';
-requires 'Parse::CPAN::Packages'       => '2.33';
 #requires 'Parse::CPAN::Authors';
+requires 'Parse::CPAN::Packages'       => '2.33';
 requires 'Parse::CPAN::Whois'          => '0.02';
+requires 'Perl::Critic'                => '1.106';
 requires 'Perl::MinimumVersion'        => '1.28';
-requires 'Pod::Simple'                 => '3.16';
+requires 'POSIX';
 requires 'PPI::Document';
 requires 'PPI::Find'                   => '1.215';
 requires 'PPIx::EditorTools'           => '0.12';
 requires 'Template'                    => '2.22' ;
-
-requires 'Plack'                       => '0.9978';
-requires 'Plack::Runner';              # no version ?
-
+requires 'Time::HiRes';
 requires 'YAML::Any'                   => '0.72';
 requires 'YAML'                        => '0.73';
-requires 'Dancer'                      => '1.3040';
+
+requires 'Pod::Simple'                 => '3.16';
+requires 'Pod::Simple::HTML';
+requires 'Plack'                       => '0.9978';
+requires 'Plack::Runner';              # no version ?
+requires 'Plack::Handler::FCGI';
+requires 'Plack::Util';
+
 
 test_requires 'Test::Deep'             => '0.108';
 test_requires 'Test::More'             => '0.98';

@@ -2,7 +2,7 @@ package CPAN::Digger::Index;
 use 5.008008;
 use Moose;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 extends 'CPAN::Digger';
 
@@ -12,6 +12,7 @@ use Capture::Tiny         qw(capture);
 use Data::Dumper          qw(Dumper);
 use File::Basename        qw(basename dirname);
 use File::Copy            qw(copy move);
+use File::Copy::Recursive qw(fcopy);
 use File::Path            qw(mkpath);
 use File::Spec            ();
 use File::Temp            qw(tempdir);
@@ -24,6 +25,10 @@ use POSIX                 ();
 use Parse::CPAN::Packages ();
 use YAML::Any             ();
 use PPIx::EditorTools::Outline;
+use Perl::Critic;
+use Archive::Any;
+#require Archive::Any::Plugin::Tar;
+#require Archive::Any::Plugin::Zip;
 
 use CPAN::Digger::PPI;
 use CPAN::Digger::Pod;
@@ -358,8 +363,6 @@ sub generate_outline {
 
 	return if not $self->outline;
 
-	use Perl::Critic;
-
 	my $pc = Perl::Critic->new( -severity => 5 );
 	my @all_outlines;
 	my %all_versions;
@@ -488,7 +491,6 @@ sub generate_central_files {
 	my $self = shift;
 
 	# copy static files from public/ to --outdir
-	use File::Copy::Recursive qw(fcopy);
 	my $outdir = _untaint_path($self->output);
 	mkpath $outdir;
 
@@ -555,9 +557,6 @@ sub unzip {
 		db->unzip_error($path, 'invalid_extension', '');
 		return;
 	}
-	require Archive::Any;
-	#require Archive::Any::Plugin::Tar;
-	#require Archive::Any::Plugin::Zip;
 
 	LOG("Unzipping '$full_path'");
 	my $archive;

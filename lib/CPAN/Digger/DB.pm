@@ -2,7 +2,7 @@ package CPAN::Digger::DB;
 use 5.008008;
 use Moose;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 has 'dbfile' => (is => 'ro', isa => 'Str');
 has 'dbh'    => (is => 'rw');
