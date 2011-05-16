@@ -651,6 +651,8 @@ sub _untaint_path {
 sub collect_distributions {
 	my ($self) = @_;
 
+	LOG('collecting list of distributions');
+
 	return if not $self->cpan;
 
 	db->dbh->begin_work;
@@ -716,6 +718,8 @@ sub collect_distributions {
 
 	db->dbh->commit;
 
+	LOG('done collecting distributions');
+
 	return;
 }
 
@@ -723,11 +727,17 @@ sub update_from_whois {
 	my ($self) = @_;
 
 	LOG('start whois');
+	my $file = $self->cpan . '/authors/00whois.xml';
+	if (not -e $file) {
+		die "Could not find whois file $file";
+		# TODO minim cpan does not mirror this file
+		# either ask RJBS to include it, mirror ourself or use the
+		# other file (01mailrc.txt.gz) I think
+	}
 
 	db->dbh->begin_work;
 
 
-	my $file = $self->cpan . '/authors/00whois.xml';
 	my $whois = Parse::CPAN::Whois->new($file);
 	foreach my $who ($whois->authors) {
                 my $pauseid = $who->pauseid;
@@ -772,6 +782,8 @@ sub update_from_whois {
 	}
 
 	db->dbh->commit;
+
+	LOG('whois finished');
 	
 	return;
 }
