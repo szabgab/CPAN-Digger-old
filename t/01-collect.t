@@ -425,7 +425,7 @@ $ENV{CPAN_DIGGER_DBFILE} = $dbfile;
     #my $exp = dclone($expected_authors{FAKE1});
     #$exp->{type} = 'a';
     #$data->{data}[0]{name} = Encode::encode('utf8', $data->{data}[0]{name});
-    #cmp_deeply($data, {data => [$exp], ellapsed_time => ignore()}, '/q/FA/author');
+    #cmp_deeply($data, {data => [$exp], elapsed_time => ignore()}, '/q/FA/author');
 }
 
 

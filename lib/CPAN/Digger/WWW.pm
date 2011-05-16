@@ -21,7 +21,7 @@ sub render_response {
     my ($template, $data) = @_;
 
     $data ||= {};
-    $data->{ellapsed_time} = int(10_000 * (time - vars->{start}))/10_000;
+    $data->{elapsed_time} = int(10_000 * (time - vars->{start}))/10_000;
     $data->{digger_version} = $VERSION;
     my $content_type = request->content_type || params->{content_type} || '';
     if ($content_type =~ /json/) {

@@ -6,9 +6,9 @@
 
   </div> <!-- page -->
 
-  <div id="ellapsed_time">
-    [% IF ellapsed_time %]
-    Ellapsed time [% ellapsed_time %]
+  <div id="elapsed_time">
+    [% IF elapsed_time %]
+    Elapsed time [% elapsed_time %]
     [% END %]
   </div>
 
