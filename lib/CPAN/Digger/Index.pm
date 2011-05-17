@@ -104,7 +104,6 @@ sub process_all_distros {
                 my $details = db->get_distro_details_by_id($d->{id});
                 next if $details;
 		$self->process_distro($d->{path});
-        sleep 1;
 	}
 	LOG('done processiong all distros');
 
