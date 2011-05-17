@@ -2,6 +2,8 @@ use strict;
 use warnings;
 
 use autodie;
+use Cwd            qw(cwd);
+use DBI;
 use Encode         ();
 use File::Basename qw(dirname);
 use File::Copy qw(copy);
@@ -13,6 +15,9 @@ use Storable qw(dclone);
 use Test::More;
 use Test::Deep;
 use Test::NoWarnings;
+
+use CPAN::Digger::DB;
+
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
@@ -30,12 +35,11 @@ diag "dbdir: $dbdir";
 
 my $dbfile = "$dbdir/a.db";
 
-use CPAN::Digger::DB;
-use DBI;
 
 my $TS = re('\d+'); # don't care about exact timestamps
 my $ID = re('\d+'); # don't care about IDs as they are just helpers and they get allocated based on file-order
 
+my $home = cwd;
 
 ############################ setup cpan
 create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.meta" );
@@ -439,11 +443,17 @@ sub create_file {
     close $fh;
 }
 
+use CPAN::Digger::Run;
+
 sub collect {
-    system("$^X -Ilib script/cpan_digger.pl --cpan $cpan --dbfile $dbfile --output $outdir --collect --whois");
+    chdir $home;
+    @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--collect', '--whois');
+    CPAN::Digger::Run::run;
 }
 
 sub process {
     my ($path) = @_;
-    system("$^X -Ilib script/cpan_digger.pl --cpan $cpan --dbfile $dbfile --output $outdir --process --full --filter $path");
+    chdir $home;
+    @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--process', '--full', '--filter', $path);
+    CPAN::Digger::Run::run;
 }

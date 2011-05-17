@@ -13,7 +13,7 @@ use CPAN::Digger::Index;
 our $VERSION = '0.02';
 
 sub run {
-	
+
 	my $root = dirname dirname abs_path $0;
 
 	my %opt;
