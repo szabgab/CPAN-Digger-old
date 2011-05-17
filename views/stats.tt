@@ -43,7 +43,7 @@ This page will contain various statistics and reports about the collected data.
 <h2>Other</h2>
 <table>
 <tr><td>Number of Perl::Critic poplicies</td><td>[% number_of_policies %]</td></tr>
-<tr><td>Number of Perl::Critic violations</td><td>[% number_of_violations %]</td></tr>
+<tr><td>Number of Perl::Critic violations</td><td><a href="/violations">[% number_of_violations %]</a></td></tr>
 </table>
 
 [% INCLUDE incl/footer.tt %]

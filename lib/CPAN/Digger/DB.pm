@@ -383,7 +383,10 @@ sub get_top_pc_policies {
 
     $n ||= 10;
     #$self->dbh->selectall_hashref('SELECT * FROM pc_policy, perl_critics ORDER BY name');
-    $self->dbh->selectall_arrayref('SELECT policy, COUNT(policy) cnt FROM perl_critics GROUP BY policy ORDER BY cnt LIMIT ?', {}, $n)
+    $self->dbh->selectall_arrayref('SELECT pc_policy.name, COUNT(policy) cnt 
+        FROM perl_critics, pc_policy
+        WHERE perl_critics.policy=pc_policy.id
+        GROUP BY pc_policy.name ORDER BY cnt DESC LIMIT ?', {}, $n)
 }
 
 ################################## subs for the stats page

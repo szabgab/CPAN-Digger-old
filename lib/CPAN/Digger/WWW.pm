@@ -461,6 +461,10 @@ get qr{/(syn|src|dist)(/.*)?} => sub {
     };
 };
 
+get '/violations' => sub {
+    return render_response 'violations', {violations => db->get_top_pc_policies};
+};
+
 sub _get_outline {
     my ($path) = @_;
     if (-e $path) {

@@ -406,7 +406,7 @@ process('Padre-Plugin-CommandLine');
     
     my $top_policies = $db->get_top_pc_policies;
     #diag explain $top_policies;
-    is_deeply $top_policies, [[1, 1]], 'one policy ones';
+    is_deeply $top_policies, [['ControlStructures::ProhibitMutatingListFunctions', 1]], 'one policy ones';
     
 
     my $ppc = $db->get_distro_by_path($pathx);
