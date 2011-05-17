@@ -40,6 +40,7 @@ sub run {
 		'pod',
 		'syn',
 		'outline',
+		'critic=s',
 
 		'full',
 	) or usage();
@@ -129,10 +130,11 @@ One of these is required:
 
 If --process is give then one or more of the steps:
    --prepare        
-   --pod            generate HTML pages from POD
-   --syn            generate syntax highlighted source files
+   --pod              generate HTML pages from POD
+   --syn              generate syntax highlighted source files
    --outline
-   --full           do all the steps one by one in the process
+   --full             do all the steps one by one in the process
+   --critic profile   Run Perl::Critic on every file using the give profile (e.g. public/critic-core.ini)
 
 Examples:
 $0 --cpan /var/www/cpan --output /var/www/digger --dbfile /var/www/digger/digger.db --collect --whois

@@ -49,6 +49,7 @@ has 'prepare' => (is => 'ro', isa => 'Str');
 has 'pod'     => (is => 'ro', isa => 'Str');
 has 'syn'     => (is => 'ro', isa => 'Str');
 has 'outline' => (is => 'ro', isa => 'Str');
+has 'critic'  => (is => 'ro', isa => 'Str');
 
 my $dbx;
 sub db {
@@ -186,7 +187,6 @@ sub process_distro {
 	$data{min_perl} = $min_perl_version;
 	db->update_distro_details(\%data, $dist->{id});
 	{
-#		open my $out, '>', "$dist_dir/critic.txt";
 		my $policies = db->get_all_policies;
 		if (%$pc_violations) {
 			my $id_of_file = db->get_file_ids_of_dist($dist->{id});
@@ -208,11 +208,7 @@ sub process_distro {
 					db->add_violation($v, $id_of_file->{$file}{id}, $policies->{$policy});
 				}
 			}
-#			print $out "<pre>\n";
-#			print $out $pc_violations;
-#			print $out "\n</pre>\n";
 		}
-#		close $out;
 	}
 	{
 		open my $out, '>', "$dist_dir/version.txt";
@@ -393,7 +389,8 @@ sub generate_outline {
 
 	return if not $self->outline;
 
-	my $pc = Perl::Critic->new( -severity => 5 );
+	my $pc = $self->critic ? Perl::Critic->new( -profile =>  $self->critic ) : undef;
+
 	my @all_outlines;
 	my %all_versions;
 	my $all_version_markers = '';
@@ -406,13 +403,14 @@ sub generate_outline {
 		my @violations;
 		eval {
 			my $ppi = CPAN::Digger::PPI->new(infile => $file->{path});
-			#my $x = $ppi->get_ppi;
 
 			$outline = PPIx::EditorTools::Outline->new->find( ppi => $ppi->get_ppi );
 
 			($min_perl, $version_markers) = $ppi->min_perl;
-			
-			@violations = $pc->critique( $ppi->get_ppi );
+
+			if ($self->critic) {
+				@violations = $pc->critique( $ppi->get_ppi );
+			}
 		};
 		if ($@) {
 			ERROR("Exception in PPI while generating outline for $file->{path} $@");

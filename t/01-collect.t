@@ -541,6 +541,7 @@ sub process {
     my ($path) = @_;
     chdir $home;
     @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--process', '--full', '--filter', $path);
+    push @ARGV, '--critic', "$home/public/critic-core.ini";
     CPAN::Digger::Run::run;
 }
 sub dbh { 
