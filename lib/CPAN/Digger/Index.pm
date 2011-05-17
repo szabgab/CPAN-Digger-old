@@ -272,20 +272,7 @@ sub collect_meta_data {
 
 	my @readme_files = qw('README');
 
-	# additional fields needed for the main page of the distribution
-	# my $author = $self->author_info($data->{author});
-	# if (not $source_dir) {
-		# if ($author) {
-			# $data->{author_name} = $author->name;
-		# } else {
-			# WARN("Could not find details of '$data->{author}'");
-		# }
-	# }
-
-#	$data->{author_name} ||= $data->{author};
-
 	my @special_files = sort grep { -e $_ } (qw(META.yml MANIFEST INSTALL Makefile.PL Build.PL), @changes_files, @readme_files);
-#	$data->{prefix} = $d->prefix;
 	
 	if ($data->{meta}{resources}{repository}) {
 		my $repo = delete $data->{meta}{resources}{repository};
@@ -306,7 +293,6 @@ sub collect_meta_data {
 # unzip if needed or copy files if we were supplied with a directory structure (e.g. an svn checkout)
 sub prepare_src {
 	my ($self, $d, $src_dir, $source_dir, $path) = @_;
-
 
 	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
 
