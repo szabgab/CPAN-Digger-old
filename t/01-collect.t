@@ -379,34 +379,118 @@ process('Padre-Plugin-CommandLine');
     #exit;
 
     my $all_policies = $db->get_all_policies;
-    #diag explain $all_policies;
+    #diag explain $all_policies
     is_deeply $all_policies, {
-          'ControlStructures::ProhibitMutatingListFunctions' => {
-            'id' => 1,
-            'name' => 'ControlStructures::ProhibitMutatingListFunctions'
-        }
-    }, 'all_policies';
-
-    my $violations = dbh()->selectall_hashref('SELECT * FROM perl_critics', 'fileid');
-    #diag explain $violations;
-    my $file_id = $db->get_file_id($distro_id, 'lib/Padre/Plugin/CommandLine.pm');
-    cmp_deeply $violations, {
-    $file_id => {
-     'column_number' => 8,
-     'description' => q{Don't modify $_ in list functions},
-     'fileid' => $file_id,
-     'line_number' => 161,
-     'logical_line_number' => 161,
-     'policy' => 1,
-     'visual_column_number' => 8
+   'BuiltinFunctions::ProhibitComplexMappings' => {
+     'id' => 3,
+     'name' => 'BuiltinFunctions::ProhibitComplexMappings'
+   },
+   'ControlStructures::ProhibitMutatingListFunctions' => {
+     'id' => 4,
+     'name' => 'ControlStructures::ProhibitMutatingListFunctions'
+   },
+   'RegularExpressions::RequireExtendedFormatting' => {
+     'id' => 1,
+     'name' => 'RegularExpressions::RequireExtendedFormatting'
+   },
+   'Subroutines::ProhibitExcessComplexity' => {
+     'id' => 2,
+     'name' => 'Subroutines::ProhibitExcessComplexity'
    }
-  };
+ }, 'all_policies';
 
-    
+
+    my $violations = dbh()->selectall_arrayref('SELECT * FROM perl_critics ORDER BY fileid, line_number, column_number');
+    my $file_id = $db->get_file_id($distro_id, 'lib/Padre/Plugin/CommandLine.pm');
+    #diag explain $violations;
+    cmp_deeply $violations, [
+   [
+     7,
+     1,
+     'Regular expression without "/x" flag',
+     94,
+     94,
+     15,
+     15
+   ],
+   [
+     7,
+     2,
+     'Subroutine "on_key_pressed" with high complexity score (24)',
+     112,
+     112,
+     1,
+     1
+   ],
+   [
+     7,
+     1,
+     'Regular expression without "/x" flag',
+     131,
+     131,
+     28,
+     28
+   ],
+   [
+     7,
+     3,
+     'Map blocks should have a single statement',
+     161,
+     161,
+     8,
+     8
+   ],
+   [
+     7,
+     4,
+     'Don\'t modify $_ in list functions',
+     161,
+     161,
+     8,
+     8
+   ],
+   [
+     7,
+     1,
+     'Regular expression without "/x" flag',
+     161,
+     161,
+     21,
+     21
+   ],
+   [
+     7,
+     1,
+     'Regular expression without "/x" flag',
+     162,
+     162,
+     21,
+     21
+   ]
+ ], 'violations';
+   
     
     my $top_policies = $db->get_top_pc_policies;
     #diag explain $top_policies;
-    is_deeply $top_policies, [['ControlStructures::ProhibitMutatingListFunctions', 1]], 'one policy ones';
+    is_deeply $top_policies, 
+     [
+   [
+     'RegularExpressions::RequireExtendedFormatting',
+     4
+   ],
+   [
+     'BuiltinFunctions::ProhibitComplexMappings',
+     1
+   ],
+   [
+     'ControlStructures::ProhibitMutatingListFunctions',
+     1
+   ],
+   [
+     'Subroutines::ProhibitExcessComplexity',
+     1
+   ]
+ ] , 'top_policies';
     
 
     my $ppc = $db->get_distro_by_path($pathx);
