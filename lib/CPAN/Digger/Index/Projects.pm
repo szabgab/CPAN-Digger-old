@@ -34,22 +34,22 @@ sub get_projects {
 sub update_from_whois {
 	my ($self) = @_;
 
-	LOG('start adding authors');
+	LOG('start adding project authors');
 
-	my $projects = $self->get_projects;
-	#die Dumper $p;
-
-	db->dbh->begin_work;
-	foreach my $p (@$projects) {
-		my $have = db->get_author($p->{author});
-		if (not $have) {
-			LOG("add_author $p->{author}");
-			db->add_author({}, $p->{author});
-		}
-	}
-	db->dbh->commit;
-
-	LOG('adding authors finished');
+	# my $projects = $self->get_projects;
+	# #die Dumper $p;
+# 
+	# db->dbh->begin_work;
+	# foreach my $p (@$projects) {
+		# my $have = db->get_author($p->{author});
+		# if (not $have) {
+			# LOG("add_author $p->{author}");
+			# db->add_author({}, $p->{author});
+		# }
+	# }
+	# db->dbh->commit;
+# 
+	LOG('done adding project authors');
 
 	return;
 }
@@ -64,9 +64,10 @@ sub collect_distributions {
 	my $now = time;
 	db->dbh->begin_work;
 	foreach my $p (@$projects) {
-		my @args = ($p->{author}, $p->{name}, $p->{version}, "$p->{name}/$p->{version}", $now, $now);
-		LOG("insert_distr @args");
-		db->insert_distro(@args);
+		#my @args = ($p->{author}, $p->{name}, $p->{version}, "$p->{name}/$p->{version}", $now, $now);
+		#LOG("insert_distr @args");
+		#db->insert_distro(@args);
+		db->insert_project($p->{name}, $p->{version}, $p->{path}, $now);
 	}
 
 	db->dbh->commit;

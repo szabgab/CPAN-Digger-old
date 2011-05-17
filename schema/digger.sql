@@ -32,6 +32,14 @@ CREATE TABLE distro_details (
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 
+CREATE TABLE project (
+    id       INTEGER PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL,
+    version  VARCHAR(30) NOT NULL,
+    path     VARCHAR(255) UNIQUE NOT NULL,
+    added_timestamp DATE
+);
+
 
 CREATE TABLE author (
     pauseid      VARCHAR(50) PRIMARY KEY,

@@ -11,6 +11,7 @@ use File::Path qw(mkpath);
 use File::Temp qw(tempdir);
 use JSON qw(from_json);
 use Storable qw(dclone);
+use YAML     ();
 
 use Test::More;
 use Test::Deep;
@@ -22,7 +23,7 @@ use CPAN::Digger::Run;
 
 # number of tests in the following groups:
 # collect,  process_cpan,  process_projects dancer,    noWarnings 
-plan tests => 21 + 5 + 6 + 14 + 1;
+plan tests => 21 + 5 + 5 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -325,14 +326,14 @@ my $pathx = 'S/SP/SPECTRUM/Padre-Plugin-CommandLine-0.02.tar.gz';
 
 {
     my $files = dbh()->selectall_arrayref('SELECT * from file ORDER BY distroid, path');
-    is_deeply $files, [], 'no files yet';
+    cmp_deeply $files, [], 'no files yet';
 }
 
 process_cpan_package('Padre-Plugin-CommandLine');
 {
     my $files = dbh()->selectall_arrayref('SELECT path from file ORDER BY distroid, path');
     #diag explain $files;
-    is_deeply $files, [
+    cmp_deeply $files, [
    [
      'Build.PL'
    ],
@@ -364,7 +365,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
     $db->setup;
 
     my $distros = $db->get_distros_like('Padre-Plugin-CommandLine');
-    is_deeply $distros, [
+    cmp_deeply $distros, [
    {
      'author' => 'SPECTRUM',
      'name' => 'Padre-Plugin-CommandLine',
@@ -380,7 +381,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
 
     my $all_policies = $db->get_all_policies;
     #diag explain $all_policies
-    is_deeply $all_policies, {
+    cmp_deeply $all_policies, {
    'BuiltinFunctions::ProhibitComplexMappings' => {
      'id' => 3,
      'name' => 'BuiltinFunctions::ProhibitComplexMappings'
@@ -472,7 +473,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
     
     my $top_policies = $db->get_top_pc_policies;
     #diag explain $top_policies;
-    is_deeply $top_policies, 
+    cmp_deeply $top_policies, 
      [
    [
      'RegularExpressions::RequireExtendedFormatting',
@@ -557,12 +558,26 @@ process_cpan_package('Padre-Plugin-CommandLine');
 is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 6, '6 authors';
 is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 5, '5 distros';
 
-process_project('eg/projects.yml');
-is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 7, '1 author added';
-is dbh()->selectrow_array('SELECT COUNT(*) FROM author WHERE pauseid=?', {}, 'SZABGAB_dev'), 1, 'specific author added';
-is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 6, '6 distros';
-is dbh()->selectrow_array('SELECT COUNT(*) FROM distro WHERE name =?', {}, 'Dev-CPAN-Digger'), 1, '1 distro';
 
+my $yaml = YAML::LoadFile("$home/eg/projects.yml");
+$yaml->{projects}[0]{path} = $home;
+YAML::DumpFile("$dbdir/project.yml", $yaml);
+process_project("$dbdir/project.yml");
+is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 6, 'no author added';
+is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 5, 'no distro added';
+{
+  my $proj = dbh()->selectall_arrayref('SELECT * FROM project');
+  #diag explain $proj;
+  cmp_deeply $proj, [
+   [
+     1,
+     'Dev-CPAN-Digger',
+     '1.00',
+     '/home/gabor/work/CPAN-Digger',
+     $TS,
+   ]
+  ], '1 project';
+}
 #################################################### Testing Dancer
 
 use CPAN::Digger::WWW;

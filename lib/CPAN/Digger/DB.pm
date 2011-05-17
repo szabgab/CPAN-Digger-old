@@ -41,6 +41,19 @@ sub setup {
     return;
 }
 
+
+####### TABLE project
+
+sub insert_project {
+    my ($self, $name, $version, $path, $added_timestamp) = @_;
+    
+    return if $self->dbh->selectrow_array('SELECT COUNT(*) FROM project WHERE path=?', {}, $path);
+
+    $self->dbh->do('INSERT INTO project (name, version, path, added_timestamp) VALUES(?, ?, ?, ?)', 
+        {}, $name, $version, $path, $added_timestamp);
+    return;
+}
+
 ####### TABLE distro
 
 sub insert_distro {
