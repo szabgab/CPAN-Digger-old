@@ -55,7 +55,24 @@ sub update_from_whois {
 }
 
 sub collect_distributions {
-	WARN('collect_distributions NOT yet implemented');
+	my ($self) = @_;
+
+	LOG('start inserting project names');
+
+	my $projects = $self->get_projects;
+
+	my $now = time;
+	db->dbh->begin_work;
+	foreach my $p (@$projects) {
+		my @args = ($p->{author}, $p->{name}, $p->{version}, "$p->{name}/$p->{version}", $now, $now);
+		LOG("insert_distr @args");
+		db->insert_distro(@args);
+	}
+
+	db->dbh->commit;
+
+	LOG('done inserting project names');
+	
 	return;
 }
 

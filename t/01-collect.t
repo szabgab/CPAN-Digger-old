@@ -21,8 +21,8 @@ use CPAN::Digger::Run;
 
 
 # number of tests in the following groups:
-# collect,  process,   dancer,    noWarnings 
-plan tests => 21 + 5 + 3 + 14 + 1;
+# collect,  process_cpan,  process_projects dancer,    noWarnings 
+plan tests => 21 + 5 + 6 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -369,8 +369,8 @@ process_cpan_package('Padre-Plugin-CommandLine');
      'author' => 'SPECTRUM',
      'name' => 'Padre-Plugin-CommandLine',
      'version' => '0.02'
-   }
- ];
+   },
+ ], 'get_distros_like';
  
     my $distro_id = dbh()->selectrow_array('SELECT id FROM distro WHERE name=?', {}, 'Padre-Plugin-CommandLine');
     diag "distro_id: $distro_id";
@@ -555,11 +555,13 @@ process_cpan_package('Padre-Plugin-CommandLine');
 
 ####################################################  processing projects
 is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 6, '6 authors';
+is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 5, '5 distros';
 
 process_project('eg/projects.yml');
 is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 7, '1 author added';
 is dbh()->selectrow_array('SELECT COUNT(*) FROM author WHERE pauseid=?', {}, 'SZABGAB_dev'), 1, 'specific author added';
-
+is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 6, '6 distros';
+is dbh()->selectrow_array('SELECT COUNT(*) FROM distro WHERE name =?', {}, 'Dev-CPAN-Digger'), 1, '1 distro';
 
 #################################################### Testing Dancer
 

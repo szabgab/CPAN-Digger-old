@@ -14,10 +14,6 @@ use File::Path     qw(mkpath);
 
 use CPAN::Digger::Tools;
 
-my $sql_insert = q{
-    INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) 
-                VALUES (?, ?, ?, ?, ?, ?)
-};
 sub setup {
     my ($self) = @_;
 
@@ -49,6 +45,11 @@ sub setup {
 
 sub insert_distro {
     my ($self, @args) = @_;
+
+    my $sql_insert = q{
+        INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+    };
 
     my $count = $self->dbh->selectrow_array('SELECT COUNT(*) FROM distro WHERE path = ?', {}, $args[3]);
     if (not $count) {
