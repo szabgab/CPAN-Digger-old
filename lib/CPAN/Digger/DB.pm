@@ -448,6 +448,20 @@ sub count_modules {
 	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM module');
 }
 
+sub count_files {
+       	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM file');
+}
+sub count_pc_policies {
+       	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM pc_policy');
+}
+
+sub count_violations {
+       	my ($self) = @_;
+	return scalar $self->dbh->selectrow_array('SELECT COUNT(*) FROM perl_critics');
+}
+
 #########################################################
 
 sub slurp {

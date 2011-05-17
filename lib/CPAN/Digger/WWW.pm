@@ -251,6 +251,9 @@ get '/stats' => sub {
 
 	number_of_modules => db->count_modules,
 
+        number_of_files       => db->count_files,
+        number_of_policies    => db->count_pc_policies,
+        number_of_violations  => db->count_violations,
     );
     return render_response 'stats', \%data;
 };
