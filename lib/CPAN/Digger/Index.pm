@@ -131,13 +131,13 @@ sub process_distro {
 		return if $d->{unzip_error};
 		$self->prepare_src($d, $src_dir, $source_dir, $path) or return;
 	}
-	my @files = File::Find::Rule->file->relative->in($src_dir);
 
 	if ($source_dir) {
 		chdir $source_dir;
 	} else {
 		chdir $d->{distvname};
 	}
+	my @files = File::Find::Rule->file->relative->in('.');
 
 	my $pods = $self->generate_html_from_pod($dist_dir, $d);
 
@@ -185,15 +185,35 @@ sub process_distro {
 	}
 	$data{min_perl} = $min_perl_version;
 	db->update_distro_details(\%data, $dist->{id});
-#	{
+	{
 #		open my $out, '>', "$dist_dir/critic.txt";
-#		if (%$pc_violations) {
+		my $policies = db->get_all_policies;
+		if (%$pc_violations) {
+			my $id_of_file = db->get_file_ids_of_dist($dist->{id});
+			#die Dumper $id_of_file;
+			foreach my $file (keys %$pc_violations) {
+				#die $file;
+				
+				if (not $id_of_file->{$file}) {
+					warn("id of file '$file' is missing");
+					next;
+				}
+				foreach my $v (@{ $pc_violations->{$file} }) {
+					my $policy = substr($v->policy, 22);
+					#print "$policy\n";
+					if (not $policies->{$policy}) {
+						$policies->{$policy} = db->add_policy($policy);
+					}
+					#print STDERR $id_of_file->{$file}, "\n";
+					db->add_violation($v, $id_of_file->{$file}{id}, $policies->{$policy});
+				}
+			}
 #			print $out "<pre>\n";
 #			print $out $pc_violations;
 #			print $out "\n</pre>\n";
-#		}
+		}
 #		close $out;
-#	}
+	}
 	{
 		open my $out, '>', "$dist_dir/version.txt";
 		print $out "<pre>\n";
@@ -361,7 +381,7 @@ sub generate_syn {
 		#my $tt = $self->get_tt;
 		#$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
 		open my $out, '>', $outfile;
-		print $out qq{<div class="code">$html</div>}
+		print $out qq{<div class="code">$html</div>};
 
 	}
 
@@ -419,7 +439,7 @@ sub generate_outline {
 		$all_version_markers .= "$module\n" . Dumper($version_markers) . "\n";
 
 		if (@violations) {
-			$all_violations{$file} = \@violations;
+			$all_violations{ $file->{path} } = \@violations;
 		}
 	}
 

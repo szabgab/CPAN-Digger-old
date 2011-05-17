@@ -22,7 +22,7 @@ use CPAN::Digger::Run;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 17 + 5 + 14 + 1;
+plan tests => 21 + 5 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -334,36 +334,81 @@ process('Padre-Plugin-CommandLine');
     #diag explain $files;
     is_deeply $files, [
    [
-     'Padre-Plugin-CommandLine-0.02/Build.PL'
+     'Build.PL'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/Changes'
+     'Changes'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/MANIFEST'
+     'MANIFEST'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/META.yml'
+     'META.yml'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/Makefile.PL'
+     'Makefile.PL'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/README'
+     'README'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/lib/Padre/Plugin/CommandLine.pm'
+     'lib/Padre/Plugin/CommandLine.pm'
    ],
    [
-     'Padre-Plugin-CommandLine-0.02/t/00-load.t'
+     't/00-load.t'
    ]
    ], 'files';
-
 }
-
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
+
+    my $distros = $db->get_distros_like('Padre-Plugin-CommandLine');
+    is_deeply $distros, [
+   {
+     'author' => 'SPECTRUM',
+     'name' => 'Padre-Plugin-CommandLine',
+     'version' => '0.02'
+   }
+ ];
+ 
+    my $distro_id = dbh()->selectrow_array('SELECT id FROM distro WHERE name=?', {}, 'Padre-Plugin-CommandLine');
+    diag "distro_id: $distro_id";
+
+    #diag explain $db->get_file_ids_of_dist($distro_id);
+    #exit;
+
+    my $all_policies = $db->get_all_policies;
+    #diag explain $all_policies;
+    is_deeply $all_policies, {
+          'ControlStructures::ProhibitMutatingListFunctions' => {
+            'id' => 1,
+            'name' => 'ControlStructures::ProhibitMutatingListFunctions'
+        }
+    }, 'all_policies';
+
+    my $violations = dbh()->selectall_hashref('SELECT * FROM perl_critics', 'fileid');
+    #diag explain $violations;
+    my $file_id = $db->get_file_id($distro_id, 'lib/Padre/Plugin/CommandLine.pm');
+    cmp_deeply $violations, {
+    $file_id => {
+     'column_number' => 8,
+     'description' => q{Don't modify $_ in list functions},
+     'fileid' => $file_id,
+     'line_number' => 161,
+     'logical_line_number' => 161,
+     'policy' => 1,
+     'visual_column_number' => 8
+   }
+  };
+
+    
+    
+    my $top_policies = $db->get_top_pc_policies;
+    #diag explain $top_policies;
+    is_deeply $top_policies, [[1, 1]], 'one policy ones';
+    
+
     my $ppc = $db->get_distro_by_path($pathx);
     #diag explain $ppc;
     cmp_deeply $ppc, {

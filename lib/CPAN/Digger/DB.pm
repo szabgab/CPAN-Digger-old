@@ -345,6 +345,46 @@ sub add_file {
 }
 
 
+sub get_file_id {
+    my ($self, $distroid, $path) = @_;
+    return scalar $self->dbh->selectrow_array('SELECT id FROM file WHERE distroid=? AND path=?', {}, $distroid, $path);
+}
+sub get_file_ids_of_dist {
+    my ($self, $distroid) = @_;
+    $self->dbh->selectall_hashref('SELECT id, path FROM file WHERE distroid=?', 'path', {}, $distroid);
+}
+
+
+### perl_critics
+sub add_violation {
+    my ($self, $v, $file_id, $policy_id) = @_;
+    #print STDERR "$file_id\n";
+    $self->dbh->do('INSERT INTO perl_critics (fileid, policy, description, 
+        line_number, logical_line_number, column_number, visual_column_number) VALUES(?, ?, ?, ?, ?, ?, ?)', {},
+        $file_id, $policy_id, $v->description, $v->line_number, $v->logical_line_number, $v->column_number, $v->visual_column_number);
+}
+
+### pc_policy
+sub add_policy {
+    my ($self, $name) = @_;
+
+    $self->dbh->do('INSERT INTO pc_policy (name) VALUES(?)', {}, $name);
+    return scalar $self->dbh->selectrow_array('SELECT id FROM pc_policy WHERE name=?', {}, $name);
+}
+
+sub get_all_policies {
+    my ($self) = @_;
+
+    $self->dbh->selectall_hashref('SELECT * FROM pc_policy', 'name');
+}
+
+sub get_top_pc_policies {
+    my ($self, $n) = @_;
+
+    $n ||= 10;
+    #$self->dbh->selectall_hashref('SELECT * FROM pc_policy, perl_critics ORDER BY name');
+    $self->dbh->selectall_arrayref('SELECT policy, COUNT(policy) cnt FROM perl_critics GROUP BY policy ORDER BY cnt LIMIT ?', {}, $n)
+}
 
 ################################## subs for the stats page
 sub count_distros {
