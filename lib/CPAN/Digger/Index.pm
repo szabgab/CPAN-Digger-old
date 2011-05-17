@@ -61,34 +61,6 @@ sub db {
 	return $dbx;
 }
 
-# sub index_dir {
-	# my $self = shift;
-# 
-	# $ENV{PATH} = '/bin:/usr/bin';
-	# my $dir = $self->dir;
-	# 
-	# # prefix should be something like  AUTHOR/Module-Name-1.00
-	# my $prefix = $self->prefix;
-	# my ($author, $distvname)  = split m{/}, $prefix;
-	# my ($dist, $version)      = split m{-(?=\d)}, $distvname;
-	# my $path    = join '/', substr($author, 0, 1), substr($author, 0, 2); 
-	# my $d = Parse::CPAN::Packages::Distribution->new(
-		# dist      => $dist,
-		# prefix    => "$path/$prefix",
-		# cpanid    => $author,
-		# distvname => $distvname,
-		# version   => $version,
-		# # filename =>
-		# # maturity =>
-	# );
-	# $self->process_distro($d, abs_path $dir);
-# 
-	# return;
-# }
-# 
-
-
-
 sub process_all_distros {
 	my ($self) = @_;
 
