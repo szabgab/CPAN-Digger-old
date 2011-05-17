@@ -337,6 +337,15 @@ sub add_subs {
     }
 }
 
+###### file
+
+sub add_file {
+    my  ($self, $path, $distid) = @_;
+    $self->dbh->do('INSERT INTO file (path, distroid) VALUES (?,?)', {}, $path,$distid);
+}
+
+
+
 ################################## subs for the stats page
 sub count_distros {
 	my ($self) = @_;

@@ -29,7 +29,6 @@ CREATE TABLE distro_details (
     special_files     VARCHAR(1000),
     pods              VARCHAR(1000),
     min_perl          VARCHAR(20),
-    critic            TEXT,
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 
@@ -90,4 +89,29 @@ CREATE TABLE subs (
     line      INTEGER NOT NULL,
     FOREIGN KEY(module_id)  REFERENCES module (id)
 );
+
+CREATE TABLE file (
+    id        INTEGER PRIMARY KEY,
+    distroid  INTEGER NOT NULL,
+    path      VARCHAR(250) UNIQUE NOT NULL
+);
+
+CREATE TABLE pc_policy (
+    id       INTEGER PRIMARY KEY,
+    name     VARCHAR(250) UNIQUE NOT NULL
+);
+CREATE INDEX pc_policy_name_idx ON pc_policy (name);
+
+CREATE TABLE perl_critics (
+    fileid               INTEGER NOT NULL,
+    policy               INTEGER NOT NULL,
+    description          VARCHAR(255),
+    line_number          INTEGER,
+    logical_line_number  INTEGER,
+    column_number        INTEGER,
+    visual_column_number INTEGER,
+    FOREIGN KEY(fileid)  REFERENCES file (id),
+    FOREIGN KEY(policy)  REFERENCES pc_policy (id)
+);
+
 

@@ -17,11 +17,12 @@ use Test::Deep;
 use Test::NoWarnings;
 
 use CPAN::Digger::DB;
+use CPAN::Digger::Run;
 
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 15 + 5 + 14 + 1;
+plan tests => 17 + 5 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -40,21 +41,6 @@ my $TS = re('\d+'); # don't care about exact timestamps
 my $ID = re('\d+'); # don't care about IDs as they are just helpers and they get allocated based on file-order
 
 my $home = cwd;
-
-############################ setup cpan
-create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.meta" );
-create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
-
-copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/"  or die $!;
-copy 't/files/02whois.xml', "$cpan/authors/00whois.xml" or die $!;
-mkpath "$cpan/authors/id/A/AF/AFOXSON";
-copy 't/files/author-1.0.json', "$cpan/authors/id/A/AF/AFOXSON/" or die $!;
-collect();
-
-
-### check database
-my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile","","");
-my $sth = $dbh->prepare('SELECT * FROM distro ORDER BY name');
 
 my %expected_authors = (
   'AFOXSON' => {
@@ -113,8 +99,22 @@ my %expected_authors = (
   },
 );
 
+
+###########################
+diag 'setup cpan';
+create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.meta" );
+create_file( "$cpan/authors/id/F/FA/FAKE1/Package-Name-0.02.tar.gz" );
+
+copy 't/files/My-Package-1.02.tar.gz', "$cpan/authors/id/F/FA/FAKE1/"  or die $!;
+copy 't/files/02whois.xml', "$cpan/authors/00whois.xml" or die $!;
+mkpath "$cpan/authors/id/A/AF/AFOXSON";
+copy 't/files/author-1.0.json', "$cpan/authors/id/A/AF/AFOXSON/" or die $!;
+
+collect();
+diag 'collected first set';
+
 {
-    my $author_json = $dbh->selectall_arrayref('SELECT * FROM author_json ORDER BY pauseid, field, name');
+    my $author_json = dbh()->selectall_arrayref('SELECT * FROM author_json ORDER BY pauseid, field, name');
     #diag explain $author_json;
     cmp_deeply $author_json, [
          [
@@ -162,26 +162,30 @@ my %expected_authors = (
        ], 'author_json';
 }
 
-{
-  $sth->execute;
-  my @data;
-  while (my @row = $sth->fetchrow_array) {
-  #    diag "@row";
-      push @data, \@row;
-  }
-  #diag explain @data;
-
-  cmp_deeply(\@data, [
-    [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS, undef, undef],
-    [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS, undef, undef],
-  ], 'data is ok') or diag explain \@data;
-
-  my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
-  #diag explain $authors;
-  cmp_deeply $authors, {
-    map {$_ => $expected_authors{$_}} qw(AFOXSON KORSHAK SPECTRUM FAKE1 YKO)
-    } , 'authors';
-}
+### check database
+my $exp_data =
+         [
+            {
+              author => 'FAKE1',
+              name => 'My-Package',
+              version => '1.02'
+            },
+            {
+              author => 'FAKE1',
+              name => 'Package-Name',
+              version => '0.02'
+            },
+            {
+              author => 'FAKE2',
+              name => 'Some-Package',
+              version => '2.00'
+            },
+            {
+              author => 'FAKE2',
+              name => 'Some-Package',
+              version => '2.01'
+            },
+            ];
 
 my $expected_data = 
          [
@@ -196,6 +200,32 @@ my $expected_data =
               version => '0.02'
             },
           ];
+
+#############
+
+{
+  my $sth = dbh()->prepare('SELECT * FROM distro ORDER BY name');
+  $sth->execute;
+  my @data;
+  while (my @row = $sth->fetchrow_array) {
+  #    diag "@row";
+      push @data, \@row;
+  }
+  #diag explain @data;
+
+  cmp_deeply(\@data, [
+    [$ID, 'FAKE1', 'My-Package', '1.02', 'F/FA/FAKE1/My-Package-1.02.tar.gz', $TS, $TS, undef, undef],
+    [$ID, 'FAKE1', 'Package-Name', '0.02', 'F/FA/FAKE1/Package-Name-0.02.tar.gz', $TS, $TS, undef, undef],
+  ], 'data is ok') or diag explain \@data;
+
+  my $authors = dbh()->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
+  #diag explain $authors;
+  cmp_deeply $authors, {
+    map {$_ => $expected_authors{$_}} qw(AFOXSON KORSHAK SPECTRUM FAKE1 YKO)
+    } , 'authors';
+}
+
+
 my $expected_data2 = dclone($expected_data);
 $expected_data2->[0]{id} = $ID;
 $expected_data2->[1]{id} = $ID;
@@ -253,30 +283,6 @@ copy 't/files/03whois.xml', "$cpan/authors/00whois.xml" or die $!;
 
 collect();
 
-### check database
-my $exp_data =  
-         [
-            { 
-              author => 'FAKE1',
-              name => 'My-Package',
-              version => '1.02'
-            },
-            {
-              author => 'FAKE1',
-              name => 'Package-Name',
-              version => '0.02'
-            },
-            {
-              author => 'FAKE2',
-              name => 'Some-Package',
-              version => '2.00'
-            },
-            {
-              author => 'FAKE2',
-              name => 'Some-Package',
-              version => '2.01'
-            },
-            ];
 my $exp_data2 = dclone $exp_data;
 splice(@$exp_data2, 2,1);
 $exp_data2->[0]{id} = $ID;
@@ -297,7 +303,7 @@ my %expected_authors2 = (
     cmp_deeply($data2, $exp_data2, 'get_distros_latest_version');
 
 
-    my $authors = $dbh->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
+    my $authors = dbh()->selectall_hashref('SELECT * FROM author ORDER BY pauseid', 'pauseid');
     #diag explain $authors;
     cmp_deeply $authors, \%expected_authors, 'authors';
 
@@ -316,7 +322,45 @@ collect();
 process('Package-Name');
 my $pathx = 'S/SP/SPECTRUM/Padre-Plugin-CommandLine-0.02.tar.gz'; 
 #process($pathx);
+
+{
+    my $files = dbh()->selectall_arrayref('SELECT * from file ORDER BY distroid, path');
+    is_deeply $files, [], 'no files yet';
+}
+
 process('Padre-Plugin-CommandLine');
+{
+    my $files = dbh()->selectall_arrayref('SELECT path from file ORDER BY distroid, path');
+    #diag explain $files;
+    is_deeply $files, [
+   [
+     'Padre-Plugin-CommandLine-0.02/Build.PL'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/Changes'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/MANIFEST'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/META.yml'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/Makefile.PL'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/README'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/lib/Padre/Plugin/CommandLine.pm'
+   ],
+   [
+     'Padre-Plugin-CommandLine-0.02/t/00-load.t'
+   ]
+   ], 'files';
+
+}
+
 {
     my $db = CPAN::Digger::DB->new(dbfile => $dbfile);
     $db->setup;
@@ -335,7 +379,7 @@ process('Padre-Plugin-CommandLine');
       'unzip_error_details' => ignore(),
     }, 'Padre-Plugin-CommandLine';
 
-    my ($cnt) = $dbh->selectrow_array('SELECT COUNT(*) FROM distro_details');
+    my ($cnt) = dbh()->selectrow_array('SELECT COUNT(*) FROM distro_details');
     #diag "Number of distro_detail lines $cnt";
     #diag "ID: $ppc->{id}";
     my $ppc_details = $db->get_distro_details_by_id($ppc->{id});
@@ -356,7 +400,6 @@ process('Padre-Plugin-CommandLine');
       meta_license    => 'perl',
       meta_version    => '0.02',
       min_perl        => '5.006',
-      critic          => undef, #re('in list functions at line'), #ignore(), Don't modify $_ in list functions at line 161, column 8. See page 114 of PBP.
       examples        => undef,
     }, 'Padre-Plugin-CommandLine details';
 
@@ -367,12 +410,12 @@ process('Padre-Plugin-CommandLine');
       abstract => 'Padre::Plugin::CommandLine - vi and emacs in Padre ?',
     }], 'pods';
 
-    my $modules = $dbh->selectall_arrayref('SELECT * FROM module ORDER BY name');
+    my $modules = dbh()->selectall_arrayref('SELECT * FROM module ORDER BY name');
     cmp_deeply $modules, 
       [[1, 'Padre::Plugin::CommandLine', 'Padre::Plugin::CommandLine - vi and emacs in Padre ?', '5.006', 1, 5]],
       'module table';
       
-    my $subs = $dbh->selectall_arrayref('SELECT * FROM subs ORDER BY name');
+    my $subs = dbh()->selectall_arrayref('SELECT * FROM subs ORDER BY name');
     cmp_deeply $subs, [
           ['about', 1, 196 ],
           ['menu',  1,  63 ],
@@ -443,8 +486,6 @@ sub create_file {
     close $fh;
 }
 
-use CPAN::Digger::Run;
-
 sub collect {
     chdir $home;
     @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--collect', '--whois');
@@ -456,4 +497,7 @@ sub process {
     chdir $home;
     @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--process', '--full', '--filter', $path);
     CPAN::Digger::Run::run;
+}
+sub dbh { 
+    DBI->connect("dbi:SQLite:dbname=$dbfile","","");
 }

@@ -131,6 +131,7 @@ sub process_distro {
 		return if $d->{unzip_error};
 		$self->prepare_src($d, $src_dir, $source_dir, $path) or return;
 	}
+	my @files = File::Find::Rule->file->relative->in($src_dir);
 
 	if ($source_dir) {
 		chdir $source_dir;
@@ -162,6 +163,13 @@ sub process_distro {
 
 	my $min_perl_version = 1;
 	db->dbh->begin_work;
+
+	
+	# add files to database
+	foreach my $f (@files) {
+		db->add_file($f, $dist->{id});
+	}
+
 	foreach my $t (@{$data{modules}}) {
 		db->update_module($t, $min_versions->{$t->{name}}, 1, $dist->{id});
 		$min_perl_version = max($min_versions->{$t->{name}}, $min_perl_version);
@@ -176,17 +184,16 @@ sub process_distro {
 		db->add_subs($o->{name}, $o->{methods});
 	}
 	$data{min_perl} = $min_perl_version;
-	#$data{critic}   = $pc_violations;
 	db->update_distro_details(\%data, $dist->{id});
-	{
-		open my $out, '>', "$dist_dir/critic.txt";
-		if ($pc_violations) {
-			print $out "<pre>\n";
-			print $out $pc_violations;
-			print $out "\n</pre>\n";
-		}
-		close $out;
-	}
+#	{
+#		open my $out, '>', "$dist_dir/critic.txt";
+#		if (%$pc_violations) {
+#			print $out "<pre>\n";
+#			print $out $pc_violations;
+#			print $out "\n</pre>\n";
+#		}
+#		close $out;
+#	}
 	{
 		open my $out, '>', "$dist_dir/version.txt";
 		print $out "<pre>\n";
@@ -370,7 +377,7 @@ sub generate_outline {
 	my @all_outlines;
 	my %all_versions;
 	my $all_version_markers = '';
-	my $all_violations = '';
+	my %all_violations;
 	foreach my $file (@$files) {
 
 		my $min_perl;
@@ -410,19 +417,13 @@ sub generate_outline {
 		$module =~ s{/}{::}g;
 		$all_versions{$module} = "$min_perl"; # forced stringification
 		$all_version_markers .= "$module\n" . Dumper($version_markers) . "\n";
-		#{
-		#	open my $out, '>', $vm_file;
-		#	print $out Dumper $version_markers;
-		#}
 
 		if (@violations) {
-			$all_violations .= "$module\n" . join('', @violations) . "\n";
-		#	open my $out, '>', $pc_file;
-		#	print $out @violations;
+			$all_violations{$file} = \@violations;
 		}
 	}
 
-	return (\@all_outlines, \%all_versions, $all_violations, $all_version_markers);
+	return (\@all_outlines, \%all_versions, \%all_violations, $all_version_markers);
 }
 
 sub _generate_html {
@@ -740,7 +741,6 @@ sub update_from_whois {
 	}
 
 	db->dbh->begin_work;
-
 
 	my $whois = Parse::CPAN::Whois->new($file);
 	foreach my $who ($whois->authors) {
