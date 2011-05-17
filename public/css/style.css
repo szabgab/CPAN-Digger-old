@@ -38,7 +38,15 @@ body {
    margin-left: 10px;
 }
 
-#ellapsed_time {
+elapsed_time {
+  /*
+   background-color: #00FF00;
+   position: fixed;
+  bottom: 10px;
+   height: 30px;
+   text-align: center;
+   width: 50%;
+  */
 }
 
 /* syntax highlighting */
