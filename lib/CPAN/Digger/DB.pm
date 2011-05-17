@@ -251,8 +251,12 @@ sub add_author {
     my $fields = join ', ', grep { defined $data->{$_} } @fields;
     my @values = map { $data->{$_} } grep { defined $data->{$_} } @fields;
     my $placeholders = join ', ', ('?') x scalar @values;
-    
-    my $sql = "INSERT INTO author (pauseid, $fields) VALUES(?, $placeholders)";
+    if (@values) {
+        $fields = ", $fields";
+        $placeholders = ", $placeholders";
+    }
+
+    my $sql = "INSERT INTO author (pauseid $fields) VALUES(? $placeholders)";
     #print "$sql\n";
     $self->dbh->do($sql, {}, $pauseid, @values);
 

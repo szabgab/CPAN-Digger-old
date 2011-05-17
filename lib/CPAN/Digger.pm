@@ -95,6 +95,29 @@ for each word include where it could be found
    cgi     distro               CGI-Application
    cgi     module               CGI::Simple
    cgi     module               CGI::Application
+   
+
+=head1 Projects
+
+CPAN::Digger is (going to be) capable of processing non-CPAN projects as well.
+We are still trying to design how that should work. Let's start with one example:
+
+Dreamwidth L<http://dreamwidth.org> uses Mercurial to maintain their source code.
+To check out their main repository type:
+  
+  hg clone http://hg.dwscoalition.org/dw-free/
+
+projects file:
+  Name:      DW-Free          will be used as the distribution
+  Version:   1.0              some projects might want to index several versions, this field can be used to indicated that
+  Author:    DREAMWIDTH       will be used instead of the PAUSEID (a leading underscore can ensure there is no conflict
+                              with real (even future) PAUSEIDs)
+  Path:      /path/to/source  path to where the source code lives (CPAN::Digger will copy the files from there)
+  Description:    some text    not used by the digger
+  
+Currently the Digger won't try to update the source directory using the VCS tools.
+
+
 
 =head1 AUTHOR
 

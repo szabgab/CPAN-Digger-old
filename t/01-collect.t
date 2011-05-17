@@ -22,7 +22,7 @@ use CPAN::Digger::Run;
 
 # number of tests in the following groups:
 # collect,  process,   dancer,    noWarnings 
-plan tests => 21 + 5 + 14 + 1;
+plan tests => 21 + 5 + 3 + 14 + 1;
 
 my $cleanup = !$ENV{KEEP};
 
@@ -319,16 +319,16 @@ collect();
 
 ###################################   process files
 #process('F/FA/FAKE1/Package-Name-0.02.tar.gz');
-process('Package-Name');
+process_cpan_package('Package-Name');
 my $pathx = 'S/SP/SPECTRUM/Padre-Plugin-CommandLine-0.02.tar.gz'; 
-#process($pathx);
+#process_cpan_package($pathx);
 
 {
     my $files = dbh()->selectall_arrayref('SELECT * from file ORDER BY distroid, path');
     is_deeply $files, [], 'no files yet';
 }
 
-process('Padre-Plugin-CommandLine');
+process_cpan_package('Padre-Plugin-CommandLine');
 {
     my $files = dbh()->selectall_arrayref('SELECT path from file ORDER BY distroid, path');
     #diag explain $files;
@@ -553,6 +553,13 @@ process('Padre-Plugin-CommandLine');
         ], 'subs';
 }
 
+####################################################  processing projects
+is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 6, '6 authors';
+
+process_project('eg/projects.yml');
+is dbh()->selectrow_array('SELECT COUNT(*) FROM author'), 7, '1 author added';
+is dbh()->selectrow_array('SELECT COUNT(*) FROM author WHERE pauseid=?', {}, 'SZABGAB_dev'), 1, 'specific author added';
+
 
 #################################################### Testing Dancer
 
@@ -621,13 +628,24 @@ sub collect {
     CPAN::Digger::Run::run;
 }
 
-sub process {
+sub process_cpan_package {
     my ($path) = @_;
+
     chdir $home;
     @ARGV = ('--cpan', $cpan, '--dbfile', $dbfile, '--output', $outdir, '--process', '--full', '--filter', $path);
     push @ARGV, '--critic', "$home/public/critic-core.ini";
     CPAN::Digger::Run::run;
 }
+
+sub process_project {
+    my ($path) = @_;
+
+    chdir $home;
+    @ARGV = ('--dbfile', $dbfile, '--output', $outdir, '--process', '--full', '--projects', $path, '--whois', '--collect');
+    push @ARGV, '--critic', "$home/public/critic-core.ini";
+    CPAN::Digger::Run::run;
+}
+
 sub dbh { 
     DBI->connect("dbi:SQLite:dbname=$dbfile","","");
 }

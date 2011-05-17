@@ -9,6 +9,7 @@ use File::Spec;
 use Getopt::Long qw(GetOptions);
 
 use CPAN::Digger::Index;
+use CPAN::Digger::Index::Projects;
 
 our $VERSION = '0.02';
 
@@ -24,11 +25,7 @@ sub run {
 		'cpan=s',
 		'filter=s',
 
-	# temporarily disabled
-	#	'dir=s',
-	#	'name=s',
-	#	'author=s',
-	#	'version=s',
+		'projects=s',
 
 		'whois',
 		'collect',
@@ -47,10 +44,9 @@ sub run {
 
 
 	usage('--dbfile required') if not $opt{dbfile};
-	usage('--cpan or --dir required') if not $opt{cpan} and not $opt{dir};
+	usage('--cpan or --projects required') if not $opt{cpan} and not $opt{projects};
 	usage("Directory '$opt{cpan}' not found") if $opt{cpan} and not -d $opt{cpan};
-	usage('if --dir is given then --name also need to be supplied')
-		if $opt{dir} and not $opt{name};
+	usage("File '$opt{projects}' not found") if $opt{projects} and not -e $opt{projects};
 	usage('--output required') if not $opt{output};
 	usage('--output must be given an existing directory') if not -d $opt{output};
 
@@ -80,7 +76,10 @@ sub run {
 
 	$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
 
-	my $cpan = CPAN::Digger::Index->new(%opt);
+	my $cpan = $opt{cpan}
+		? CPAN::Digger::Index->new(%opt)
+		: CPAN::Digger::Index::Projects->new(%opt);
+
 	if ($run{whois}) {
 		$cpan->update_from_whois;
 	}
@@ -112,23 +111,19 @@ Required:
 
 One of these is required:
    --cpan PATH_TO_CPAN_MIRROR
-   --dir PATH_TO_SOURCE_DIR or PATH_TO_SOURCE_FILE
-
-   --name NAME_OF_PROJECT  (name is required if --dir is given)
-
+   --projects PATH_TO_CONGIG.yml
 
 Optional:
-   --filter REGEX   only packages that match the regex will be indexed
+   --filter REGEX   only packages that match the regex will be indexed (can be used with --cpan)
 
 One of these is required:
    --whois          update authors table of the database from the 00whois.xml file
    --collect        go over the CPAN mirror and add the name of each file to the 'distro' table
    --static         copy the static files
 
-   --distro   A/AU/AUTHOR/Distro-Name-1.00.tar.gz    to process this distro
    --process  process all distros
 
-If --process is give then one or more of the steps:
+If --process is given then one or more of the steps:
    --prepare        
    --pod              generate HTML pages from POD
    --syn              generate syntax highlighted source files

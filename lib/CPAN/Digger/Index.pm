@@ -106,7 +106,7 @@ sub process_all_distros {
                 next if $details;
 		$self->process_distro($d->{path});
 	}
-	LOG('done processiong all distros');
+	LOG('done processing all distros');
 
 	return;
 }
@@ -776,10 +776,10 @@ sub update_from_whois {
 		}
 
 		if (not $have) {
-			LOG('add_author ' . Dumper \%new_data);
+			LOG("add_author $pauseid " . Dumper \%new_data);
 			db->add_author(\%new_data, $pauseid);
 		} elsif ($changed) {
-			LOG('update_author ' . Dumper \%new_data);
+			LOG("update_author $pauseid " . Dumper \%new_data);
 			db->update_author(\%new_data, $pauseid);
 		}
 		if ($author_json) {
