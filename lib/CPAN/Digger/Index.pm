@@ -91,6 +91,7 @@ sub process_all_distros {
 	my ($self) = @_;
 
 	my $distros = db->get_all_distros;
+	LOG('start processing distros');
 	#LOG(Dumper $distros);
 	my $filter = $self->filter;
 	foreach my $name (sort keys %$distros) {
@@ -104,6 +105,7 @@ sub process_all_distros {
 		$self->process_distro($d->{path});
         sleep 1;
 	}
+	LOG('done processiong all distros');
 
 	return;
 }
@@ -733,6 +735,8 @@ sub update_from_whois {
 		# TODO minim cpan does not mirror this file
 		# either ask RJBS to include it, mirror ourself or use the
 		# other file (01mailrc.txt.gz) I think
+		# create ~/.minicpanrc with the following line in it:
+		#  also_mirror: authors/00whois.xml
 	}
 
 	db->dbh->begin_work;
