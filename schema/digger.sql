@@ -93,7 +93,8 @@ CREATE TABLE subs (
 CREATE TABLE file (
     id        INTEGER PRIMARY KEY,
     distroid  INTEGER NOT NULL,
-    path      VARCHAR(250) UNIQUE NOT NULL
+    path      VARCHAR(250) NOT NULL,
+    CONSTRAINT distro_path UNIQUE (distroid, path)
 );
 
 CREATE TABLE pc_policy (
