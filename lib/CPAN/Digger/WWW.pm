@@ -4,8 +4,6 @@ our $VERSION = '0.02';
 
 use Dancer ':syntax';
 
-use CPAN::Digger::DB;
-
 use Data::Dumper  qw(Dumper);
 use Encode        qw(decode);
 use File::Basename qw(basename);
@@ -14,6 +12,9 @@ use List::Util    qw(max);
 use POSIX         ();
 use Time::HiRes   qw(time);
 use YAML          ();
+
+use CPAN::Digger::DB;
+use CPAN::Digger::Tools;
 
 #set serializer => 'Mutable';
 
@@ -477,13 +478,6 @@ sub _get_outline {
 
 sub _date {
     return POSIX::strftime("%Y %b %d", gmtime shift);
-}
-
-sub slurp {
-    my $file = shift;
-    open my $fh, '<', $file or die;
-    local $/ = undef;
-    <$fh>;
 }
 
 sub _escape {

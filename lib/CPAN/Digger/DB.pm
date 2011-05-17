@@ -12,6 +12,8 @@ use Data::Dumper   qw(Dumper);
 use File::Basename qw(dirname);
 use File::Path     qw(mkpath);
 
+use CPAN::Digger::Tools;
+
 my $sql_insert = q{
     INSERT INTO distro (author, name, version, path, file_timestamp, added_timestamp) 
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -54,7 +56,7 @@ sub insert_distro {
             $self->dbh->do($sql_insert, {}, @args);
         };
         if ($@) {
-            CPAN::Digger::Index::ERROR("Exception in insert_distro @args");
+            ERROR("Exception in insert_distro @args");
         }
     }
 }
@@ -149,7 +151,7 @@ sub _get_distros {
 
 sub unzip_error {
     my ($self, $path, $error, $details) = @_;
-    CPAN::Digger::Index::WARN("unzip_error $error - $details in $path");
+    WARN("unzip_error $error - $details in $path");
     my $cnt = $self->dbh->do('UPDATE distro SET unzip_error=?, unzip_error_details=? WHERE path=?', {},
         $error, $details, $path);
     # TODO: report if cannot update?
@@ -200,8 +202,8 @@ sub update_distro_details {
 
     my $sql = "INSERT INTO distro_details (id $fields) VALUES(? $placeholders)";
 
-    #CPAN::Digger::Index::LOG("SQL: $sql");
-    #CPAN::Digger::Index::LOG("$id @values");
+    #LOG("SQL: $sql");
+    #LOG("$id @values");
     $self->dbh->do('DELETE FROM distro_details WHERE id=?', {}, $id);
     $self->dbh->do($sql, {}, $id, @values);
 
@@ -307,7 +309,7 @@ sub update_author_json {
 ##### module table
 sub update_module {
 	my ($self, $data, $min_perl, $is_module, $distro_id) = @_;
-    	CPAN::Digger::Index::LOG("update_module of $distro_id " . Dumper $data);
+    	LOG("update_module of $distro_id " . Dumper $data);
 	# name is defined as unique though I think what should be unique is the name + distro_id
 	# we then will have to also find out which distro is the one that is really supplying the module!
 	# for now we keep this simple (and probably incorrect)
@@ -326,9 +328,9 @@ sub get_module_by_name {
 sub add_subs {
     my ($self, $module, $subs) = @_;
 
-    CPAN::Digger::Index::LOG("add subs $module " . Dumper $subs);
+    LOG("add subs $module " . Dumper $subs);
     my $m = $self->get_module_by_name($module);
-    CPAN::Digger::Index::LOG("m: " . Dumper $m);
+    LOG("m: " . Dumper $m);
     return if not $m;
     
     foreach my $s (@$subs) {
@@ -467,11 +469,5 @@ sub count_violations {
 
 #########################################################
 
-sub slurp {
-    my $file = shift;
-    open my $fh, '<', $file or die;
-    local $/ = undef;
-    <$fh>;
-}
 
 1;
