@@ -5,11 +5,16 @@ use warnings;
 use Perl::Critic;
 use Carp;
 
-my $file = shift or die "Usage: $0 FILE";
+my ($file, $profile) = @ARGV;
+die "Usage: $0 FILE  INI_FILE" if not $file;
 
-croak('ss') if not $file;
-
-my $pc = Perl::Critic->new( -severity => 4 );
+my %args;
+if ($profile) {
+	$args{'-profile'} = $profile;
+} else {
+	$args{'-severity'} = 4;
+}
+my $pc = Perl::Critic->new( %args );
 my @violations = $pc->critique( $file );
 foreach my $v (@violations) {
 	print "=============================\n";
