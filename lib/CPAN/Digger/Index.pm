@@ -86,7 +86,7 @@ sub process_all_distros {
 
 # process a single distribution given the (relative) path to it
 sub process_distro {
-	my ($self, $path, $source_dir) = @_;
+	my ($self, $path) = @_;
 
 	#$self->counter_distro($self->counter_distro +1);
 	LOG("Working on $path");
@@ -102,14 +102,11 @@ sub process_distro {
 
 	if ($self->prepare) {
 		return if $d->{unzip_error};
-		$self->prepare_src($d, $src_dir, $source_dir, $path) or return;
+		$self->prepare_src($d, $src_dir, $path) or return;
 	}
 
-	if ($source_dir) {
-		chdir $source_dir;
-	} else {
-		chdir $d->{distvname};
-	}
+	chdir $d->{distvname}; # source_dir
+
 	my @files = File::Find::Rule->file->relative->in('.');
 
 	my $pods = $self->generate_html_from_pod($dist_dir, $d);
@@ -264,28 +261,15 @@ sub collect_meta_data {
 
 # unzip if needed or copy files if we were supplied with a directory structure (e.g. an svn checkout)
 sub prepare_src {
-	my ($self, $d, $src_dir, $source_dir, $path) = @_;
+	my ($self, $d, $src_dir, $path) = @_;
 
 	my $full_path = File::Spec->catfile( $self->cpan, 'authors', 'id', $path );
 
 	chdir $src_dir;
 	my $distv_dir = File::Spec->catdir($src_dir, $d->{distvname});
 	if (not -e $distv_dir) {
-		if ($source_dir) {
-			LOG("Source directory $source_dir");
-			# just copy the files
-			foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
-				next if $file =~ /\.svn|\.git|CVS|blib/;
-				my $from = File::Spec->catfile($source_dir, $file);
-				my $to   = File::Spec->catfile($d->{distvname}, $file);
-				#LOG("Copy $from to $to");
-				mkpath dirname $to;
-				copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
-			}
-		} else {
-			my $unzip = $self->unzip($path, $full_path, $d->{distvname});
-			return if not $unzip;
-		}
+		my $unzip = $self->unzip($path, $full_path, $d->{distvname});
+		return if not $unzip;
 	}
 
 	if (not -e $d->{distvname}) {

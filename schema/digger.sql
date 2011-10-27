@@ -32,14 +32,6 @@ CREATE TABLE distro_details (
     FOREIGN KEY(id)   REFERENCES distro (id)
 );
 
-CREATE TABLE project (
-    id       INTEGER PRIMARY KEY,
-    name     VARCHAR(255) NOT NULL,
-    version  VARCHAR(30) NOT NULL,
-    path     VARCHAR(255) UNIQUE NOT NULL,
-    added_timestamp DATE
-);
-
 
 CREATE TABLE author (
     pauseid      VARCHAR(50) PRIMARY KEY,
@@ -61,24 +53,19 @@ CREATE INDEX author_profile_pauseid_idx ON author_json (pauseid);
 CREATE INDEX author_profile_name_idx ON author_json (name);
 CREATE INDEX author_profile_field_idx ON author_json (field);
 
-CREATE TABLE word_types (
-    id       INTEGER PRIMARY KEY,
-    name     VARCHAR(50) UNIQUE NOT NULL
-);
-CREATE INDEX word_types_idx ON word_types (name);
-INSERT INTO word_types VALUES(1, 'distro_name');
-INSERT INTO word_types VALUES(2, 'abstract');
-INSERT INTO word_types VALUES(3, 'meta_keyword');
 
-CREATE TABLE words (
-    word    VARCHAR(30) NOT NULL,
-    type    INTEGER NOT NULL,
-    distro  INTEGER NOT NULL,
-    source  VARCHAR(100) NOT NULL,
-    FOREIGN KEY(type)    REFERENCES word_types (id),
-    FOREIGN KEY(distro)  REFERENCES distro (id)
+
+CREATE TABLE project (
+    id       INTEGER PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL,
+    version  VARCHAR(30) NOT NULL,
+    path     VARCHAR(255) UNIQUE NOT NULL,
+    added_timestamp DATE
 );
-CREATE INDEX words_word_idx ON words (word);
+
+
+
+
 
 CREATE TABLE module (
     id       INTEGER PRIMARY KEY,
@@ -124,3 +111,21 @@ CREATE TABLE perl_critics (
 );
 
 
+CREATE TABLE word_types (
+    id       INTEGER PRIMARY KEY,
+    name     VARCHAR(50) UNIQUE NOT NULL
+);
+CREATE INDEX word_types_idx ON word_types (name);
+INSERT INTO word_types VALUES(1, 'distro_name');
+INSERT INTO word_types VALUES(2, 'abstract');
+INSERT INTO word_types VALUES(3, 'meta_keyword');
+
+CREATE TABLE words (
+    word    VARCHAR(30) NOT NULL,
+    type    INTEGER NOT NULL,
+    distro  INTEGER NOT NULL,
+    source  VARCHAR(100) NOT NULL,
+    FOREIGN KEY(type)    REFERENCES word_types (id),
+    FOREIGN KEY(distro)  REFERENCES distro (id)
+);
+CREATE INDEX words_word_idx ON words (word);

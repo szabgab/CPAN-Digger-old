@@ -78,14 +78,50 @@ sub collect_distributions {
 }
 
 sub process_all_distros {
-	WARN('process_all_distros NOT yet implemented');
+	my ($self) = @_;
+	
+	LOG('start processing projects');
+
+	my $projects = $self->get_projects;
+
+	my $now = time;
+	db->dbh->begin_work;
+
+	foreach my $p (@$projects) {
+		
+	}
+
+	db->dbh->commit;
+
+	LOG('done processing projects');
+
 	return;
 }
 
+sub prepare_src {
+	my ($self, $d, $src_dir, $path) = @_;
+
+my $source_dir;
+	LOG("Source directory $source_dir");
+	# just copy the files
+	foreach my $file (File::Find::Rule->file->relative->in($source_dir)) {
+		next if $file =~ /\.svn|\.git|CVS|blib/;
+		my $from = File::Spec->catfile($source_dir, $file);
+		my $to   = File::Spec->catfile($d->{distvname}, $file);
+		#LOG("Copy $from to $to");
+		mkpath dirname $to;
+		copy $from, $to or die "Could not copy from '$from' to '$to' while in " . cwd() . " $!";
+	}
+
+	return;
+}
 
 #sub generate_central_files {
 #	return;
 #}
+
+sub collect_meta_data {
+}
 
 1;
 
