@@ -1,6 +1,8 @@
 package CPAN::Digger::Index::Projects;
 use Moose;
 
+our $VERSION = '0.03';
+
 extends 'CPAN::Digger::Index';
 
 has 'projects'      => ( is => 'ro', isa => 'Str' );

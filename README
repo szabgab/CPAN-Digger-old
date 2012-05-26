@@ -4,12 +4,12 @@ or for any application written in Perl.
 WARNING: This is a very early version of the application.
 Most of the planned things won't work.
 
-The package contains both the tools to process 
+The package contains both the tools to process
 and index the Perl code and the web interface
 for it.
 
-It is designed to be able to handle 
-- a single perl script 
+It is designed to be able to handle
+- a single perl script
 - a Perl application that lives in a directory tree
 - a mirror of CPAN
 
@@ -133,7 +133,7 @@ TODO
     if not yet, then try to extract them
     report distros that cannot be extracted (and don't try them again)
 *) Generate package/version distro pages:
-   Static or dynamic? 
+   Static or dynamic?
    listing all the versions we have in the database
 
 *) Script that can process an individual distribution which is give as either a zip file
