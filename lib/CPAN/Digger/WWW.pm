@@ -43,7 +43,7 @@ sub db {
 
 }
 
-before sub {
+hook before => sub {
     var start => time;
 
     return;
