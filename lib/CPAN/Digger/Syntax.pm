@@ -7,8 +7,8 @@ our $VERSION = '0.02';
 
 extends 'CPAN::Digger';
 
-has 'infile' => (is => 'ro', isa => 'Str');
-has 'outfile' => (is => 'ro', isa => 'Str');
+has 'infile'  => ( is => 'ro', isa => 'Str' );
+has 'outfile' => ( is => 'ro', isa => 'Str' );
 
 # based on Padre::Document::Perl::PPILexer
 
@@ -19,28 +19,29 @@ use autodie;
 
 
 sub process {
-	my ($self, %opt) = @_;
+	my ( $self, %opt ) = @_;
 
 	my $tt = $self->get_tt;
 
-	my $infile  = CPAN::Digger::Index::_untaint_path($opt{infile});
-	my $outfile = CPAN::Digger::Index::_untaint_path($opt{outfile});
+	my $infile  = CPAN::Digger::Index::_untaint_path( $opt{infile} );
+	my $outfile = CPAN::Digger::Index::_untaint_path( $opt{outfile} );
 
 	open my $fh, '<', $infile;
 	my @rows = <$fh>;
 	close $fh;
 	my $text = join '', @rows;
-#	my $text = do { open my $fh, '<', $infile; local $/ = undef; <$fh> };
+
+	#	my $text = do { open my $fh, '<', $infile; local $/ = undef; <$fh> };
 	my $ppi_doc = PPI::Document->new( \$text );
 	if ( not defined $ppi_doc ) {
-		die sprintf('PPI::Document Error %s', PPI::Document->errstr );
+		die sprintf( 'PPI::Document Error %s', PPI::Document->errstr );
 	}
 	my @tokens = $ppi_doc->tokens;
 	$ppi_doc->index_locations;
 
 	#print "First $first lines $lines\n";
 	my $current_row = 0;
-	my $html = '';
+	my $html        = '';
 	foreach my $t (@tokens) {
 
 		#print $t->content;
@@ -54,24 +55,24 @@ sub process {
 		#			print "$row, $rowchar, ", $t->length, "  ", $t->class, "  ", $css, "  ", $t->content, "\n";
 		#		}
 		#		last if $row > 10;
-		my $len   = $t->length;
+		my $len = $t->length;
 		$row--;
 		$rowchar--;
-		
+
 		# logger
-#		printf("%s, %s, %s, %s   %s\n", $row, $rowchar, $col, $len, $css);
-#		printf("[%s]", $rows[$row]);
-#		printf("<%s>", substr($rows[$row], $rowchar, $len));
+		#		printf("%s, %s, %s, %s   %s\n", $row, $rowchar, $col, $len, $css);
+		#		printf("[%s]", $rows[$row]);
+		#		printf("<%s>", substr($rows[$row], $rowchar, $len));
 
 		#$html .= sprintf('<div class="%s">%s</div>', $css, substr($rows[$row], $rowchar, $len));
-		$html .= sprintf('<div class="%s">', $css);
-		while (length($rows[$row]) < $rowchar + $len) {
-			$html .= substr($rows[$row], $rowchar);
-			$len -= length substr($rows[$row], $rowchar); 
+		$html .= sprintf( '<div class="%s">', $css );
+		while ( length( $rows[$row] ) < $rowchar + $len ) {
+			$html .= substr( $rows[$row], $rowchar );
+			$len -= length substr( $rows[$row], $rowchar );
 			$row++;
 		}
 		if ($len) {
-			$html .= substr($rows[$row], $rowchar, $len);
+			$html .= substr( $rows[$row], $rowchar, $len );
 		}
 		$html .= '</div>';
 	}
@@ -79,12 +80,12 @@ sub process {
 
 	my %data = (
 		filename => $opt{infile},
-		code => $html,
+		code     => $html,
 	);
-	$tt->process('syntax.tt', \%data, $outfile) or die $tt->error;
+	$tt->process( 'syntax.tt', \%data, $outfile ) or die $tt->error;
 
-#	open my $out, '>', $outfile;
-#	print $out $html;
+	#	open my $out, '>', $outfile;
+	#	print $out $html;
 	return 1;
 }
 

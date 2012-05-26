@@ -9,19 +9,19 @@ use Perl::MinimumVersion;
 
 our $VERSION = '0.02';
 
-has 'infile' => (is => 'rw', isa => 'Str');
-has 'ppi'    => (is => 'rw', isa => 'PPI::Document');
+has 'infile' => ( is => 'rw', isa => 'Str' );
+has 'ppi'    => ( is => 'rw', isa => 'PPI::Document' );
 
 sub min_perl {
 	my ($self) = @_;
-	my $pm = Perl::MinimumVersion->new( $self->ppi );
-	my @vm = $pm->version_markers;
-	return ($pm->minimum_version, \@vm);
+	my $pm     = Perl::MinimumVersion->new( $self->ppi );
+	my @vm     = $pm->version_markers;
+	return ( $pm->minimum_version, \@vm );
 }
 
 sub read_file {
 	my ($self) = @_;
-	
+
 	my $file = $self->infile;
 	my $text = do {
 		open my $fh, '<', $file or die;
@@ -34,9 +34,9 @@ sub read_file {
 sub get_ppi {
 	my ($self) = @_;
 
-	if (not $self->ppi) {
+	if ( not $self->ppi ) {
 		my $text = $self->read_file;
-		my $ppi = PPI::Document->new( \$text );
+		my $ppi  = PPI::Document->new( \$text );
 		die if not defined $ppi;
 		$ppi->index_locations;
 		$self->ppi($ppi);
@@ -47,7 +47,7 @@ sub get_ppi {
 sub get_syntax {
 	my ($self) = @_;
 
-	my $ppi = $self->get_ppi;
+	my $ppi  = $self->get_ppi;
 	my $html = <<"END_HTML";
 END_HTML
 
@@ -57,31 +57,31 @@ END_HTML
 
 		my ( $row, $rowchar, $col ) = @{ $t->location };
 
-		my $css = $self->_css_class($t);
+		my $css     = $self->_css_class($t);
 		my $content = $t->content;
 		chomp $content;
 
 		# TODO set the width of the rownumber constant
 		# TODO allow the user to turn on/off row numbers
 		#      (this should be some javascript setting hide/show)
-		if (not defined $current_row or $current_row < $row) {
-                        if (defined $current_row) {
+		if ( not defined $current_row or $current_row < $row ) {
+			if ( defined $current_row ) {
 				$html .= "</div>\n"; #close the row;
-                        }
+			}
 			$current_row = $row;
 			$html .= qq(<div class="row">$current_row );
 		}
 
 
 		# TODO: how handle tabs and indentation in general?? for now we replace TABs by 4 spaces
-		if ($t->isa('PPI::Token::Whitespace')) {
+		if ( $t->isa('PPI::Token::Whitespace') ) {
 			$content =~ s/\t/    /s;
-			if (length $content > 1) {
+			if ( length $content > 1 ) {
 				$content = qq(<pre class="ws">$content</pre>);
 			}
 		}
 
-		if ($css eq 'keyword' or $css eq 'core' or $css eq 'pragma') {
+		if ( $css eq 'keyword' or $css eq 'core' or $css eq 'pragma' ) {
 			$content = qq(<a>$content</a>);
 		}
 

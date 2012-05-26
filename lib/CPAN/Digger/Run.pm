@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Cwd qw(abs_path);
-use Data::Dumper          qw(Dumper);
+use Data::Dumper qw(Dumper);
 use File::Basename qw(dirname);
 use File::Spec;
 use Getopt::Long qw(GetOptions);
@@ -18,7 +18,8 @@ sub run {
 	my $root = dirname dirname abs_path $0;
 
 	my %opt;
-	GetOptions(\%opt,
+	GetOptions(
+		\%opt,
 		'output=s',
 		'dbfile=s',
 
@@ -43,31 +44,31 @@ sub run {
 	) or usage();
 
 
-	usage('--dbfile required') if not $opt{dbfile};
-	usage('--cpan or --projects required') if not $opt{cpan} and not $opt{projects};
-	usage("Directory '$opt{cpan}' not found") if $opt{cpan} and not -d $opt{cpan};
-	usage("File '$opt{projects}' not found") if $opt{projects} and not -e $opt{projects};
-	usage('--output required') if not $opt{output};
+	usage('--dbfile required')                            if not $opt{dbfile};
+	usage('--cpan or --projects required')                if not $opt{cpan} and not $opt{projects};
+	usage("Directory '$opt{cpan}' not found")             if $opt{cpan} and not -d $opt{cpan};
+	usage("File '$opt{projects}' not found")              if $opt{projects} and not -e $opt{projects};
+	usage('--output required')                            if not $opt{output};
 	usage('--output must be given an existing directory') if not -d $opt{output};
 
 	usage('On or more of --collect, --whois  or --process is needed')
-		if  not $opt{collect}
-		and not $opt{whois}
-		and not $opt{static}
-		and not $opt{process};
+		if not $opt{collect}
+			and not $opt{whois}
+			and not $opt{static}
+			and not $opt{process};
 
-	if ($opt{process}) {
+	if ( $opt{process} ) {
 		usage('On or more of --syn, --pod, --prepare, --outline or --full is needed')
-			if  not $opt{full}
-			and not $opt{syn}
-			and not $opt{pod}
-			and not $opt{prepare}
-			and not $opt{outline};
+			if not $opt{full}
+				and not $opt{syn}
+				and not $opt{pod}
+				and not $opt{prepare}
+				and not $opt{outline};
 	}
 
 	$opt{root} = $root;
 
-	if (delete $opt{full}) {
+	if ( delete $opt{full} ) {
 		$opt{$_} = 1 for qw(prepare syn pod outline);
 	}
 
@@ -76,23 +77,24 @@ sub run {
 
 	$ENV{CPAN_DIGGER_DBFILE} = $opt{dbfile};
 
-	my $cpan = $opt{cpan}
+	my $cpan =
+		$opt{cpan}
 		? CPAN::Digger::Index->new(%opt)
 		: CPAN::Digger::Index::Projects->new(%opt);
 
-	if ($run{whois}) {
+	if ( $run{whois} ) {
 		$cpan->update_from_whois;
 	}
 
-	if ($run{collect}) {
+	if ( $run{collect} ) {
 		$cpan->collect_distributions;
 	}
 
-	if ($run{process}) {
+	if ( $run{process} ) {
 		$cpan->process_all_distros();
 	}
 
-	if ($run{static}) {
+	if ( $run{static} ) {
 		$cpan->generate_central_files;
 	}
 }
@@ -124,7 +126,7 @@ One of these is required:
    --process  process all distros
 
 If --process is given then one or more of the steps:
-   --prepare        
+   --prepare
    --pod              generate HTML pages from POD
    --syn              generate syntax highlighted source files
    --outline

@@ -9,7 +9,7 @@ use CPAN::Digger;
 use CPAN::Digger::Index;
 
 my $d = CPAN::Digger->new;
-isa_ok($d, 'CPAN::Digger');
+isa_ok( $d, 'CPAN::Digger' );
 
 # Test cases for unzip and process files:
 

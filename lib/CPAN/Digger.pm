@@ -6,40 +6,42 @@ use MooseX::StrictConstructor;
 our $VERSION = '0.02';
 
 use autodie;
-use Carp                  ();
-use Template              ();
+use Carp     ();
+use Template ();
 
 #use CPAN::Digger::DB;
 
-has 'root'    => (is => 'ro', isa => 'Str');
-has 'dbfile'  => (is => 'ro', isa => 'Str');
+has 'root'   => ( is => 'ro', isa => 'Str' );
+has 'dbfile' => ( is => 'ro', isa => 'Str' );
 
 #has 'db'     => (is => 'rw', isa => 'MongoDB::Database');
 
-has 'tt'     => (is => 'rw', isa => 'Template');
+has 'tt' => ( is => 'rw', isa => 'Template' );
 
 sub BUILD {
 	my $self = shift;
+
 	#$self->db(CPAN::Digger::DB->db);
-};
+}
 
 
 sub get_tt {
 	my $self = shift;
 
-	if (not $self->tt) {
+	if ( not $self->tt ) {
 
 		my $root = $self->root;
-	
+
 		my $config = {
 			INCLUDE_PATH => "$root/views",
 			INTERPOLATE  => 1,
 			POST_CHOMP   => 1,
-		#	PRE_PROCESS  => 'incl/header.tt',
-		#	POST_PROCESS  => 'incl/footer.tt',
-			EVAL_PERL    => 1,
+
+			#	PRE_PROCESS  => 'incl/header.tt',
+			#	POST_PROCESS  => 'incl/footer.tt',
+			EVAL_PERL => 1,
 		};
-		$self->tt(Template->new($config));
+		$self->tt( Template->new($config) );
 	}
 
 	return $self->tt;
@@ -91,7 +93,7 @@ sudo tar xzf CPAN-Digger-0.02.tar.gz
 sudo mkdir CPAN-Digger-0.02/logs
 sudo chmod a+w CPAN-Digger-0.02/logs
 edit the environments/production.yml file
-and set the path to the database to 
+and set the path to the database to
 /var/www/cpan-digger/digger/digger.db
 
 
@@ -103,7 +105,7 @@ CPAN indexes:
   authors/00whois.xml     by Parse::CPAN::Whois  (superset of the above)
   modules/02packages.details.txt.gz  by Parse::CPAN::Packages   (CPAN.pm uses)
                             also by CPAN::PackageDetails
-  modules/03modlist.data.gz   (CPAN.pm uses) 
+  modules/03modlist.data.gz   (CPAN.pm uses)
 
 
 
@@ -132,7 +134,7 @@ for each word include where it could be found
    cgi     distro               CGI-Application
    cgi     module               CGI::Simple
    cgi     module               CGI::Application
-   
+
 
 =head1 Projects
 
@@ -141,7 +143,7 @@ We are still trying to design how that should work. Let's start with one example
 
 Dreamwidth L<http://dreamwidth.org> uses Mercurial to maintain their source code.
 To check out their main repository type:
-  
+
   hg clone http://hg.dwscoalition.org/dw-free/
 
 projects file:
@@ -151,7 +153,7 @@ projects file:
                               with real (even future) PAUSEIDs)
   Path:      /path/to/source  path to where the source code lives (CPAN::Digger will copy the files from there)
   Description:    some text    not used by the digger
-  
+
 Currently the Digger won't try to update the source directory using the VCS tools.
 
 
