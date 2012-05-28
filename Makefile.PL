@@ -32,6 +32,7 @@ requires 'Cwd';
 requires 'Dancer' => '1.3040';
 requires 'Data::Dumper';
 requires 'DBI'    => '1.611';
+requires 'DBD::SQLite' => '1.35';
 requires 'Encode' => '2.38';
 requires 'File::Basename';
 requires 'File::Copy';
