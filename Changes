@@ -1,5 +1,6 @@
 
   - missing requiremend DBD::SQLite
+  - specify the policies better
 
 0.03 2012.05.26
   - replace before by hook before as Dancer has deprecated the former
