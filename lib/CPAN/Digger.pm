@@ -3,7 +3,7 @@ use 5.008008;
 use Moose;
 use MooseX::StrictConstructor;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use autodie;
 use Carp     ();

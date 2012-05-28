@@ -1,4 +1,5 @@
 
+0.04 2012.05.28
   - missing requiremend DBD::SQLite
   - specify the policies better
 
