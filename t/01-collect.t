@@ -576,7 +576,7 @@ is dbh()->selectrow_array('SELECT COUNT(*) FROM distro'), 5, 'no distro added';
 		[   1,
 			'Dev-CPAN-Digger',
 			'1.00',
-			'/home/gabor/work/CPAN-Digger',
+			$home,
 			$TS,
 		]
 		],
