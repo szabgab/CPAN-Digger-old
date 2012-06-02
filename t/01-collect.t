@@ -393,7 +393,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
 			'name' => 'Subroutines::ProhibitExcessComplexity'
 		}
 		},
-		'all_policies';
+		'all_policies' or diag explain $all_policies;
 
 
 	my $violations =
@@ -481,7 +481,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
 			1
 		]
 		],
-		'top_policies';
+		'top_policies' or diag explain $top_policies;
 
 
 	my $ppc = $db->get_distro_by_path($pathx);
