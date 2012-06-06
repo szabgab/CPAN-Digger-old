@@ -25,7 +25,7 @@ use Parse::CPAN::Whois ();
 #use Parse::CPAN::Authors  ();
 use POSIX                 ();
 use Parse::CPAN::Packages ();
-use YAML::Any             ();
+use YAML                  ();
 use PPIx::EditorTools::Outline;
 use Perl::Critic;
 use Archive::Any;
@@ -213,7 +213,7 @@ sub collect_meta_data {
 	# someone does not try to fill it with garbage or too much data.
 	if ( $data->{has_meta_yml} ) {
 		eval {
-			my $meta = YAML::Any::LoadFile('META.yml');
+			my $meta = YAML::LoadFile('META.yml');
 
 			#print Dumper $meta;
 			my @fields = qw(license abstract author name requires version);

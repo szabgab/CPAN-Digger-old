@@ -460,7 +460,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
 			21
 		]
 		],
-		'violations';
+		'violations' or diag explain $violations;
 
 
 	my $top_policies = $db->get_top_pc_policies;

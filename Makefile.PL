@@ -60,7 +60,7 @@ requires 'PPI::Find'         => '1.215';
 requires 'PPIx::EditorTools' => '0.12';
 requires 'Template'          => '2.22';
 requires 'Time::HiRes';
-requires 'YAML::Any' => '0.72';
+#requires 'YAML::Any' => '0.72';
 requires 'YAML'      => '0.73';
 
 requires 'Pod::Simple' => '3.16';
