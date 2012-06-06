@@ -1,7 +1,7 @@
 package CPAN::Digger::Index::Projects;
 use Moose;
 
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 extends 'CPAN::Digger::Index';
 

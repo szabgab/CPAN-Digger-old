@@ -1,6 +1,6 @@
 package CPAN::Digger::WWW;
 
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 use Dancer ':syntax';
 

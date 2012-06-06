@@ -1,3 +1,6 @@
+0.06 2012.06.06
+  - fixing some tests
+  - stop using YAML::Any
 
 0.05 2012.05.29
   - fixing test

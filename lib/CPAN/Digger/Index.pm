@@ -2,7 +2,7 @@ package CPAN::Digger::Index;
 use 5.008008;
 use Moose;
 
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 extends 'CPAN::Digger';
 

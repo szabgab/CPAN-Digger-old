@@ -2,7 +2,7 @@ package CPAN::Digger::Tools;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.06';
 
 use base 'Exporter';
 our @EXPORT = qw(slurp LOG ERROR WARN);
