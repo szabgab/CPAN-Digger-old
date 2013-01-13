@@ -1,6 +1,7 @@
 
+0.07 2013.01.13
   - Add all the Perl::Critic::* packages to the list of prereqs.
-  - Include the complaints from those in the tests.
+  - Include the reports from those in the tests.
 
 0.06 2012.06.06
   - fixing some tests

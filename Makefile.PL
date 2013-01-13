@@ -105,7 +105,7 @@ test_requires 'Test::NoWarnings' => '1.04';
 no_index 'directory' => qw{ t xt eg share inc privinc };
 
 install_script 'script/cpan_digger.pl';
-homepage 'http://cpandigger.com/'
+homepage 'http://cpandigger.com/';
 repository 'https://github.com/szabgab/CPAN-Digger';
 
 eval {

@@ -11,7 +11,7 @@ use Getopt::Long qw(GetOptions);
 use CPAN::Digger::Index;
 use CPAN::Digger::Index::Projects;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub run {
 
