@@ -376,6 +376,10 @@ process_cpan_package('Padre-Plugin-CommandLine');
 	#diag explain $all_policies
 	cmp_deeply $all_policies,
 		{
+        'Bangs::ProhibitBitwiseOperators' => {
+            'id' => 5,
+            'name' => 'Bangs::ProhibitBitwiseOperators'
+        },
 		'BuiltinFunctions::ProhibitComplexMappings' => {
 			'id'   => 3,
 			'name' => 'BuiltinFunctions::ProhibitComplexMappings'
@@ -458,7 +462,16 @@ process_cpan_package('Padre-Plugin-CommandLine');
 			162,
 			21,
 			21
-		]
+		],
+        [
+          7,
+          5,
+          'Use of bitwise operator',
+          172,
+          172,
+          12,
+          12
+        ],
 		],
 		'violations' or diag explain $violations;
 
@@ -471,6 +484,10 @@ process_cpan_package('Padre-Plugin-CommandLine');
 		[   'RegularExpressions::RequireExtendedFormatting',
 			4
 		],
+        [
+          'Bangs::ProhibitBitwiseOperators',
+          1
+        ],
 		[   'BuiltinFunctions::ProhibitComplexMappings',
 			1
 		],
