@@ -7,7 +7,7 @@ use PPI::Find;
 
 use Perl::MinimumVersion;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 has 'infile' => ( is => 'rw', isa => 'Str' );
 has 'ppi'    => ( is => 'rw', isa => 'PPI::Document' );
