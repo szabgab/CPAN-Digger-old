@@ -1,3 +1,5 @@
+0.08 2013.01.14
+  - remove 3 prereqs that failed on Windows.
 
 0.07 2013.01.13
   - Add all the Perl::Critic::* packages to the list of prereqs.

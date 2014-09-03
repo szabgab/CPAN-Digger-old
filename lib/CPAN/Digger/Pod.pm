@@ -2,7 +2,7 @@ package CPAN::Digger::Pod;
 use 5.008008;
 use Moose;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 #extends 'CPAN::Digger';
 extends 'Pod::Simple::HTML';
