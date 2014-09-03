@@ -118,6 +118,8 @@ eval {
 		File::Copy::Recursive::rcopy( $dir, "share/$dir" );
 	}
 
+	# next line generates warning:
+	# Unrecognized escape \l passed through in regex;
 	install_share();
 };
 
