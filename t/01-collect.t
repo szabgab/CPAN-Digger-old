@@ -527,6 +527,8 @@ process_cpan_package('Padre-Plugin-CommandLine');
 
 	#diag explain $ppc_details;
 
+	TODO: {
+		local $TODO = 'Case sensitive file system issue' if $^O eq 'darwin';
 	cmp_deeply $ppc_details,
 		{
 		has_meta_json   => undef,
@@ -546,6 +548,7 @@ process_cpan_package('Padre-Plugin-CommandLine');
 		examples        => undef,
 		},
 		'Padre-Plugin-CommandLine details';
+	}
 
 	cmp_deeply from_json( $ppc_details->{pods} ),
 		[
