@@ -53,7 +53,7 @@ requires 'MooseX::StrictConstructor' => '0.19';
 requires 'Parse::CPAN::Packages'       => '2.38';
 requires 'Parse::CPAN::Whois'          => '0.02';
 
-requires 'Perl::Critic'                => '1.118';
+requires 'Perl::Critic'                => '1.122';
 requires 'Perl::Critic::Bangs'         => '1.10';
 requires 'Perl::Critic::Compatibility' => '1.001';
 requires 'Perl::Critic::Deprecated'    => '1.108';
@@ -82,8 +82,8 @@ requires 'Perl::Critic::Tics'            => '0.006';
 
 requires 'Perl::MinimumVersion'          => '1.31';
 requires 'POSIX';
-requires 'PPI::Document'                 => '1.215'; # PPI
-requires 'PPI::Find'                     => '1.215'; # PPI
+requires 'PPI::Document'                 => '1.218'; # PPI
+requires 'PPI::Find'                     => '1.218'; # PPI
 requires 'PPIx::EditorTools'             => '0.18';
 requires 'Template'                      => '2.24';
 requires 'Time::HiRes';
